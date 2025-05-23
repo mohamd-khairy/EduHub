@@ -32,10 +32,10 @@ useSeoMeta({
 </script>
 
 <template>
-  <UApp>
+  <UApp dir="rtl">
     <NuxtLoadingIndicator />
 
-    <NuxtLayout>
+    <NuxtLayout dir="rtl">
       <NuxtPage />
     </NuxtLayout>
   </UApp>
