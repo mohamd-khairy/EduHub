@@ -5,113 +5,136 @@ const toast = useToast()
 const open = ref(false)
 
 const links = [[{
-  label: 'Home',
+  class: 'text-lg',
+  label: 'الصفحة الرئيسية',
   icon: 'i-lucide-house',
   to: '/',
   onSelect: () => {
     open.value = false
-  }
+  },
 }, {
-  label: 'Courses',
+
+  class: 'text-lg',
+  label: 'الطلاب',
   icon: 'i-lucide-inbox',
-  to: '/inbox',
-  badge: '4',
+  to: '/students',
+  // badge: '4',
   onSelect: () => {
     open.value = false
   }
 }, {
-  label: 'Students',
-  icon: 'i-lucide-users',
-  to: '/customers',
-  onSelect: () => {
-    open.value = false
-  }
-},{
-  label: 'Teachers',
-  icon: 'i-lucide-users',
-  to: '/customers',
-  onSelect: () => {
-    open.value = false
-  }
-},{
-  label: 'Parents',
-  icon: 'i-lucide-users',
-  to: '/customers',
-  onSelect: () => {
-    open.value = false
-  }
-},{
-  label: 'Users',
-  icon: 'i-lucide-users',
-  to: '/customers',
-  onSelect: () => {
-    open.value = false
-  }
-},{
-  label: 'Payments',
-  icon: 'i-lucide-users',
-  to: '/customers',
-  onSelect: () => {
-    open.value = false
-  }
-},{
-  label: 'Exams',
-  icon: 'i-lucide-users',
-  to: '/customers',
-  onSelect: () => {
-    open.value = false
-  }
-},{
-  label: 'Results',
+
+  class: 'text-lg',
+  label: 'الكورسات',
   icon: 'i-lucide-users',
   to: '/customers',
   onSelect: () => {
     open.value = false
   }
 }, {
-  label: 'Settings',
+  class: 'text-lg',
+  label: 'المدرسيين',
+  icon: 'i-lucide-users',
+  to: '/customers',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  class: 'text-lg',
+  label: 'أولياء الامور',
+  icon: 'i-lucide-users',
+  to: '/customers',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  class: 'text-lg',
+  label: 'الموظفين',
+  icon: 'i-lucide-users',
+  to: '/customers',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  class: 'text-lg',
+  label: 'المدفوعات',
+  icon: 'i-lucide-users',
+  to: '/customers',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  class: 'text-lg',
+  label: 'الامتحانات',
+  icon: 'i-lucide-users',
+  to: '/customers',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  class: 'text-lg',
+  label: 'الدرجات',
+  icon: 'i-lucide-users',
+  to: '/customers',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+
+  class: 'text-lg',
+  label: 'الاعدادات',
   to: '/settings',
   icon: 'i-lucide-settings',
   defaultOpen: true,
   children: [{
-    label: 'General',
+    class: 'text-lg',
+    label: 'الاعدادات العامة',
     to: '/settings',
     exact: true,
     onSelect: () => {
       open.value = false
     }
   }, {
-    label: 'Roles',
+
+    class: 'text-lg',
+    label: 'الادوار',
     to: '/settings/members',
     onSelect: () => {
       open.value = false
     }
   }, {
-    label: 'Permissions',
+
+    class: 'text-lg',
+    label: 'الصلاحيات',
     to: '/settings/members',
     onSelect: () => {
       open.value = false
     }
   }, {
-    label: 'Notifications',
+    class: 'text-lg',
+    label: 'الاشعارات',
     to: '/settings/notifications',
     onSelect: () => {
       open.value = false
     }
   }, {
-    label: 'Security',
+    class: 'text-lg',
+    label: 'الحماية',
     to: '/settings/security',
     onSelect: () => {
       open.value = false
     }
   }]
 }], [{
-  label: 'Feedback',
+  class: 'text-lg',
+  label: 'التقييمات',
   icon: 'i-lucide-message-circle',
   to: '',
   target: '_blank'
 }, {
-  label: 'Help & Support',
+
+  class: 'text-lg',
+  label: 'المساعدة',
   icon: 'i-lucide-info',
   to: '',
   target: '_blank'
@@ -167,20 +190,15 @@ onMounted(async () => {
       collapsible
       resizable
       class="bg-elevated/25"
-      :ui="{ footer: 'lg:border-t lg:border-default' }"
-    >
+      :ui="{ footer: 'lg:border-t lg:border-default' }">
       <template #header="{ collapsed }">
         <TeamsMenu :collapsed="collapsed" />
       </template>
 
       <template #default="{ collapsed }">
-        <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" />
+        <!-- <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" /> -->
 
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[0]"
-          orientation="vertical"
-        />
+        <UNavigationMenu :collapsed="collapsed" :items="links[0]" orientation="vertical" />
 
         <UNavigationMenu
           :collapsed="collapsed"

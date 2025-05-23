@@ -47,7 +47,7 @@ function onSubmit() {
 
 <template>
   <UDashboardPanel id="inbox-2">
-    <UDashboardNavbar :title="mail.subject" :toggle="false">
+    <UDashboardNavbar title="تفاصيل الطالب" :toggle="false">
       <template #leading>
         <UButton
           icon="i-lucide-x"
@@ -84,17 +84,17 @@ function onSubmit() {
     <div class="flex flex-col sm:flex-row justify-between gap-1 p-4 sm:px-6 border-b border-default">
       <div class="flex items-start gap-4 sm:my-1.5">
         <UAvatar
-          v-bind="mail.from.avatar"
-          :alt="mail.from.name"
+          v-bind="mail.image"
+          :alt="mail.name"
           size="3xl"
         />
 
         <div class="min-w-0">
           <p class="font-semibold text-highlighted">
-            {{ mail.from.name }}
+            {{ mail.name }}
           </p>
           <p class="text-muted">
-            {{ mail.from.email }}
+            {{ mail.email }} - {{ mail.phone }}
           </p>
         </div>
       </div>
@@ -106,7 +106,7 @@ function onSubmit() {
 
     <div class="flex-1 p-4 sm:p-6 overflow-y-auto">
       <p class="whitespace-pre-wrap">
-        {{ mail.body }}
+        {{ mail }}
       </p>
     </div>
 
@@ -116,7 +116,7 @@ function onSubmit() {
           <UIcon name="i-lucide-reply" class="size-5" />
 
           <span class="text-sm truncate">
-            Reply to {{ mail.from.name }} ({{ mail.from.email }})
+            Reply to {{ mail.name }} ({{mail.phone }}) ({{ mail.email }})
           </span>
         </template>
 

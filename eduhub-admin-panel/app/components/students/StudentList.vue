@@ -58,8 +58,8 @@ defineShortcuts({
         @click="selectedMail = mail"
       >
         <div class="flex items-center justify-between" :class="[mail.unread && 'font-semibold']">
-          <div class="flex items-center gap-3">
-            {{ mail.from.name }}
+          <div class="flex items-center gap-3 text-lg">
+            {{ mail.name }}
 
             <UChip v-if="mail.unread" />
           </div>
@@ -67,10 +67,10 @@ defineShortcuts({
           <span>{{ isToday(new Date(mail.date)) ? format(new Date(mail.date), 'HH:mm') : format(new Date(mail.date), 'dd MMM') }}</span>
         </div>
         <p class="truncate" :class="[mail.unread && 'font-semibold']">
-          {{ mail.subject }}
+          {{ mail.phone }}  -  {{ mail.email }}
         </p>
         <p class="text-dimmed line-clamp-1">
-          {{ mail.body }}
+          {{ mail.grade_level }}  -  {{ mail.school_name }}
         </p>
       </div>
     </div>

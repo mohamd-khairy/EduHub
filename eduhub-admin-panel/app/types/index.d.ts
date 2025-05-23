@@ -15,10 +15,16 @@ export interface User {
 export interface Mail {
   id: number
   unread?: boolean
-  from: User
-  subject: string
-  body: string
+  name: string
   date: string
+  phone: string
+  email: string
+  image: string
+  grade_level: string
+  gender: string
+  school_name: string
+  parent?: string
+  course_name: string
 }
 
 export interface Member {
