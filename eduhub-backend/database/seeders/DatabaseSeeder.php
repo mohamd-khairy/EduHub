@@ -3,6 +3,17 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Database\Factories\AttendanceFactory;
+use Database\Factories\CourseFactory;
+use Database\Factories\CourseStudentFactory;
+use Database\Factories\ExamFactory;
+use Database\Factories\ExamResultFactory;
+use Database\Factories\ParentModelFactory;
+use Database\Factories\PaymentFactory;
+use Database\Factories\StudentFactory;
+use Database\Factories\TeacherAttendanceFactory;
+use Database\Factories\TeacherFactory;
+use Database\Factories\UserFactory;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,11 +24,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        UserFactory::new()->count(10)->create();
+        CourseFactory::new()->count(10)->create();
+        StudentFactory::new()->count(10)->create();
+        CourseStudentFactory::new()->count(10)->create();
+        ParentModelFactory::new()->count(10)->create();
+        TeacherFactory::new()->count(10)->create();
+        TeacherAttendanceFactory::new()->count(10)->create();
+        PaymentFactory::new()->count(10)->create();
+        AttendanceFactory::new()->count(10)->create();
+        ExamFactory::new()->count(10)->create();
+        ExamResultFactory::new()->count(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
     }
 }

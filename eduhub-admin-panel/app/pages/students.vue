@@ -14,7 +14,15 @@ const tabItems = [{
 }]
 const selectedTab = ref('all')
 
-const { data: mails } = await useFetch<Mail[]>('/api/mails', { default: () => [] })
+// const { data: mails } = await useFetch<Mail[]>('http://localhost/EduHub/eduhub-backend/public/api/student', { transform: (response) => response.data })
+
+const { data: mails, error } = await useFetch<{
+  status: boolean
+  message: string
+  data: Mail[]
+}>('http://localhost/EduHub/eduhub-backend/public/api/student', {
+  transform: (res) => res.data?.data
+})
 
 // Filter mails based on the selected tab
 const filteredMails = computed(() => {
@@ -25,7 +33,7 @@ const filteredMails = computed(() => {
   return mails.value
 })
 
-const selectedMail = ref<object | null>()
+const selectedMail = ref<Mail | null>()
 
 const isMailPanelOpen = computed({
   get() {
@@ -44,22 +52,18 @@ watch(filteredMails, () => {
     selectedMail.value = null
   }
 })
+
 watch(selectedMail, () => {
-  console.log(selectedMail.value);
+  console.log(selectedMail.value)
 })
+
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('lg')
 </script>
 
 <template>
-  <UDashboardPanel
-    id="inbox-1"
-    :default-size="25"
-    :min-size="20"
-    :max-size="30"
-    resizable
-  >
+  <UDashboardPanel id="inbox-1" :default-size="25" :min-size="20" :max-size="30" resizable>
     <UDashboardNavbar title="الطلاب">
       <template #leading>
         <UDashboardSidebarCollapse />
@@ -69,12 +73,7 @@ const isMobile = breakpoints.smaller('lg')
       </template>
 
       <template #right>
-        <UTabs
-          v-model="selectedTab"
-          :items="tabItems"
-          :content="false"
-          size="xs"
-        />
+        <UTabs v-model="selectedTab" :items="tabItems" :content="false" size="xs" />
       </template>
     </UDashboardNavbar>
     <StudentList v-model="selectedMail" :mails="filteredMails" />

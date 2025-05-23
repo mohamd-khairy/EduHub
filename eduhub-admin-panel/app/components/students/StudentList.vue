@@ -52,21 +52,21 @@ defineShortcuts({
       <div
         class="p-4 sm:px-6 text-sm cursor-pointer border-l-2 transition-colors"
         :class="[
-          mail.unread ? 'text-highlighted' : 'text-toned)',
+          mail?.unread ? 'text-highlighted' : 'text-toned)',
           selectedMail && selectedMail.id === mail.id ? 'border-primary bg-primary/10' : 'border-(--ui-bg) hover:border-primary hover:bg-primary/5'
         ]"
         @click="selectedMail = mail"
       >
-        <div class="flex items-center justify-between" :class="[mail.unread && 'font-semibold']">
+        <div class="flex items-center justify-between" :class="[mail?.unread && 'font-semibold']">
           <div class="flex items-center gap-3 text-lg">
             {{ mail.name }}
 
-            <UChip v-if="mail.unread" />
+            <UChip v-if="mail?.unread" />
           </div>
 
-          <span>{{ isToday(new Date(mail.date)) ? format(new Date(mail.date), 'HH:mm') : format(new Date(mail.date), 'dd MMM') }}</span>
+          <span>{{ isToday(new Date(mail.created_at)) ? format(new Date(mail.created_at), 'HH:mm') : format(new Date(mail.created_at), 'dd MMM') }}</span>
         </div>
-        <p class="truncate" :class="[mail.unread && 'font-semibold']">
+        <p class="truncate" :class="[mail?.unread && 'font-semibold']">
           {{ mail.phone }}  -  {{ mail.email }}
         </p>
         <p class="text-dimmed line-clamp-1">

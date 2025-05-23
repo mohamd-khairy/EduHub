@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class ParentModel extends Model
 {
     use HasFactory;
-    protected $table = 'parents';
+
+    protected $table = 'parent_models';
+
     protected $fillable = ['name', 'phone', 'email', 'address'];
 
     public function students()

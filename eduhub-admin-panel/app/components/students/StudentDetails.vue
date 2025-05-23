@@ -49,22 +49,12 @@ function onSubmit() {
   <UDashboardPanel id="inbox-2">
     <UDashboardNavbar title="تفاصيل الطالب" :toggle="false">
       <template #leading>
-        <UButton
-          icon="i-lucide-x"
-          color="neutral"
-          variant="ghost"
-          class="-ms-1.5"
-          @click="emits('close')"
-        />
+        <UButton icon="i-lucide-x" color="neutral" variant="ghost" class="-ms-1.5" @click="emits('close')" />
       </template>
 
       <template #right>
         <UTooltip text="Archive">
-          <UButton
-            icon="i-lucide-inbox"
-            color="neutral"
-            variant="ghost"
-          />
+          <UButton icon="i-lucide-inbox" color="neutral" variant="ghost" />
         </UTooltip>
 
         <UTooltip text="Reply">
@@ -72,22 +62,14 @@ function onSubmit() {
         </UTooltip>
 
         <UDropdownMenu :items="dropdownItems">
-          <UButton
-            icon="i-lucide-ellipsis-vertical"
-            color="neutral"
-            variant="ghost"
-          />
+          <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" />
         </UDropdownMenu>
       </template>
     </UDashboardNavbar>
 
     <div class="flex flex-col sm:flex-row justify-between gap-1 p-4 sm:px-6 border-b border-default">
       <div class="flex items-start gap-4 sm:my-1.5">
-        <UAvatar
-          v-bind="mail.image"
-          :alt="mail.name"
-          size="3xl"
-        />
+        <img :src="mail.image" :alt="mail.name" width="50"/>
 
         <div class="min-w-0">
           <p class="font-semibold text-highlighted">
@@ -100,13 +82,13 @@ function onSubmit() {
       </div>
 
       <p class="max-sm:pl-16 text-muted text-sm sm:mt-2">
-        {{ format(new Date(mail.date), 'dd MMM HH:mm') }}
+        <!-- {{ format(new Date(mail.created_at), 'dd MMM HH:mm') }} -->
       </p>
     </div>
 
     <div class="flex-1 p-4 sm:p-6 overflow-y-auto">
       <p class="whitespace-pre-wrap">
-        {{ mail }}
+        {{ mail.name }}
       </p>
     </div>
 
@@ -116,46 +98,23 @@ function onSubmit() {
           <UIcon name="i-lucide-reply" class="size-5" />
 
           <span class="text-sm truncate">
-            Reply to {{ mail.name }} ({{mail.phone }}) ({{ mail.email }})
+            Reply to {{ mail.name }} ({{ mail.phone }}) ({{ mail.email }})
           </span>
         </template>
 
         <form @submit.prevent="onSubmit">
-          <UTextarea
-            v-model="reply"
-            color="neutral"
-            variant="none"
-            required
-            autoresize
-            placeholder="Write your reply..."
-            :rows="4"
-            :disabled="loading"
-            class="w-full"
-            :ui="{ base: 'p-0 resize-none' }"
-          />
+          <UTextarea v-model="reply" color="neutral" variant="none" required autoresize
+            placeholder="Write your reply..." :rows="4" :disabled="loading" class="w-full"
+            :ui="{ base: 'p-0 resize-none' }" />
 
           <div class="flex items-center justify-between">
             <UTooltip text="Attach file">
-              <UButton
-                color="neutral"
-                variant="ghost"
-                icon="i-lucide-paperclip"
-              />
+              <UButton color="neutral" variant="ghost" icon="i-lucide-paperclip" />
             </UTooltip>
 
             <div class="flex items-center justify-end gap-2">
-              <UButton
-                color="neutral"
-                variant="ghost"
-                label="Save draft"
-              />
-              <UButton
-                type="submit"
-                color="neutral"
-                :loading="loading"
-                label="Send"
-                icon="i-lucide-send"
-              />
+              <UButton color="neutral" variant="ghost" label="Save draft" />
+              <UButton type="submit" color="neutral" :loading="loading" label="Send" icon="i-lucide-send" />
             </div>
           </div>
         </form>
