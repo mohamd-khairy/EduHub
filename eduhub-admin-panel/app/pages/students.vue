@@ -5,31 +5,37 @@ import type { Mail } from '~/types'
 import StudentList from '~/components/students/StudentList.vue'
 import StudentDetails from '~/components/students/StudentDetails.vue'
 
-const tabItems = [{
-  label: 'All',
-  value: 'all'
-}, {
-  label: 'Unread',
-  value: 'unread'
-}]
-const selectedTab = ref('all')
-
-const { data: mails, error } = await useFetch<{
-  status: boolean
-  message: string
-  data: Mail[]
-}>('http://localhost/EduHub/eduhub-backend/public/api/student', {
-  transform: (res) => res.data?.data
+const allStudents = ref<object[]>([]) // ← البيانات الأصلية الكاملة
+const filteredStudents = ref<object[]>([]) // ← البيانات المعروضة بعد الفلترة
+const search = ref('')
+const pagination = ref({
+  page: 1,
+  pageCount: 1,
+  pageSize: 10,
+  total: 0
 })
 
-// Filter mails based on the selected tab
-const filteredMails = computed(() => {
-  if (selectedTab.value === 'unread') {
-    return mails.value.filter(mail => !!mail.unread)
+// Initial load
+await loadData()
+
+async function loadData(page = 1) {
+  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/student?page=${page}`, {
+    transform: (res) => res.data
+  })
+
+  if (data.value) {
+    allStudents.value = data.value?.data
+    filteredStudents.value = [...allStudents.value]
+
+
+    pagination.value = {
+      page: data.value.current_page,
+      pageCount: data.value.last_page,
+      pageSize: data.value.per_page,
+      total: data.value.total
+    }
   }
-
-  return mails.value
-})
+}
 
 const selectedMail = ref<Mail | null>()
 
@@ -44,17 +50,16 @@ const isMailPanelOpen = computed({
   }
 })
 
-// Reset selected mail if it's not in the filtered mails
-watch(filteredMails, () => {
-  if (!filteredMails.value.find(mail => mail.id === selectedMail.value?.id)) {
-    selectedMail.value = null
+function setFilterValue(value: string) {
+  if (value?.length >= 1) {
+    search.value = value
+    filteredStudents.value = allStudents.value.filter(student =>
+      student.name.toLowerCase().includes(value.toLowerCase())
+    )
+  } else {
+    filteredStudents.value = allStudents
   }
-})
-
-watch(selectedMail, () => {
-  console.log(selectedMail.value)
-})
-
+}
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('lg')
@@ -66,15 +71,15 @@ const isMobile = breakpoints.smaller('lg')
       <template #leading>
         <UDashboardSidebarCollapse />
       </template>
-      <template #trailing>
-        <UBadge :label="filteredMails.length" variant="subtle" />
-      </template>
 
       <template #right>
-        <UTabs v-model="selectedTab" :items="tabItems" :content="false" size="xs" />
+
+        <UInput class="max-w-sm" icon="i-lucide-search" placeholder="ابحث ..."
+          @update:model-value="setFilterValue($event)" />
+
       </template>
     </UDashboardNavbar>
-    <StudentList v-model="selectedMail" :mails="filteredMails" />
+    <StudentList v-model="selectedMail" :mails="filteredStudents" />
   </UDashboardPanel>
 
   <StudentDetails v-if="selectedMail" :mail="selectedMail" @close="selectedMail = null" />

@@ -22,12 +22,12 @@ watch(selectedMail, () => {
 
 defineShortcuts({
   arrowdown: () => {
-    const index = props.mails.findIndex(mail => mail.id === selectedMail.value?.id)
+    const index = props.mails.findIndex(mail => mail.id === selectedMail?.value?.id)
 
     if (index === -1) {
-      selectedMail.value = props.mails[0]
-    } else if (index < props.mails.length - 1) {
-      selectedMail.value = props.mails[index + 1]
+      selectedMail.value = props?.mails[0]
+    } else if (index < props?.mails.length - 1) {
+      selectedMail.value = props?.mails[index + 1]
     }
   },
   arrowup: () => {
@@ -57,20 +57,18 @@ defineShortcuts({
         ]"
         @click="selectedMail = mail"
       >
-        <div class="flex items-center justify-between" :class="[mail?.unread && 'font-semibold']">
+        <div class="flex items-center justify-between" :class="['font-semibold']">
           <div class="flex items-center gap-3 text-lg">
             {{ mail.name }}
-
-            <UChip v-if="mail?.unread" />
           </div>
 
-          <span>{{ isToday(new Date(mail.created_at)) ? format(new Date(mail.created_at), 'HH:mm') : format(new Date(mail.created_at), 'dd MMM') }}</span>
+          <span>{{ isToday(new Date(mail?.created_at)) ? format(new Date(mail?.created_at), 'HH:mm') : format(new Date(mail?.created_at), 'dd MMM') }}</span>
         </div>
-        <p class="truncate" :class="[mail?.unread && 'font-semibold']">
-          {{ mail.phone }}  -  {{ mail.email }}
+        <p class="truncate" :class="['font-semibold']">
+          ({{ mail.phone }})  -  ({{ mail.email }})
         </p>
         <p class="text-dimmed line-clamp-1">
-          {{ mail.grade_level }}  -  {{ mail.school_name }}
+          ({{ mail.grade_level }})  -  ({{ mail.school_name }})
         </p>
       </div>
     </div>
