@@ -20,39 +20,6 @@ class Student extends Model
         'image'
     ];
 
-    protected $with = [
-        'parent',
-        'attendance',
-        'courses',
-        'payments',
-        'evaluations',
-        'courseEnrollments'
-    ];
-
-
-    public function getModelRelations($model)
-    {
-        $relations = collect(get_class_methods($model))
-            ->filter(function ($method) use ($model) {
-                if ((new \ReflectionMethod($model, $method))->getNumberOfParameters() > 0) {
-                    return false;
-                }
-
-                try {
-                    $return = $model->$method();
-                    return $return instanceof \Illuminate\Database\Eloquent\Relations\Relation;
-                } catch (\Throwable $e) {
-                    return false;
-                }
-            })
-            ->values()
-            ->toArray();
-
-        // $relations = implode(',', $relations);
-
-        return $relations;
-    }
-
     public function parent()
     {
         return $this->belongsTo(ParentModel::class, 'parent_id');
@@ -67,6 +34,7 @@ class Student extends Model
     {
         return $this->belongsToMany(Course::class, 'course_students')->withPivot('start_date', 'end_date', 'status');
     }
+
     public function payments()
     {
         return $this->hasMany(Payment::class);

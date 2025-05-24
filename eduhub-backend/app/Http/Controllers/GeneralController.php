@@ -11,11 +11,19 @@ class GeneralController extends Controller
      */
     public function index(Request $request)
     {
-        $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
+        try {
+            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
 
-        $data = $model->paginate();
+            if ($request->relations)
+                $relations = explode(',', $request->relations);
 
-        return  $this->success($data);
+            $data = $model->with($relations ?? [])->paginate();
+
+            return  $this->success($data);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return  $this->fail([]);
+        }
     }
 
     /**

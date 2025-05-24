@@ -10,7 +10,7 @@ abstract class Controller
             'status' => true,
             'code' => 200,
             'data' => $data
-        ]);
+        ], 200);
     }
 
     public function fail()
@@ -19,6 +19,6 @@ abstract class Controller
             'status' => false,
             'code' => 400,
             'data' => []
-        ]);
+        ], 400);
     }
 }

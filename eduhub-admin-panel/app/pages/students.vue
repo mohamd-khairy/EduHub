@@ -14,8 +14,6 @@ const tabItems = [{
 }]
 const selectedTab = ref('all')
 
-// const { data: mails } = await useFetch<Mail[]>('http://localhost/EduHub/eduhub-backend/public/api/student', { transform: (response) => response.data })
-
 const { data: mails, error } = await useFetch<{
   status: boolean
   message: string

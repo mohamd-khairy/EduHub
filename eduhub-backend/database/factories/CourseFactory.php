@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Group;
+use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,8 +26,8 @@ class CourseFactory extends Factory
                 'لغة إنجليزية 1',
                 'كيمياء تطبيقية'
             ]),
-            'teacher_id' => 1, // يُفضل تغييره في Seeder لعلاقة ديناميكية مع TeacherFactory
-            'group_name' => $this->faker->randomElement(['المجموعة أ', 'المجموعة ب', 'المجموعة ج']),
+            'teacher_id' => Teacher::inRandomOrder()->first()?->id ?? Teacher::factory(),
+            'group_id' => Group::inRandomOrder()->first()?->id ?? Group::factory(),
             'schedule' => $this->faker->randomElement([
                 'الأحد والثلاثاء 5:00 - 7:00 مساءً',
                 'الإثنين والأربعاء 6:00 - 8:00 مساءً',

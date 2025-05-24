@@ -8,6 +8,7 @@ use Database\Factories\CourseFactory;
 use Database\Factories\CourseStudentFactory;
 use Database\Factories\ExamFactory;
 use Database\Factories\ExamResultFactory;
+use Database\Factories\GroupFactory;
 use Database\Factories\ParentModelFactory;
 use Database\Factories\PaymentFactory;
 use Database\Factories\StudentFactory;
@@ -25,7 +26,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         UserFactory::new()->count(10)->create();
-        CourseFactory::new()->count(10)->create();
+        CourseFactory::new()->count(50)->create();
         StudentFactory::new()->count(10)->create();
         CourseStudentFactory::new()->count(10)->create();
         ParentModelFactory::new()->count(10)->create();
@@ -35,6 +36,6 @@ class DatabaseSeeder extends Seeder
         AttendanceFactory::new()->count(10)->create();
         ExamFactory::new()->count(10)->create();
         ExamResultFactory::new()->count(10)->create();
-
+        GroupFactory::new()->count(10)->create();
     }
 }
