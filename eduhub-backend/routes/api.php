@@ -17,6 +17,7 @@ Route::group([], function () {
     Route::get('teacher', [GeneralController::class, 'index']);
     Route::get('parentModel', [GeneralController::class, 'index']);
     Route::get('exam', [GeneralController::class, 'index']);
+    Route::get('examResult', [GeneralController::class, 'index']);
     Route::get('attendance', [GeneralController::class, 'index']);
     Route::get('payment', [GeneralController::class, 'index']);
     Route::get('examResult', [GeneralController::class, 'index']);

@@ -69,7 +69,7 @@ const links = [[{
   class: 'text-lg',
   label: 'المدفوعات',
   icon: 'i-lucide-users',
-  to: '/customers',
+  to: '/payments',
   onSelect: () => {
     open.value = false
   }
@@ -77,7 +77,7 @@ const links = [[{
   class: 'text-lg',
   label: 'الامتحانات',
   icon: 'i-lucide-users',
-  to: '/customers',
+  to: '/exams',
   onSelect: () => {
     open.value = false
   }
@@ -85,7 +85,7 @@ const links = [[{
   class: 'text-lg',
   label: 'الدرجات',
   icon: 'i-lucide-users',
-  to: '/customers',
+  to: '/results',
   onSelect: () => {
     open.value = false
   }
