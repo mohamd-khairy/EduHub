@@ -17,6 +17,7 @@ use Database\Factories\TeacherFactory;
 use Database\Factories\UserFactory;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -37,5 +38,11 @@ class DatabaseSeeder extends Seeder
         ExamFactory::new()->count(10)->create();
         ExamResultFactory::new()->count(10)->create();
         GroupFactory::new()->count(10)->create();
+
+        Role::create(["name" => "admin"]);
+
+        User::get()->each(function (User $user) {
+            $user->assignRole("admin");
+        });
     }
 }

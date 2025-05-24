@@ -45,7 +45,7 @@ const links = [[{
   class: 'text-lg',
   label: 'المدرسيين',
   icon: 'i-lucide-users',
-  to: '/customers',
+  to: '/teachers',
   onSelect: () => {
     open.value = false
   }
@@ -53,7 +53,7 @@ const links = [[{
   class: 'text-lg',
   label: 'أولياء الامور',
   icon: 'i-lucide-users',
-  to: '/customers',
+  to: '/parents',
   onSelect: () => {
     open.value = false
   }
@@ -61,7 +61,7 @@ const links = [[{
   class: 'text-lg',
   label: 'الموظفين',
   icon: 'i-lucide-users',
-  to: '/customers',
+  to: '/users',
   onSelect: () => {
     open.value = false
   }

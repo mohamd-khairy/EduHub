@@ -10,11 +10,12 @@ Route::get('/user', function (Request $request) {
 
 Route::group([], function () {
 
+    Route::get('user', [GeneralController::class, 'index']);
     Route::get('student', [GeneralController::class, 'index']);
     Route::get('group', [GeneralController::class, 'index']);
     Route::get('course', [GeneralController::class, 'index']);
     Route::get('teacher', [GeneralController::class, 'index']);
-    Route::get('parent', [GeneralController::class, 'index']);
+    Route::get('parentModel', [GeneralController::class, 'index']);
     Route::get('exam', [GeneralController::class, 'index']);
     Route::get('attendance', [GeneralController::class, 'index']);
     Route::get('payment', [GeneralController::class, 'index']);
