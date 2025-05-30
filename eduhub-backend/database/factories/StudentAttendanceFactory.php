@@ -18,7 +18,7 @@ class StudentAttendanceFactory extends Factory
     {
         return [
             'student_id' => \App\Models\Student::inRandomOrder()->value('id') ?? \App\Models\Student::factory()->create()->id,
-            'course_id' => \App\Models\Course::inRandomOrder()->value('id') ?? \App\Models\Course::factory()->create()->id,
+            'group_id' => \App\Models\Group::inRandomOrder()->value('id') ?? \App\Models\Group::factory()->create()->id,
             'date' => $this->faker->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
             'status' => $this->faker->randomElement(['present', 'absent', 'late']),
             'note' => $this->faker->optional()->sentence(),

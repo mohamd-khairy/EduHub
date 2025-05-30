@@ -10,9 +10,9 @@ class Teacher extends Model
     use HasFactory;
     protected $fillable = ['name', 'phone', 'email', 'specialization', 'salary_type', 'salary_amount'];
 
-    public function courses()
+    public function groups()
     {
-        return $this->hasMany(Course::class);
+        return $this->hasMany(Group::class);
     }
 
     public function attendances()

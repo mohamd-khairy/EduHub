@@ -10,12 +10,12 @@ class Schedule extends Model
     use HasFactory;
 
     protected $fillable = [
-        'course_id', 'weekday', 'start_time', 'end_time', 'room_id'
+        'group_id', 'weekday', 'start_time', 'end_time', 'room_id'
     ];
 
-    public function course()
+    public function group()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Group::class);
     }
 
     public function room()

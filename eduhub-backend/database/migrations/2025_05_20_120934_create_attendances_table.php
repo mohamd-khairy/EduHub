@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id');
-            $table->unsignedBigInteger('course_id');
+            $table->unsignedBigInteger('group_id');
             $table->date('date');
             $table->enum('status', ['present', 'absent', 'late']);
             $table->text('note')->nullable();

@@ -30,9 +30,10 @@ class Student extends Model
         return $this->hasMany(StudentAttendance::class);
     }
 
-    public function courses()
+    public function groups()
     {
-        return $this->belongsToMany(Course::class, 'course_students')->withPivot('start_date', 'end_date', 'status');
+        return $this->belongsToMany(Course::class, 'enrollments',  'student_id', 'group_id')
+            ->withPivot('start_date', 'end_date', 'status');
     }
 
     public function payments()
@@ -45,8 +46,8 @@ class Student extends Model
         return $this->hasMany(Evaluation::class);
     }
 
-    public function courseEnrollments()
+    public function enrollments()
     {
-        return $this->hasMany(CourseStudent::class);
+        return $this->hasMany(Enrollment::class);
     }
 }

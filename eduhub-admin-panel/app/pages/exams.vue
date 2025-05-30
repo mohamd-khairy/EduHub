@@ -32,7 +32,7 @@ const pagination = ref({
 await loadData()
 
 async function loadData(page = 1) {
-  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/exam?relations=course&page=${page}`, {
+  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/exam?relations=group&page=${page}`, {
     transform: (res) => res.data
   })
 
@@ -151,13 +151,13 @@ const columns: TableColumn<User>[] = [
     }
   },
   {
-    accessorKey: 'course',
-    header: 'اسم الكورس',
+    accessorKey: 'group',
+    header: 'اسم المجموعة',
     cell: ({ row }) => {
       const color = 'warning'
 
       return h(() =>
-        row.original.course?.name
+        row.original.group?.name
       )
     }
   },

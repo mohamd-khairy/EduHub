@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
-import AddModal from '~/components/groups/AddModal.vue'
-import DeleteModal from '~/components/groups/DeleteModal.vue'
+import AddModal from '~/components/courses/AddModal.vue'
+import DeleteModal from '~/components/courses/DeleteModal.vue'
 import type { User } from '~/types'
 
 const UButton = resolveComponent('UButton')
@@ -32,7 +32,7 @@ const pagination = ref({
 await loadData()
 
 async function loadData(page = 1) {
-  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/group?page=${page}`, {
+  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/group?relations=teacher,course&page=${page}`, {
     transform: (res) => res.data
   })
 
@@ -151,8 +151,42 @@ const columns: TableColumn<User>[] = [
     }
   },
   {
-    accessorKey: 'description',
-    header: 'محتوي المجموعة'
+    accessorKey: 'course_name',
+    header: 'اسم الكورس',
+    cell: ({ row }) => {
+      const color = 'warning'
+
+      return h(() =>
+        row.original.course.name
+      )
+    }
+  },
+  {
+    accessorKey: 'teacher',
+    header: 'المدرس',
+    cell: ({ row }) => {
+      const color = 'warning'
+
+      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
+        row.original.teacher.name
+      )
+    }
+  },
+  {
+    accessorKey: 'max_students',
+    header: 'اقصي عدد للطلاب'
+  },
+  {
+    accessorKey: 'schedule',
+    header: 'المواعيد',
+    filterFn: 'equals',
+    cell: ({ row }) => {
+      const color = 'success'
+
+      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
+        row.original.schedule
+      )
+    }
   },
   {
     id: 'actions',

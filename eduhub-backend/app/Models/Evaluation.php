@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class Evaluation extends Model
 {
     use HasFactory;
-    protected $fillable = ['student_id', 'course_id', 'score', 'comment', 'evaluated_at'];
+    protected $fillable = ['student_id', 'group_id', 'score', 'comment', 'evaluated_at'];
 
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
-    public function course()
+    public function group()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Group::class);
     }
 }
