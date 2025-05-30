@@ -2,12 +2,15 @@
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import { ref, computed, onMounted } from 'vue'
-import AddModal from '~/components/courses/AddModal.vue'
-import DeleteModal from '~/components/courses/DeleteModal.vue'
+import AddModal from '~/components/groups/AddModal.vue'
+import DeleteModal from '~/components/groups/DeleteModal.vue'
+import EditModal from '~/components/groups/EditModal.vue'
 import type { User } from '~/types'
 import { useGroupStore } from '~/stores/groupStore'
 
 const groupStore = useGroupStore()
+const courseStore = useCourseStore()
+const teacherStore = useTeacherStore()
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -35,11 +38,19 @@ function getRowItems(row: any) {
     { label: 'مشاهدة المدفوعات', icon: 'i-lucide-wallet' },
     { type: 'separator' },
     {
+      label: 'تعديل المجموعة',
+      icon: 'i-lucide-edit',
+      color: 'primary',
+      onSelect() {
+        groupStore.editItem = row.original
+        groupStore.editModalOpen = true
+      }
+    },
+    {
       label: 'حذف المجموعة',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
-        // groupStore.idsToDelete = [row.original.id]
         groupStore.addId(row.original.id)
         groupStore.deleteModalOpen = true
       }
@@ -175,8 +186,12 @@ const columns: TableColumn<User>[] = [
   }
 ]
 
-const selectedIds = computed(() => groupStore.selectedIds)
 const count = computed(() => groupStore.selectedIds.length)
+
+onMounted(() => {
+  teacherStore.loadTeachersForSelect()
+  courseStore.loadCoursesForSelect()
+})
 </script>
 
 <template>
@@ -192,6 +207,8 @@ const count = computed(() => groupStore.selectedIds.length)
         </template>
 
         <DeleteModal :count="count" v-model:open="groupStore.deleteModalOpen" />
+
+        <EditModal :item="groupStore.editItem" v-model:open="groupStore.editModalOpen" />
 
       </UDashboardNavbar>
     </template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
-import AddModal from '~/components/groups/AddModal.vue'
-import DeleteModal from '~/components/groups/DeleteModal.vue'
+import AddModal from '~/components/courses/AddModal.vue'
+import DeleteModal from '~/components/courses/DeleteModal.vue'
 import type { User } from '~/types'
 
 const UButton = resolveComponent('UButton')

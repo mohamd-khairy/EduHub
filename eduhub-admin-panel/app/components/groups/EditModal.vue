@@ -5,6 +5,23 @@ import { useGroupStore } from '~/stores/groupStore'
 import { useCourseStore } from '~/stores/courseStore'
 import { useTeacherStore } from '~/stores/teacherStore'
 
+const open = ref(false)
+
+const props = defineProps({
+  open: Boolean,
+  item: Object
+})
+
+const emit = defineEmits(['update:open'])
+
+watch(() => props.open, (val) => {
+  open.value = val
+})
+
+watch(open, (val) => {
+  emit('update:open', val)
+})
+
 const groupStore = useGroupStore()
 const courseStore = useCourseStore()
 const teacherStore = useTeacherStore()
@@ -13,40 +30,30 @@ const schema = z.object({
   name: z.string().min(2, 'Too short'),
   email: z.string().email('Invalid email')
 })
-const open = ref(false)
 
 type Schema = z.output<typeof schema>
+
 
 const toast = useToast()
 
 async function onSubmit() {
   const payload = {
     name: state.name,
-    course_id: state.course_id?.value,  // no .value if reactive
-    teacher_id: state.teacher_id?.value, // same here
+    course_id: state.course_id?.value || props.item?.course_id,  // no .value if reactive
+    teacher_id: state.teacher_id?.value || props.item?.teacher_id, // same here
     schedule: (state.schedule || [])
       .filter(item => item.day && item.time)
       .map(item => `${item.day}-${item.time}`)
       .join(', ')
   }
 
-  console.log(payload);
-
-  groupStore.addGroup(payload)
+  groupStore.editGroup(payload , props.item?.id)
   toast.add({ title: 'Success', description: `مجموعة جديد ${state.name} تم اضافة بنجاح`, color: 'success' })
   open.value = false
 }
 
 const searchTeacherTerm = ref('')
 const searchCourseTerm = ref('')
-
-// const teacherOptions = ref<typeof teacherStore.items>([])
-// const courseOptions = ref<typeof courseStore.items>([])
-
-// onMounted(async () => {
-//   teacherOptions.value = await teacherStore.loadTeachersForSelect()
-//   courseOptions.value = await courseStore.loadCoursesForSelect()
-// })
 
 watch(searchCourseTerm, (newVal) => {
   if (newVal.length >= 3 || newVal.length < 1)
@@ -64,12 +71,20 @@ const state = reactive<Partial<Schema>>({
   name: null,
   course_id: null,
   teacher_id: null,
-  schedule: [{ day: '', time: '' }]
+  schedule: []
 })
+
+function parseScheduleString(scheduleStr: string) {
+  if (!scheduleStr) return []
+
+  return scheduleStr.split(',').map(part => {
+    const [day, time] = part.trim().split('-')
+    return { day, time }
+  })
+}
 
 const days = ['السبت', 'الاحد', ' الاثنين', 'الثلاثاء', 'الاربعاء', 'الخميس', 'الجمعة']
 // To add a new line
-// Add day-time string to the schedule
 function addScheduleItem() {
   state.schedule.push({ day: '', time: '' }) // Add a new object with day and time properties
 }
@@ -78,11 +93,20 @@ function addScheduleItem() {
 function removeScheduleItem(index: number) {
   state.schedule.splice(index, 1)
 }
+
+watch(() => props.item, (val) => {
+  if (!val) return
+  state.name = val.name || ''
+  state.course_id = val.course?.name || null
+  state.teacher_id = val.teacher?.name || null
+  state.schedule = parseScheduleString(val.schedule || '')
+}, { immediate: true, deep: true })
+
 </script>
 
 <template>
-  <UModal v-model:open="open" title="اضافة مجموعة" description="إضافة مجموعة جديد" dir="rtl">
-    <UButton label="إضافة مجموعة جديد" icon="i-lucide-plus" dir="rtl" />
+  <UModal v-model:open="open" title="تعديل مجموعة" description="إضافة مجموعة جديد" dir="rtl">
+    <UButton label="تعديل مجموعة " icon="i-lucide-plus" dir="rtl" />
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">
@@ -109,7 +133,6 @@ function removeScheduleItem(index: number) {
 
         <UFormField label="مواعيد المجموعة" placeholder="اسم المجموعة" name="schedule">
 
-          <!-- Loop through each schedule item and display input fields -->
           <div v-for="(item, index) in state.schedule" :key="index" class="flex items-center space-x-4 mb-4 w-full">
 
             <!-- Select Day -->
