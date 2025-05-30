@@ -20,30 +20,8 @@ const table = useTemplateRef('table') // Make sure this returns a reactive ref
 const columnFilters = ref([{ id: 'name', value: '' }])
 const columnVisibility = ref()
 
-const items = ref<User[]>([])
-
-// async function loadData(page = 1) {
-//   const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/group?relations=teacher,course&page=${page}`, {
-//     transform: (res) => res.data
-//   })
-
-//   if (data.value) {
-//     items.value = data.value.data
-
-    // pagination.value = {
-    //   page: data.value.current_page,
-    //   pageCount: data.value.last_page,
-    //   pageSize: data.value.per_page,
-    //   total: data.value.total
-    // }
-//   }
-// }
-
-
-// await loadData()
-
 onMounted(() => {
-  groupStore.loadGroups()
+  groupStore.loadAllGroups()
 })
 
 
@@ -61,10 +39,9 @@ function getRowItems(row: any) {
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
-        toast.add({
-          title: 'حذف المجموعة',
-          description: 'تم حذف المجموعة بنجاح'
-        })
+        // groupStore.idsToDelete = [row.original.id]
+        groupStore.addId(row.original.id)
+        groupStore.deleteModalOpen = true
       }
     }
   ]
@@ -75,14 +52,36 @@ const columns: TableColumn<User>[] = [
     id: 'select',
     header: ({ table }) =>
       h(UCheckbox, {
-        modelValue: table.getIsSomePageRowsSelected() ? 'indeterminate' : table.getIsAllPageRowsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => table.toggleAllPageRowsSelected(!!value),
+        modelValue: groupStore.selectedIds.length > 0 && groupStore.selectedIds.length === table.getFilteredRowModel().rows.length
+          ? true
+          : groupStore.selectedIds?.length > 0
+            ? 'indeterminate'
+            : false,
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            // Select all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              groupStore.toggleId(r.original.id)
+            })
+          } else {
+            // Deselect all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              groupStore.removeId(r.original.id)
+            })
+          }
+        },
         ariaLabel: 'Select all'
       }),
     cell: ({ row }) =>
       h(UCheckbox, {
-        modelValue: row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
+        modelValue: groupStore.selectedIds.includes(row.original.id),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            groupStore.addId(row.original.id)
+          } else {
+            groupStore.removeId(row.original.id)
+          }
+        },
         ariaLabel: 'Select row'
       })
   },
@@ -176,11 +175,8 @@ const columns: TableColumn<User>[] = [
   }
 ]
 
-const selectedRows = computed(() => table?.value?.tableApi?.getFilteredSelectedRowModel().rows || [])
-
-const selectedIds = computed(() => selectedRows.value.map(row => row.original.id))
-
-const count = computed(() => selectedIds.value.length)
+const selectedIds = computed(() => groupStore.selectedIds)
+const count = computed(() => groupStore.selectedIds.length)
 </script>
 
 <template>
@@ -194,6 +190,9 @@ const count = computed(() => selectedIds.value.length)
         <template #right>
           <AddModal />
         </template>
+
+        <DeleteModal :count="count" v-model:open="groupStore.deleteModalOpen" />
+
       </UDashboardNavbar>
     </template>
 
@@ -204,7 +203,7 @@ const count = computed(() => selectedIds.value.length)
           @update:model-value="table?.value?.tableApi?.getColumn('name')?.setFilterValue($event)" />
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <DeleteModal :count="count" :ids="selectedIds">
+          <DeleteModal :count="count">
             <UButton v-if="count" label="حذف" color="error" variant="subtle" icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>{{ count }}</UKbd>
@@ -242,8 +241,9 @@ const count = computed(() => selectedIds.value.length)
 
       <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
         <div class="flex items-center gap-1.5" dir="ltr">
-          <UPagination dir="ltr" :total="groupStore?.pagination?.total" :items-per-page="groupStore?.pagination?.pageSize"
-            :default-page="groupStore?.pagination?.page" @update:page="(p) => groupStore.loadGroups(p)" />
+          <UPagination dir="ltr" :total="groupStore?.pagination?.total"
+            :items-per-page="groupStore?.pagination?.pageSize" :default-page="groupStore?.pagination?.page"
+            @update:page="(p) => groupStore.loadGroups(p)" />
         </div>
       </div>
     </template>
