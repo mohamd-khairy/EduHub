@@ -57,4 +57,18 @@ class GeneralController extends Controller
     {
         //
     }
+
+    public function deleteAll(Request $request)
+    {
+        try {
+            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
+
+            $data = $model->whereIn('id', $request->ids)->delete();
+
+            return  $this->success($data);
+        } catch (\Throwable $th) {
+            throw $th;
+            return  $this->fail([]);
+        }
+    }
 }

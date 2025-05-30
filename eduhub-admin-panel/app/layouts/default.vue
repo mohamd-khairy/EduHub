@@ -15,9 +15,9 @@ const links = [[{
 }, {
 
   class: 'text-lg',
-  label: 'الطلاب',
+  label: 'المجموعات',
   icon: 'i-lucide-inbox',
-  to: '/students',
+  to: '/groups',
   // badge: '4',
   onSelect: () => {
     open.value = false
@@ -25,9 +25,9 @@ const links = [[{
 }, {
 
   class: 'text-lg',
-  label: 'المجموعات',
+  label: 'الطلاب',
   icon: 'i-lucide-inbox',
-  to: '/groups',
+  to: '/students',
   // badge: '4',
   onSelect: () => {
     open.value = false

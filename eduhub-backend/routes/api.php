@@ -10,16 +10,52 @@ Route::get('/user', function (Request $request) {
 
 Route::group([], function () {
 
-    Route::get('user', [GeneralController::class, 'index']);
-    Route::get('student', [GeneralController::class, 'index']);
-    Route::get('group', [GeneralController::class, 'index']);
-    Route::get('course', [GeneralController::class, 'index']);
-    Route::get('teacher', [GeneralController::class, 'index']);
-    Route::get('parentModel', [GeneralController::class, 'index']);
-    Route::get('exam', [GeneralController::class, 'index']);
-    Route::get('examResult', [GeneralController::class, 'index']);
-    Route::get('attendance', [GeneralController::class, 'index']);
-    Route::get('payment', [GeneralController::class, 'index']);
-    Route::get('examResult', [GeneralController::class, 'index']);
-    Route::get('teacherAttendance', [GeneralController::class, 'index']);
+    Route::group(['prefix' => 'group'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'user'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'student'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'course'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'teacher'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'parentModel'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'exam'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'parentModel'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'examResult'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'attendance'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'payment'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'teacherAttendance'], function () {
+        Route::get('/', [GeneralController::class, 'index']);
+        Route::post('/delete-all', [GeneralController::class, 'deleteAll']);
+    });
 });
