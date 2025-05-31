@@ -25,7 +25,7 @@ export const useGroupStore = defineStore('group', () => {
     const json = await res.json()
 
     if (json?.data) {
-      items.value = json.data.data
+      items.value = json?.data?.data
 
       // Update pagination info from last response
       pagination.value.page = json.data.current_page
@@ -35,7 +35,6 @@ export const useGroupStore = defineStore('group', () => {
     }
   }
 
-  // Delete selected groups from backend, then update local items and selection
   async function addGroup(data) {
     const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/group', {
       method: 'POST', // Adjust method as your API requires
@@ -63,6 +62,7 @@ export const useGroupStore = defineStore('group', () => {
 
     if (res.ok) {
       await loadAllGroups()
+      editModalOpen.value = false
     } else {
       throw new Error('Failed to delete groups')
     }

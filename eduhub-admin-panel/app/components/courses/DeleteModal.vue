@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { useGroupStore } from '~/stores/groupStore'
 
 const toast = useToast()
-const groupStore = useGroupStore()
+const courseStore = useCourseStore()
 
 withDefaults(defineProps<{
-  count?: number,
+  count?: number
 }>(), {
   count: 0
 })
@@ -15,22 +14,20 @@ const open = ref(false)
 async function onSubmit() {
   await new Promise(resolve => setTimeout(resolve, 1000))
 
-  await groupStore.deleteSelectedGroups()
+  await courseStore.deleteSelectedcourses()
 
   open.value = false
 
   if (!open.value)
     toast.add({
-      title: 'حذف المجموعة',
-      description: 'تم حذف المجموعة بنجاح'
+      title: 'حذف الكورس',
+      description: 'تم حذف الكورس بنجاح'
     })
 }
-
-
 </script>
 
 <template>
-  <UModal v-model:open="open" :title="`حذف  ${count}  مجموعة`"
+  <UModal v-model:open="open" :title="`حذف  ${count}  كورس`"
     :description="`هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه.`">
     <slot />
 

@@ -26,14 +26,6 @@ const groupStore = useGroupStore()
 const courseStore = useCourseStore()
 const teacherStore = useTeacherStore()
 
-const schema = z.object({
-  name: z.string().min(2, 'Too short'),
-  email: z.string().email('Invalid email')
-})
-
-type Schema = z.output<typeof schema>
-
-
 const toast = useToast()
 
 async function onSubmit() {
@@ -67,6 +59,12 @@ watch(searchTeacherTerm, (newVal) => {
     teacherStore.loadTeachersForSelect(newVal)
 })
 
+const schema = z.object({
+  name: z.string().min(2, 'Too short'),
+})
+
+type Schema = z.output<typeof schema>
+
 const state = reactive<Partial<Schema>>({
   name: null,
   course_id: null,
@@ -83,7 +81,7 @@ function parseScheduleString(scheduleStr: string) {
   })
 }
 
-const days = ['السبت', 'الاحد', ' الاثنين', 'الثلاثاء', 'الاربعاء', 'الخميس', 'الجمعة']
+const days = ['السبت', 'الاحد', 'الاثنين', 'الثلاثاء', 'الاربعاء', 'الخميس', 'الجمعة']
 // To add a new line
 function addScheduleItem() {
   state.schedule.push({ day: '', time: '' }) // Add a new object with day and time properties
@@ -106,7 +104,7 @@ watch(() => props.item, (val) => {
 
 <template>
   <UModal v-model:open="open" title="تعديل مجموعة" description="إضافة مجموعة جديد" dir="rtl">
-    <UButton label="تعديل مجموعة " icon="i-lucide-plus" dir="rtl" />
+    <!-- <UButton label="تعديل مجموعة " icon="i-lucide-plus" dir="rtl" /> -->
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">
@@ -157,8 +155,8 @@ watch(() => props.item, (val) => {
         </UFormField>
 
         <div class="flex justify-end gap-2">
-          <UButton label="Cancel" color="neutral" variant="subtle" @click="open = false" />
-          <UButton label="Create" color="primary" variant="solid" type="submit" @click="onSubmit" />
+          <UButton label="الغاء" color="neutral" variant="subtle" @click="open = false" />
+          <UButton label="حفظ" color="primary" variant="solid" type="submit" @click="onSubmit" />
         </div>
       </UForm>
     </template>

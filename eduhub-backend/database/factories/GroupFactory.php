@@ -19,19 +19,14 @@ class GroupFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->randomElement([
-                'رياضيات متقدمة',
-                'الفيزياء الحديثة',
-                'لغة عربية 2',
-                'لغة إنجليزية 1',
-                'كيمياء تطبيقية'
-            ]),
+
+            'name' => $this->faker->randomElement(['المجموعة أ', 'المجموعة ب', 'المجموعة ج']),
             'teacher_id' => Teacher::inRandomOrder()->first()?->id ?? Teacher::factory(),
             'course_id' => Course::inRandomOrder()->first()?->id ?? Course::factory(),
             'schedule' => $this->faker->randomElement([
-                'الأحد والثلاثاء 5:00 - 7:00 مساءً',
-                'الإثنين والأربعاء 6:00 - 8:00 مساءً',
-                'الجمعة 2:00 - 5:00 مساءً'
+                'الاربعاء-07:31, الاثنين-19:21,  الخميس-04:18',
+                'الاحد-07:31, الثلاثاء-19:21,  الاثنين-04:18',
+                'الجمعة-07:31, الثلاثاء-19:21,  السبت-04:18',
             ]),
             'max_students' => $this->faker->numberBetween(15, 50),
         ];

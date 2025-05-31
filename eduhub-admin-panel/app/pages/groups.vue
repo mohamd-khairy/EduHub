@@ -6,7 +6,6 @@ import AddModal from '~/components/groups/AddModal.vue'
 import DeleteModal from '~/components/groups/DeleteModal.vue'
 import EditModal from '~/components/groups/EditModal.vue'
 import type { User } from '~/types'
-import { useGroupStore } from '~/stores/groupStore'
 
 const groupStore = useGroupStore()
 const courseStore = useCourseStore()
@@ -20,13 +19,12 @@ const UCheckbox = resolveComponent('UCheckbox')
 const toast = useToast()
 const table = useTemplateRef('table') // Make sure this returns a reactive ref
 
-const columnFilters = ref([{ id: 'name', value: '' }])
+const columnFilters = ref([{ id: 'اسم المجموعة', value: '' }])
 const columnVisibility = ref()
 
 onMounted(() => {
   groupStore.loadAllGroups()
 })
-
 
 // Adjust typing here (replace `User` or your row type)
 function getRowItems(row: any) {
@@ -60,7 +58,7 @@ function getRowItems(row: any) {
 
 const columns: TableColumn<User>[] = [
   {
-    id: 'select',
+    id: 'اختار',
     header: ({ table }) =>
       h(UCheckbox, {
         modelValue: groupStore.selectedIds.length > 0 && groupStore.selectedIds.length === table.getFilteredRowModel().rows.length
@@ -98,6 +96,7 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'id',
+    id: 'رقم المجموعة',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
       return h(UButton, {
@@ -112,10 +111,15 @@ const columns: TableColumn<User>[] = [
         class: '-mx-2.5',
         onClick: () => column.toggleSorting(isSorted === 'asc')
       })
-    }
+    },
+    cell: ({ row }) =>
+      h(
+        () => row.original.id
+      )
   },
   {
     accessorKey: 'name',
+    id: 'اسم المجموعة',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
       return h(UButton, {
@@ -130,29 +134,40 @@ const columns: TableColumn<User>[] = [
         class: '-mx-2.5',
         onClick: () => column.toggleSorting(isSorted === 'asc')
       })
-    }
+    },
+    cell: ({ row }) =>
+      h(
+        () => row.original.name
+      )
   },
   {
     accessorKey: 'course_name',
+    id: 'اسم الكورس',
     header: 'اسم الكورس',
-    cell: ({ row }) => h(() => row.original.course.name)
+    cell: ({ row }) => h(() => row.original.course?.name)
   },
   {
-    accessorKey: 'teacher',
-    header: 'المدرس',
+    accessorKey: 'اسم المدرس',
+    header: 'اسم المدرس',
     cell: ({ row }) =>
       h(
         UBadge,
         { class: 'capitalize', variant: 'subtle', color: 'warning' },
-        () => row.original.teacher.name
+        () => row.original.teacher?.name
       )
   },
   {
     accessorKey: 'max_students',
-    header: 'عدد للطلاب'
+    id: 'عدد الطلاب',
+    header: 'عدد للطلاب',
+    cell: ({ row }) =>
+      h(
+        () => row.original.max_students
+      )
   },
   {
     accessorKey: 'schedule',
+    id: 'المواعيد',
     header: 'المواعيد',
     filterFn: 'equals',
     cell: ({ row }) =>
@@ -163,7 +178,9 @@ const columns: TableColumn<User>[] = [
       )
   },
   {
-    id: 'actions',
+    accessorKey: 'actions',
+    id: 'الاجراءات',
+    header: 'الاجراءات',
     cell: ({ row }) =>
       h(
         'div',
@@ -186,8 +203,6 @@ const columns: TableColumn<User>[] = [
   }
 ]
 
-const count = computed(() => groupStore.selectedIds.length)
-
 onMounted(() => {
   teacherStore.loadTeachersForSelect()
   courseStore.loadCoursesForSelect()
@@ -206,7 +221,7 @@ onMounted(() => {
           <AddModal />
         </template>
 
-        <DeleteModal :count="count" v-model:open="groupStore.deleteModalOpen" />
+        <DeleteModal :count="groupStore.selectedIds.length" v-model:open="groupStore.deleteModalOpen" />
 
         <EditModal :item="groupStore.editItem" v-model:open="groupStore.editModalOpen" />
 
@@ -215,33 +230,35 @@ onMounted(() => {
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput :model-value="(table?.value?.tableApi?.getColumn('name')?.getFilterValue() as string)" class="max-w-sm"
+        <UInput :model-value="(table?.tableApi?.getColumn('اسم المجموعة')?.getFilterValue() as string)" class="max-w-sm"
           icon="i-lucide-search" placeholder="ابحث ..."
-          @update:model-value="table?.value?.tableApi?.getColumn('name')?.setFilterValue($event)" />
+          @update:model-value="table?.tableApi?.getColumn('اسم المجموعة')?.setFilterValue($event)" />
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <DeleteModal :count="count">
-            <UButton v-if="count" label="حذف" color="error" variant="subtle" icon="i-lucide-trash">
+          <DeleteModal :count="groupStore.selectedIds.length">
+            <UButton v-if="groupStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
-                <UKbd>{{ count }}</UKbd>
+                <UKbd>{{ groupStore.selectedIds.length }}</UKbd>
               </template>
             </UButton>
           </DeleteModal>
 
-          <UDropdownMenu :items="table?.value?.tableApi
+          <UDropdownMenu :items="table?.tableApi
             ?.getAllColumns()
             .filter((column) => column.getCanHide())
             .map((column) => ({
               label: upperFirst(column.id),
-              type: 'checkbox',
+              type: 'checkbox' as const,
               checked: column.getIsVisible(),
               onUpdateChecked(checked: boolean) {
-                table?.value?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+                table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
               },
               onSelect(e?: Event) {
                 e?.preventDefault()
               }
-            }))" :content="{ align: 'end' }">
+            }))
+            " :content="{ align: 'end' }">
             <UButton label="الاعمدة" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
           </UDropdownMenu>
         </div>
@@ -256,11 +273,11 @@ onMounted(() => {
           td: 'border-b border-default'
         }" />
 
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
         <div class="flex items-center gap-1.5" dir="ltr">
           <UPagination dir="ltr" :total="groupStore?.pagination?.total"
             :items-per-page="groupStore?.pagination?.pageSize" :default-page="groupStore?.pagination?.page"
-            @update:page="(p) => groupStore.loadGroups(p)" />
+            @update:page="(p) => groupStore.loadAllGroups(p)" />
         </div>
       </div>
     </template>

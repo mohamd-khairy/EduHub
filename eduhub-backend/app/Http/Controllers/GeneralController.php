@@ -17,7 +17,7 @@ class GeneralController extends Controller
             if ($request->relations)
                 $relations = explode(',', $request->relations);
 
-            $data = $model->with($relations ?? [])->paginate();
+            $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate();
 
             return  $this->success($data);
         } catch (\Throwable $th) {

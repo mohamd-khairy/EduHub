@@ -7,6 +7,8 @@ export const useCourseStore = defineStore('course', () => {
   const selectedIds = ref<number[]>([])
   const deleteModalOpen = ref(false)
   const idsToDelete = ref<number[]>([])
+  const editModalOpen = ref(false)
+  const editItem = ref({})
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -24,7 +26,7 @@ export const useCourseStore = defineStore('course', () => {
     const json = await res.json()
 
     if (json?.data) {
-      items.value = json.data.data
+      items.value = json?.data?.data
 
       // Update pagination info from last response
       pagination.value.page = json.data.current_page
@@ -70,6 +72,39 @@ export const useCourseStore = defineStore('course', () => {
     } catch (error) {
       console.error('Error loading courses:', error)
       return []
+    }
+  }
+
+  async function addCourse(data) {
+    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/course', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    if (res.ok) {
+      await loadAllCourses()
+    } else {
+      throw new Error('Failed to delete groups')
+    }
+  }
+
+  async function editCourse(data, id) {
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/course/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    if (res.ok) {
+      await loadAllCourses()
+      editModalOpen.value = false
+    } else {
+      throw new Error('Failed to delete groups')
     }
   }
 
@@ -128,6 +163,10 @@ export const useCourseStore = defineStore('course', () => {
     deleteModalOpen,
     idsToDelete,
     pagination,
+    editModalOpen,
+    editItem,
+    editCourse,
+    addCourse,
     loadAllCourses,
     loadCourses,
     loadCoursesForSelect,

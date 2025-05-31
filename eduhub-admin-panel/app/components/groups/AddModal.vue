@@ -1,9 +1,5 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
-import { useGroupStore } from '~/stores/groupStore'
-import { useCourseStore } from '~/stores/courseStore'
-import { useTeacherStore } from '~/stores/teacherStore'
 
 const groupStore = useGroupStore()
 const courseStore = useCourseStore()
@@ -11,7 +7,6 @@ const teacherStore = useTeacherStore()
 
 const schema = z.object({
   name: z.string().min(2, 'Too short'),
-  email: z.string().email('Invalid email')
 })
 const open = ref(false)
 
@@ -39,14 +34,6 @@ async function onSubmit() {
 
 const searchTeacherTerm = ref('')
 const searchCourseTerm = ref('')
-
-// const teacherOptions = ref<typeof teacherStore.items>([])
-// const courseOptions = ref<typeof courseStore.items>([])
-
-// onMounted(async () => {
-//   teacherOptions.value = await teacherStore.loadTeachersForSelect()
-//   courseOptions.value = await courseStore.loadCoursesForSelect()
-// })
 
 watch(searchCourseTerm, (newVal) => {
   if (newVal.length >= 3 || newVal.length < 1)
@@ -134,8 +121,8 @@ function removeScheduleItem(index: number) {
         </UFormField>
 
         <div class="flex justify-end gap-2">
-          <UButton label="Cancel" color="neutral" variant="subtle" @click="open = false" />
-          <UButton label="Create" color="primary" variant="solid" type="submit" @click="onSubmit" />
+          <UButton label="الغاء" color="neutral" variant="subtle" @click="open = false" />
+          <UButton label="حفظ" color="primary" variant="solid" type="submit" @click="onSubmit" />
         </div>
       </UForm>
     </template>

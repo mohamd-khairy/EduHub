@@ -17,7 +17,13 @@ class CourseFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->randomElement(['المجموعة أ', 'المجموعة ب', 'المجموعة ج']),
+            'name' => $this->faker->randomElement([
+                'رياضيات متقدمة',
+                'الفيزياء الحديثة',
+                'لغة عربية 2',
+                'لغة إنجليزية 1',
+                'كيمياء تطبيقية'
+            ]),
             'description' => $this->faker->sentence()
         ];
     }
