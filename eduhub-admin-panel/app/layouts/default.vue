@@ -22,6 +22,22 @@ const links = [[{
     open.value = false
   }
 }, {
+  class: 'text-lg',
+  label: 'المدرسيين',
+  icon: 'i-lucide-users',
+  to: '/teachers',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  class: 'text-lg',
+  label: 'أولياء الامور',
+  icon: 'i-lucide-users',
+  to: '/parents',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
 
   class: 'text-lg',
   label: 'المجموعات',
@@ -38,22 +54,6 @@ const links = [[{
   icon: 'i-lucide-inbox',
   to: '/students',
   // badge: '4',
-  onSelect: () => {
-    open.value = false
-  }
-}, {
-  class: 'text-lg',
-  label: 'المدرسيين',
-  icon: 'i-lucide-users',
-  to: '/teachers',
-  onSelect: () => {
-    open.value = false
-  }
-}, {
-  class: 'text-lg',
-  label: 'أولياء الامور',
-  icon: 'i-lucide-users',
-  to: '/parents',
   onSelect: () => {
     open.value = false
   }

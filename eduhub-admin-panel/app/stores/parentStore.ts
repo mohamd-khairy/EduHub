@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export const useGroupStore = defineStore('group', () => {
+export const useParentStore = defineStore('parent', () => {
   const items = ref<object[]>([])
+  const parentOptions = ref<object[]>([])
   const selectedIds = ref<number[]>([])
   const deleteModalOpen = ref(false)
+  const idsToDelete = ref<number[]>([])
   const editModalOpen = ref(false)
   const editItem = ref({})
-  const idsToDelete = ref<number[]>([])
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -18,14 +19,14 @@ export const useGroupStore = defineStore('group', () => {
   })
 
   // Load all pages from backend, combine all items into one array
-  async function loadAllGroups(page = 1) {
+  async function loadAllParents(page = 1) {
     items.value = [] // clear current items
 
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/group?relations=teacher,course&page=${page}`)
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/parentModel?relations=students&page=${page}`)
     const json = await res.json()
 
     if (json?.data) {
-      items.value = json?.data?.data
+      items.value = json.data.data
 
       // Update pagination info from last response
       pagination.value.page = json.data.current_page
@@ -35,9 +36,48 @@ export const useGroupStore = defineStore('group', () => {
     }
   }
 
-  async function addGroup(data) {
-    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/group', {
-      method: 'POST', // Adjust method as your API requires
+  async function loadParents(search = null) {
+    items.value = [] // clear current items
+
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/parentModel/all?search=${search}`)
+    const json = await res.json()
+
+    if (json?.data) {
+      items.value = json.data
+    }
+  }
+
+  async function loadParentsForSelect(search = null) {
+    try {
+      const response = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/parentModel/all?search=${search || ''}`)
+
+      if (!response.ok) {
+        console.error('Failed to load courses:', response.statusText)
+        return []
+      }
+
+      const json = await response.json()
+
+      // Assuming the API response has a structure like { data: [...] }
+      if (!json.data || !Array.isArray(json.data)) {
+        console.error('Invalid data format received')
+        return []
+      }
+
+      // Map data to the format expected by your select
+      parentOptions.value = json.data.map((item: { id: number, name: string }) => ({
+        label: item.name,
+        value: String(item.id)
+      }))
+    } catch (error) {
+      console.error('Error loading courses:', error)
+      return []
+    }
+  }
+
+  async function addParent(data) {
+    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/parentModel', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -45,15 +85,15 @@ export const useGroupStore = defineStore('group', () => {
     })
 
     if (res.ok) {
-      await loadAllGroups()
+      await loadAllParents()
     } else {
       throw new Error('Failed to delete groups')
     }
   }
 
-  async function editGroup(data, id) {
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/group/${id}`, {
-      method: 'PUT', // Adjust method as your API requires
+  async function editParent(data, id) {
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/parentModel/${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -61,18 +101,18 @@ export const useGroupStore = defineStore('group', () => {
     })
 
     if (res.ok) {
-      await loadAllGroups()
+      await loadAllParents()
       editModalOpen.value = false
     } else {
       throw new Error('Failed to delete groups')
     }
   }
 
-  // Delete selected groups from backend, then update local items and selection
-  async function deleteSelectedGroups() {
+  // Delete selected Parents from backend, then update local items and selection
+  async function deleteSelectedParents() {
     if (selectedIds.value.length === 0) return
 
-    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/group/delete-all', {
+    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/parentModel/delete-all', {
       method: 'POST', // Adjust method as your API requires
       headers: {
         'Content-Type': 'application/json'
@@ -83,11 +123,11 @@ export const useGroupStore = defineStore('group', () => {
     if (res.ok) {
       // Remove deleted items locally
       items.value = items.value.filter(item => !selectedIds.value.includes(item.id))
-      await loadAllGroups()
+      await loadAllParents()
       deleteModalOpen.value = false
       clearSelection()
     } else {
-      throw new Error('Failed to delete groups')
+      throw new Error('Failed to delete Parents')
     }
   }
 
@@ -119,19 +159,22 @@ export const useGroupStore = defineStore('group', () => {
 
   return {
     items,
+    parentOptions,
     selectedIds,
     deleteModalOpen,
-    editModalOpen,
-    editItem,
     idsToDelete,
     pagination,
-    loadAllGroups,
-    addGroup,
-    editGroup,
-    deleteSelectedGroups,
+    editModalOpen,
+    editItem,
+    addParent,
+    editParent,
+    loadAllParents,
+    loadParents,
+    loadParentsForSelect,
     toggleId,
     addId,
     removeId,
-    clearSelection
+    clearSelection,
+    deleteSelectedParents
   }
 })

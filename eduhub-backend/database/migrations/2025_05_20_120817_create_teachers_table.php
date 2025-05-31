@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->string('specialization');
-            $table->enum('salary_type', ['fixed', 'per_hour', 'percentage']);
             $table->decimal('salary_amount', 8, 2);
             $table->timestamps();
         });

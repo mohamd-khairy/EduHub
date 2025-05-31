@@ -25,11 +25,10 @@ async function onSubmit() {
       .join(', ')
   }
 
-  console.log(payload);
-
   groupStore.addGroup(payload)
   toast.add({ title: 'Success', description: `مجموعة جديد ${state.name} تم اضافة بنجاح`, color: 'success' })
   open.value = false
+  resetState()
 }
 
 const searchTeacherTerm = ref('')
@@ -53,6 +52,15 @@ const state = reactive<Partial<Schema>>({
   teacher_id: null,
   schedule: [{ day: '', time: '' }]
 })
+
+function resetState() {
+  Object.assign(state, {
+    name: null,
+    course_id: null,
+    teacher_id: null,
+    schedule: [{ day: '', time: '' }]
+  })
+}
 
 const days = ['السبت', 'الاحد', ' الاثنين', 'الثلاثاء', 'الاربعاء', 'الخميس', 'الجمعة']
 // To add a new line
@@ -122,7 +130,7 @@ function removeScheduleItem(index: number) {
 
         <div class="flex justify-end gap-2">
           <UButton label="الغاء" color="neutral" variant="subtle" @click="open = false" />
-          <UButton label="حفظ" color="primary" variant="solid" type="submit" @click="onSubmit" />
+          <UButton label="حفظ" color="primary" variant="solid" type="submit" loading-auto @click="onSubmit" />
         </div>
       </UForm>
     </template>

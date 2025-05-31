@@ -7,6 +7,8 @@ export const useTeacherStore = defineStore('teacher', () => {
   const selectedIds = ref<number[]>([])
   const deleteModalOpen = ref(false)
   const idsToDelete = ref<number[]>([])
+  const editModalOpen = ref(false)
+  const editItem = ref({})
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -20,7 +22,7 @@ export const useTeacherStore = defineStore('teacher', () => {
   async function loadAllTeachers(page = 1) {
     items.value = [] // clear current items
 
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/teacher?page=${page}`)
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/teacher?relations=groups&page=${page}`)
     const json = await res.json()
 
     if (json?.data) {
@@ -73,11 +75,44 @@ export const useTeacherStore = defineStore('teacher', () => {
     }
   }
 
+  async function addTeacher(data) {
+    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/teacher', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    if (res.ok) {
+      await loadAllTeachers()
+    } else {
+      throw new Error('Failed to delete groups')
+    }
+  }
+
+  async function editTeacher(data, id) {
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/teacher/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    if (res.ok) {
+      await loadAllTeachers()
+      editModalOpen.value = false
+    } else {
+      throw new Error('Failed to delete groups')
+    }
+  }
+
   // Delete selected Teachers from backend, then update local items and selection
   async function deleteSelectedTeachers() {
     if (selectedIds.value.length === 0) return
 
-    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/Teacher/delete-all', {
+    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/teacher/delete-all', {
       method: 'POST', // Adjust method as your API requires
       headers: {
         'Content-Type': 'application/json'
@@ -88,6 +123,7 @@ export const useTeacherStore = defineStore('teacher', () => {
     if (res.ok) {
       // Remove deleted items locally
       items.value = items.value.filter(item => !selectedIds.value.includes(item.id))
+      await loadAllTeachers()
       deleteModalOpen.value = false
       clearSelection()
     } else {
@@ -128,6 +164,10 @@ export const useTeacherStore = defineStore('teacher', () => {
     deleteModalOpen,
     idsToDelete,
     pagination,
+    editModalOpen,
+    editItem,
+    addTeacher,
+    editTeacher,
     loadAllTeachers,
     loadTeachers,
     loadTeachersForSelect,

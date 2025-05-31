@@ -22,7 +22,7 @@ export const useCourseStore = defineStore('course', () => {
   async function loadAllCourses(page = 1) {
     items.value = [] // clear current items
 
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/course?page=${page}`)
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/course?relations=groups&page=${page}`)
     const json = await res.json()
 
     if (json?.data) {
@@ -123,6 +123,7 @@ export const useCourseStore = defineStore('course', () => {
     if (res.ok) {
       // Remove deleted items locally
       items.value = items.value.filter(item => !selectedIds.value.includes(item.id))
+      await loadAllCourses()
       deleteModalOpen.value = false
       clearSelection()
     } else {

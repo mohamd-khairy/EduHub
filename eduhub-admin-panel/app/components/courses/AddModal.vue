@@ -12,8 +12,8 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
-  name: undefined,
-  description: undefined
+  name: null,
+  description: null
 })
 
 const toast = useToast()
@@ -21,6 +21,13 @@ async function onSubmit() {
   courseStore.addCourse(state)
   toast.add({ title: 'Success', description: `كورس جديد ${state.name} تم اضافة بنجاح`, color: 'success' })
   open.value = false
+  resetState()
+}
+function resetState() {
+  Object.assign(state, {
+    name: null,
+    description: null
+  })
 }
 </script>
 
@@ -55,6 +62,7 @@ async function onSubmit() {
             color="primary"
             variant="solid"
             type="submit"
+            loading-auto
             @click="onSubmit"
           />
         </div>

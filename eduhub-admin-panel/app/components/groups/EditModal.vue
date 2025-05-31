@@ -1,9 +1,5 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
-import { useGroupStore } from '~/stores/groupStore'
-import { useCourseStore } from '~/stores/courseStore'
-import { useTeacherStore } from '~/stores/teacherStore'
 
 const open = ref(false)
 
@@ -40,7 +36,7 @@ async function onSubmit() {
   }
 
   groupStore.editGroup(payload , props.item?.id)
-  toast.add({ title: 'Success', description: `مجموعة جديد ${state.name} تم اضافة بنجاح`, color: 'success' })
+  toast.add({ title: 'Success', description: `مجموعة  ${state.name} تم تعديل بنجاح`, color: 'success' })
   open.value = false
 }
 
@@ -103,7 +99,7 @@ watch(() => props.item, (val) => {
 </script>
 
 <template>
-  <UModal v-model:open="open" title="تعديل مجموعة" description="إضافة مجموعة جديد" dir="rtl">
+  <UModal v-model:open="open" title="تعديل مجموعة" description="تعديل مجموعة " dir="rtl">
     <!-- <UButton label="تعديل مجموعة " icon="i-lucide-plus" dir="rtl" /> -->
 
     <template #body dir="rtl">
@@ -156,7 +152,7 @@ watch(() => props.item, (val) => {
 
         <div class="flex justify-end gap-2">
           <UButton label="الغاء" color="neutral" variant="subtle" @click="open = false" />
-          <UButton label="حفظ" color="primary" variant="solid" type="submit" @click="onSubmit" />
+          <UButton label="حفظ" color="primary" variant="solid" type="submit" loading-auto @click="onSubmit" />
         </div>
       </UForm>
     </template>

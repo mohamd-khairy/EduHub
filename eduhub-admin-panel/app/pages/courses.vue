@@ -138,6 +138,17 @@ const columns: TableColumn<User>[] = [
       )
   },
   {
+    accessorKey: 'groups',
+    id: 'عدد المجموعات',
+    header: 'عدد المجموعات',
+    cell: ({ row }) =>
+      h(
+        UBadge,
+        { class: 'capitalize', variant: 'subtle', color: 'success' },
+        () => (row.original.groups).length
+      )
+  },
+  {
     accessorKey: 'description',
     id: 'تفاصيل الكورس',
     header: 'تفاصيل الكورس',
@@ -187,10 +198,10 @@ const columns: TableColumn<User>[] = [
           <AddModal />
         </template>
 
-        
+
         <DeleteModal :count="courseStore.selectedIds.length" v-model:open="courseStore.deleteModalOpen" />
 
-        <EditModal :item="courseStore.editItem"  v-model:open="courseStore.editModalOpen" />
+        <EditModal :item="courseStore.editItem" v-model:open="courseStore.editModalOpen" />
 
       </UDashboardNavbar>
     </template>
@@ -203,8 +214,8 @@ const columns: TableColumn<User>[] = [
 
         <div class="flex flex-wrap items-center gap-1.5">
           <DeleteModal :count="courseStore.selectedIds.length">
-            <UButton v-if="courseStore.selectedIds.length" label="حذف" color="error"
-              variant="subtle" icon="i-lucide-trash">
+            <UButton v-if="courseStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
                   {{ courseStore.selectedIds.length }}
