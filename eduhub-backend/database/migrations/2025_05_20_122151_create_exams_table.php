@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('group_id');
             $table->string('title');
             $table->date('date');
+            $table->time('time');
             $table->integer('total_marks');
             $table->timestamps();
         });

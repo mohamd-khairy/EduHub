@@ -6,6 +6,24 @@ use Illuminate\Http\Request;
 
 class GeneralController extends Controller
 {
+
+    // Helper function to manually parse the filter string if not in JSON format
+    private function parseFilterString($filters)
+    {
+        $filtersArray = [];
+
+        // Check if the string is in the format filter=[[exam_id,1],...]
+        // Use regex to properly match the key-value pairs inside square brackets
+        preg_match_all('/\[(\w+),\s*(\d+)\]/', $filters, $matches);
+
+        // Iterate through the matches and prepare the filters array
+        foreach ($matches[1] as $index => $key) {
+            $filtersArray[] = [$key, $matches[2][$index]];
+        }
+
+        return $filtersArray;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -14,8 +32,19 @@ class GeneralController extends Controller
         try {
             $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
 
+            //relations
             if ($request->relations)
                 $relations = explode(',', $request->relations);
+
+            //filters
+            if ($request->filters)
+                foreach ($this->parseFilterString($request->filters) as $filter) {
+                    if (count($filter) == 2) {
+                        $column = $filter[0];
+                        $value = $filter[1];
+                        $model = $model->where($column, $value);
+                    }
+                }
 
             $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate();
 

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useGroupStore } from '~/stores/groupStore'
 
 const toast = useToast()
 const groupStore = useGroupStore()

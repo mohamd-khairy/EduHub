@@ -25,6 +25,7 @@ class ExamFactory extends Factory
                 'تقييم شهري'
             ]),
             'date' => $this->faker->dateTimeBetween('-2 weeks', '+2 weeks')->format('Y-m-d'),
+            'time' => $this->faker->dateTimeBetween('-2 weeks', '+2 weeks')->format('H:i'),
             'total_marks' => $this->faker->numberBetween(20, 100),
         ];
     }

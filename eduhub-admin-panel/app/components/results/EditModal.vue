@@ -1,12 +1,38 @@
 <script setup lang="ts">
 import * as z from 'zod'
 
-const examResultStore = useExamResultStore()
-const examStore = useExamStore()
-const studentStore = useStudentStore()
+const props = defineProps({
+  open: Boolean,
+  item: Object
+})
+
+const emit = defineEmits(['update:open'])
+
+watch(() => props.open, (val) => {
+  open.value = val
+})
 
 const open = ref(false)
+
+watch(open, (val) => {
+  emit('update:open', val)
+})
+
+const examResultStore = useExamResultStore()
+const studentStore = useStudentStore()
+const examStore = useExamStore()
 const toast = useToast()
+
+async function onSubmit() {
+  const payload = {
+    score: state.score,
+    student_id: state.student_id?.value,
+    exam_id: state.exam_id?.value,
+  }
+  examResultStore.editExamResult(payload, props.item?.id)
+  toast.add({ title: 'Success', description: ` تم تعديل بنجاح`, color: 'success' })
+  open.value = false
+}
 
 const searchExamTerm = ref('')
 const searchStudentTerm = ref('')
@@ -23,41 +49,28 @@ watch(searchStudentTerm, (newVal) => {
     studentStore.loadStudentsForSelect(newVal)
 })
 
-const schema = z.object({})
+const schema = z.object({
+  title: z.string().min(2, 'Too short'),
+})
 
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
-  student_id: null,
+  score: null,
   exam_id: null,
-  score: null
+  student_id: null,
 })
 
-function resetState() {
-  Object.assign(state, {
-    student_id: null,
-    exam_id: null,
-    score: null
-  })
-}
-
-async function onSubmit() {
-  const payload = {
-    score: state.score,
-    exam_id: state.exam_id?.value,
-    student_id: state.student_id?.value,
-  }
-  examResultStore.addExamResult(payload)
-  toast.add({ title: 'Success', description: `درجة اختبار جديد ${state.exam_id?.label} تم اضافة بنجاح`, color: 'success' })
-  open.value = false
-  resetState()
-}
+watch(() => props.item, (val) => {
+  if (!val) return
+  state.score = val.score || ''
+  state.exam_id = val.exam?.title || null
+  state.student_id = val.student?.name || null
+}, { immediate: true, deep: true })
 </script>
 
 <template>
-  <UModal v-model:open="open" title="اضافة اختبار" description="إضافة اختبار جديد" dir="rtl">
-    <UButton label="إضافة اختبار جديد" icon="i-lucide-plus" dir="rtl" />
-
+  <UModal v-model:open="open" title="تعديل اختبار" description="تعديل اختبار " dir="rtl">
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">
 
@@ -78,8 +91,7 @@ async function onSubmit() {
         </UFormField>
 
         <UFormField label="درجة الطالب" placeholder="درجة الطالب" name="score">
-          <UInput required v-model="state.score" max="100" type="number" placeholder="درجة الطالب"
-            class="w-full" />
+          <UInput required v-model="state.score" max="100" type="number" placeholder="درجة الطالب" class="w-full" />
         </UFormField>
 
         <div class="flex justify-end gap-2">

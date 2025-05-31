@@ -10,7 +10,11 @@ class Exam extends Model
     use HasFactory;
 
     protected $fillable = [
-        'group_id', 'title', 'date', 'total_marks'
+        'group_id',
+        'title',
+        'date',
+        'time',
+        'total_marks'
     ];
 
     public function group()

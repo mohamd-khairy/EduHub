@@ -22,10 +22,6 @@ const table = useTemplateRef('table') // Make sure this returns a reactive ref
 const columnFilters = ref([{ id: 'اسم المجموعة', value: '' }])
 const columnVisibility = ref()
 
-onMounted(() => {
-  groupStore.loadAllGroups()
-})
-
 // Adjust typing here (replace `User` or your row type)
 function getRowItems(row: any) {
   return [
@@ -206,6 +202,7 @@ const columns: TableColumn<User>[] = [
 onMounted(() => {
   teacherStore.loadTeachersForSelect()
   courseStore.loadCoursesForSelect()
+  groupStore.loadAllGroups()
 })
 </script>
 

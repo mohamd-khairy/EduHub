@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import * as z from 'zod'
 
-const open = ref(false)
-
 const props = defineProps({
   open: Boolean,
   item: Object
@@ -13,6 +11,8 @@ const emit = defineEmits(['update:open'])
 watch(() => props.open, (val) => {
   open.value = val
 })
+
+const open = ref(false)
 
 watch(open, (val) => {
   emit('update:open', val)

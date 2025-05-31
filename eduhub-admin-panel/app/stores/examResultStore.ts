@@ -1,14 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export const useGroupStore = defineStore('group', () => {
+export const useExamResultStore = defineStore('examResult', () => {
   const items = ref<object[]>([])
-  const groupOptions = ref<object[]>([])
+  const examResultOptions = ref<object[]>([])
   const selectedIds = ref<number[]>([])
   const deleteModalOpen = ref(false)
+  const idsToDelete = ref<number[]>([])
   const editModalOpen = ref(false)
   const editItem = ref({})
-  const idsToDelete = ref<number[]>([])
+  const showExamResultItem = ref({})
+  const showExamResultModalOpen = ref(false)
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -19,14 +21,28 @@ export const useGroupStore = defineStore('group', () => {
   })
 
   // Load all pages from backend, combine all items into one array
-  async function loadAllGroups(page = 1) {
+  async function loadAllExamResults(page = 1, params = null) {
     items.value = [] // clear current items
 
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/group?relations=teacher,course&page=${page}`)
+    const relations = 'exam,student'
+
+    let url = `http://localhost/EduHub/eduhub-backend/public/api/examResult?page=${page}`
+
+    if (relations) {
+      url += `&relations=${relations}`
+    }
+
+    if (params) {
+      const filterEntries = Object.entries(params).map(([key, value]) => `[${key},${value}]`)
+      const filterParam = `filters=[${filterEntries.join(',')}]`
+      url += `&${filterParam}`
+    }
+
+    const res = await fetch(url)
     const json = await res.json()
 
     if (json?.data) {
-      items.value = json?.data?.data
+      items.value = json.data.data
 
       // Update pagination info from last response
       pagination.value.page = json.data.current_page
@@ -36,15 +52,20 @@ export const useGroupStore = defineStore('group', () => {
     }
   }
 
-  async function loadGroupsForSelect(search = null) {
+  async function loadExamResults(search = null) {
+    items.value = [] // clear current items
+
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/examResult/all?search=${search}`)
+    const json = await res.json()
+
+    if (json?.data) {
+      items.value = json.data
+    }
+  }
+
+  async function loadExamResultsForSelect(search = null) {
     try {
-      let url = `http://localhost/EduHub/eduhub-backend/public/api/group/all`
-
-      if (search) {
-        url += `?search=${search || ''}`
-      }
-
-      const response = await fetch(url)
+      const response = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/examResult/all?search=${search || ''}`)
 
       if (!response.ok) {
         console.error('Failed to load courses:', response.statusText)
@@ -60,7 +81,7 @@ export const useGroupStore = defineStore('group', () => {
       }
 
       // Map data to the format expected by your select
-      groupOptions.value = json.data.map((item: { id: number, name: string }) => ({
+      examResultOptions.value = json.data.map((item: { id: number, name: string }) => ({
         label: item.name,
         value: String(item.id)
       }))
@@ -70,9 +91,9 @@ export const useGroupStore = defineStore('group', () => {
     }
   }
 
-  async function addGroup(data) {
-    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/group', {
-      method: 'POST', // Adjust method as your API requires
+  async function addExamResult(data) {
+    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/examResult', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -80,15 +101,15 @@ export const useGroupStore = defineStore('group', () => {
     })
 
     if (res.ok) {
-      await loadAllGroups()
+      await loadAllExamResults()
     } else {
       throw new Error('Failed to delete groups')
     }
   }
 
-  async function editGroup(data, id) {
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/group/${id}`, {
-      method: 'PUT', // Adjust method as your API requires
+  async function editExamResult(data, id) {
+    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/examResult/${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -96,18 +117,18 @@ export const useGroupStore = defineStore('group', () => {
     })
 
     if (res.ok) {
-      await loadAllGroups()
+      await loadAllExamResults()
       editModalOpen.value = false
     } else {
       throw new Error('Failed to delete groups')
     }
   }
 
-  // Delete selected groups from backend, then update local items and selection
-  async function deleteSelectedGroups() {
+  // Delete selected Exams from backend, then update local items and selection
+  async function deleteSelectedExamResults() {
     if (selectedIds.value.length === 0) return
 
-    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/group/delete-all', {
+    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/examResult/delete-all', {
       method: 'POST', // Adjust method as your API requires
       headers: {
         'Content-Type': 'application/json'
@@ -118,11 +139,11 @@ export const useGroupStore = defineStore('group', () => {
     if (res.ok) {
       // Remove deleted items locally
       items.value = items.value.filter(item => !selectedIds.value.includes(item.id))
-      await loadAllGroups()
+      await loadAllExamResults()
       deleteModalOpen.value = false
       clearSelection()
     } else {
-      throw new Error('Failed to delete groups')
+      throw new Error('Failed to delete Exams')
     }
   }
 
@@ -154,21 +175,24 @@ export const useGroupStore = defineStore('group', () => {
 
   return {
     items,
+    examResultOptions,
     selectedIds,
     deleteModalOpen,
-    editModalOpen,
-    editItem,
     idsToDelete,
     pagination,
-    groupOptions,
-    loadGroupsForSelect,
-    loadAllGroups,
-    addGroup,
-    editGroup,
-    deleteSelectedGroups,
+    editModalOpen,
+    editItem,
+    showExamResultItem,
+    showExamResultModalOpen,
+    addExamResult,
+    editExamResult,
+    loadAllExamResults,
+    loadExamResults,
+    loadExamResultsForSelect,
     toggleId,
     addId,
     removeId,
-    clearSelection
+    clearSelection,
+    deleteSelectedExamResults
   }
 })
