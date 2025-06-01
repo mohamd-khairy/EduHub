@@ -6,119 +6,45 @@ defineProps<{
   mail: Mail
 }>()
 
-const emits = defineEmits(['close'])
-
-const dropdownItems = [[{
-  label: 'Mark as unread',
-  icon: 'i-lucide-check-circle'
+const links = [[{
+  label: 'General',
+  icon: 'i-lucide-user',
+  to: '/students',
+  exact: true
 }, {
-  label: 'Mark as important',
-  icon: 'i-lucide-triangle-alert'
-}], [{
-  label: 'Star thread',
-  icon: 'i-lucide-star'
+  label: 'Members',
+  icon: 'i-lucide-users',
+  to: '/students/members'
 }, {
-  label: 'Mute thread',
-  icon: 'i-lucide-circle-pause'
+  label: 'Notifications',
+  icon: 'i-lucide-bell',
+  to: '/students/notifications'
+}, {
+  label: 'Security',
+  icon: 'i-lucide-shield',
+  to: '/students/security'
 }]]
-
-const toast = useToast()
-
-const reply = ref('')
-const loading = ref(false)
-
-function onSubmit() {
-  loading.value = true
-
-  setTimeout(() => {
-    reply.value = ''
-
-    toast.add({
-      title: 'Email sent',
-      description: 'Your email has been sent successfully',
-      icon: 'i-lucide-check-circle',
-      color: 'success'
-    })
-
-    loading.value = false
-  }, 1000)
-}
 </script>
 
 <template>
   <UDashboardPanel id="inbox-2">
-    <UDashboardNavbar title="تفاصيل الطالب" :toggle="false">
-      <template #leading>
-        <UButton icon="i-lucide-x" color="neutral" variant="ghost" class="-ms-1.5" @click="emits('close')" />
-      </template>
-
-      <template #right>
-        <UTooltip text="Archive">
-          <UButton icon="i-lucide-inbox" color="neutral" variant="ghost" />
-        </UTooltip>
-
-        <UTooltip text="Reply">
-          <UButton icon="i-lucide-reply" color="neutral" variant="ghost" />
-        </UTooltip>
-
-        <UDropdownMenu :items="dropdownItems">
-          <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" />
-        </UDropdownMenu>
-      </template>
-    </UDashboardNavbar>
-
-    <div class="flex flex-col sm:flex-row justify-between gap-1 p-4 sm:px-6 border-b border-default">
-      <div class="flex items-start gap-4 sm:my-1.5">
-        <img :src="mail.image" :alt="mail.name" width="50"/>
-
-        <div class="min-w-0">
-          <p class="font-semibold text-highlighted">
-            {{ mail.name }}
-          </p>
-          <p class="text-muted">
-            {{ mail.email }} - {{ mail.phone }}
-          </p>
-        </div>
-      </div>
-
-      <p class="max-sm:pl-16 text-muted text-sm sm:mt-2">
-        <!-- {{ format(new Date(mail.created_at), 'dd MMM HH:mm') }} -->
-      </p>
-    </div>
-
-    <div class="flex-1 p-4 sm:p-6 overflow-y-auto">
-      <p class="whitespace-pre-wrap">
-        {{ mail.name }}
-      </p>
-    </div>
-
-    <div class="pb-4 px-4 sm:px-6 shrink-0">
-      <UCard variant="subtle" class="mt-auto" :ui="{ header: 'flex items-center gap-1.5 text-dimmed' }">
-        <template #header>
-          <UIcon name="i-lucide-reply" class="size-5" />
-
-          <span class="text-sm truncate">
-            Reply to {{ mail.name }} ({{ mail.phone }}) ({{ mail.email }})
-          </span>
+    <template #header>
+      <UDashboardNavbar title="تفاصيل الطالب" :toggle="false">
+        <template #leading>
+          <UDashboardSidebarCollapse />
         </template>
+      </UDashboardNavbar>
 
-        <form @submit.prevent="onSubmit">
-          <UTextarea v-model="reply" color="neutral" variant="none" required autoresize
-            placeholder="Write your reply..." :rows="4" :disabled="loading" class="w-full"
-            :ui="{ base: 'p-0 resize-none' }" />
+      <UDashboardToolbar>
+        <!-- NOTE: The `-mx-1` class is used to align with the `DashboardSidebarCollapse` button here. -->
+        <UNavigationMenu :items="links" highlight class="-mx-1 flex-1" />
+      </UDashboardToolbar>
+    </template>
 
-          <div class="flex items-center justify-between">
-            <UTooltip text="Attach file">
-              <UButton color="neutral" variant="ghost" icon="i-lucide-paperclip" />
-            </UTooltip>
-
-            <div class="flex items-center justify-end gap-2">
-              <UButton color="neutral" variant="ghost" label="Save draft" />
-              <UButton type="submit" color="neutral" :loading="loading" label="Send" icon="i-lucide-send" />
-            </div>
-          </div>
-        </form>
-      </UCard>
-    </div>
+    <template #body>
+      <div class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-2xl mx-auto">
+        <NuxtPage />
+      </div>
+    </template>
   </UDashboardPanel>
 </template>

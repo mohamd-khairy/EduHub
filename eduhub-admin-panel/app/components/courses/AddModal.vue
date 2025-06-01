@@ -46,7 +46,7 @@ function resetState() {
           <UInput required v-model="state.name" class="w-full" />
         </UFormField>
 
-        <UFormField label="اسم الكورس" placeholder="اسم الكورس" name="name">
+        <UFormField label="تفاصيل الكورس" placeholder="تفاصيل الكورس" name="name">
           <UTextarea  required v-model="state.description" class="w-full" />
         </UFormField>
 
