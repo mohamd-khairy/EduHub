@@ -7,28 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
+    /** @use HasFactory<\Database\Factories\GroupFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'teacher_id', 'group_id', 'schedule', 'max_students'];
+    protected $fillable = ['name', 'description'];
 
-    public function teacher()
+    public function groups()
     {
-        return $this->belongsTo(Teacher::class);
-    }
-
-    public function students()
-    {
-        return $this->belongsToMany(Student::class, 'course_students', 'course_id', 'student_id')
-            ->withPivot('start_date', 'end_date', 'status');
-    }
-
-    public function studentEnrollments()
-    {
-        return $this->hasMany(CourseStudent::class);
-    }
-
-    public function group()
-    {
-        return $this->belongsTo(Group::class);
+        return $this->hasMany(Group::class, 'course_id');
     }
 }

@@ -23,7 +23,6 @@ class TeacherFactory extends Factory
             'specialization' => $this->faker->randomElement([
                 'رياضيات', 'علوم', 'لغة عربية', 'لغة إنجليزية', 'فيزياء', 'كيمياء'
             ]),
-            'salary_type' => $this->faker->randomElement(['fixed', 'per_hour', 'percentage']),
             'salary_amount' => $this->faker->randomFloat(2, 1000, 5000), // قيمة بين 1000 و5000
         ];
     }

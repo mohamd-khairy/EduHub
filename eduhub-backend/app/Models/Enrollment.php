@@ -5,15 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CourseStudent extends Model
+class Enrollment extends Model
 {
     use HasFactory;
 
-    protected $table = 'course_students'; // اسم الجدول الوسيط
-
     protected $fillable = [
         'student_id',
-        'course_id',
+        'group_id',
         'start_date',
         'end_date',
         'status',
@@ -26,8 +24,8 @@ class CourseStudent extends Model
     }
 
     // العلاقة مع الدورة
-    public function course()
+    public function group()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Group::class);
     }
 }

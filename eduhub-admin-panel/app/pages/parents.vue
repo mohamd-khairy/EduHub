@@ -3,7 +3,9 @@ import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import AddModal from '~/components/parents/AddModal.vue'
 import DeleteModal from '~/components/parents/DeleteModal.vue'
-import type { User } from '~/types'
+import EditModal from '~/components/parents/EditModal.vue'
+
+const parentStore = useParentStore()
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -14,80 +16,36 @@ const toast = useToast()
 const table = useTemplateRef('table')
 
 const columnFilters = ref([{
-  id: 'name',
+  id: 'اسم ولي الامر',
   value: ''
 }])
 
 const columnVisibility = ref()
 
-const items = ref([])
-const pagination = ref({
-  page: 1,
-  pageCount: 1,
-  pageSize: 10,
-  total: 0
+onMounted(() => {
+  parentStore.loadAllParents()
 })
 
-// Initial load
-await loadData()
-
-async function loadData(page = 1) {
-  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/parentModel?page=${page}`, {
-    transform: (res) => res.data
-  })
-
-  if (data.value) {
-    items.value = data.value.data
-
-    pagination.value = {
-      page: data.value.current_page,
-      pageCount: data.value.last_page,
-      pageSize: data.value.per_page,
-      total: data.value.total
-    }
-  }
-}
-
-function getRowItems(row: Row<ob>) {
+function getRowItems(row: any) {
   return [
+    { type: 'label', label: 'الاجراءات' },
+    { type: 'separator' },
     {
-      type: 'label',
-      label: 'Actions'
-    },
-    {
-      label: 'Copy customer ID',
-      icon: 'i-lucide-copy',
+      label: 'تعديل ولي الامر',
+      icon: 'i-lucide-edit',
+      color: 'primary',
       onSelect() {
-        navigator.clipboard.writeText(row.original.id.toString())
-        toast.add({
-          title: 'Copied to clipboard',
-          description: 'Customer ID copied to clipboard'
-        })
+        parentStore.editItem = row.original
+        parentStore.editModalOpen = true
       }
     },
     {
-      type: 'separator'
-    },
-    {
-      label: 'View customer details',
-      icon: 'i-lucide-list'
-    },
-    {
-      label: 'View customer payments',
-      icon: 'i-lucide-wallet'
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: 'Delete customer',
+      label: 'حذف ولي الامر',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
-        toast.add({
-          title: 'Customer deleted',
-          description: 'The customer has been deleted.'
-        })
+        parentStore.addId(row.original.id)
+        parentStore.deleteModalOpen = true
       }
     }
   ]
@@ -95,25 +53,46 @@ function getRowItems(row: Row<ob>) {
 
 const columns: TableColumn<User>[] = [
   {
-    id: 'select',
+    accessorKey: 'select',
+    id: 'اختار',
     header: ({ table }) =>
       h(UCheckbox, {
-        'modelValue': table.getIsSomePageRowsSelected()
-          ? 'indeterminate'
-          : table.getIsAllPageRowsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-          table.toggleAllPageRowsSelected(!!value),
-        'ariaLabel': 'Select all'
+        modelValue: parentStore.selectedIds.length > 0 && parentStore.selectedIds.length === table.getFilteredRowModel().rows.length
+          ? true
+          : parentStore.selectedIds?.length > 0
+            ? 'indeterminate'
+            : false,
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            // Select all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              parentStore.toggleId(r.original.id)
+            })
+          } else {
+            // Deselect all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              parentStore.removeId(r.original.id)
+            })
+          }
+        },
+        ariaLabel: 'Select all'
       }),
     cell: ({ row }) =>
       h(UCheckbox, {
-        'modelValue': row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
-        'ariaLabel': 'Select row'
+        modelValue: parentStore.selectedIds.includes(row.original.id),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            parentStore.addId(row.original.id)
+          } else {
+            parentStore.removeId(row.original.id)
+          }
+        },
+        ariaLabel: 'Select row'
       })
   },
   {
     accessorKey: 'id',
+    id: 'رقم ولي الامر',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -133,6 +112,7 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'name',
+    id: 'اسم ولي الامر',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -152,6 +132,7 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'phone',
+    id: 'التليفون',
     header: 'التليفون',
     cell: ({ row }) => {
       const color = 'success'
@@ -162,15 +143,30 @@ const columns: TableColumn<User>[] = [
     }
   },
   {
+    accessorKey: 'students',
+    id: 'عدد الطلاب',
+    header: 'عدد الطلاب',
+    cell: ({ row }) =>
+      h(
+        UBadge,
+        { class: 'capitalize', variant: 'subtle', color: 'success' },
+        () => (row.original.students).length
+      )
+  },
+  {
     accessorKey: 'email',
+    id: 'البريد الالكتروني',
     header: 'البريد الالكتروني',
   },
   {
     accessorKey: 'address',
+    id: 'العنوان',
     header: 'العنوان'
   },
   {
-    id: 'actions',
+    accessorKey: 'actions',
+    id: 'الاجراءات',
+    header: 'الاجراءات',
     cell: ({ row }) => {
       return h(
         'div',
@@ -195,7 +191,6 @@ const columns: TableColumn<User>[] = [
     }
   }
 ]
-
 </script>
 
 <template>
@@ -209,22 +204,27 @@ const columns: TableColumn<User>[] = [
         <template #right>
           <AddModal />
         </template>
+
+        <DeleteModal :count="parentStore.selectedIds.length" v-model:open="parentStore.deleteModalOpen" />
+
+        <EditModal :item="parentStore.editItem" v-model:open="parentStore.editModalOpen" />
+
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)" class="max-w-sm"
+        <UInput :model-value="(table?.tableApi?.getColumn('اسم ولي الامر')?.getFilterValue() as string)" class="max-w-sm"
           icon="i-lucide-search" placeholder="ابحث ..."
-          @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
+          @update:model-value="table?.tableApi?.getColumn('اسم ولي الامر')?.setFilterValue($event)" />
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <DeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
-            <UButton v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length" label="حذف" color="error"
+          <DeleteModal :count="parentStore.selectedIds.length">
+            <UButton v-if="parentStore.selectedIds.length" label="حذف" color="error"
               variant="subtle" icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
-                  {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
+                  {{ parentStore.selectedIds.length }}
                 </UKbd>
               </template>
             </UButton>
@@ -251,7 +251,7 @@ const columns: TableColumn<User>[] = [
       </div>
 
       <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-        v-model:pagination="pagination" class="shrink-0" :data="items" :columns="columns" :ui="{
+        v-model:pagination="parentStore.pagination" class="shrink-0" :data="parentStore.items" :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -260,10 +260,10 @@ const columns: TableColumn<User>[] = [
         }" />
 
 
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
-        <div class="flex items-center gap-1.5" dir="rtl">
-          <UPagination dir="rtl" :total="pagination.total" :items-per-page="pagination.pageSize"
-            :default-page="pagination.page" @update:page="(p) => loadData(p)" />
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
+        <div class="flex items-center gap-1.5" dir="ltr">
+          <UPagination dir="ltr" :total="parentStore.pagination?.total" :items-per-page="parentStore.pagination?.pageSize"
+            :default-page="parentStore.pagination?.page" @update:page="(p) => parentStore.loadAllParents(p)" />
         </div>
       </div>
     </template>

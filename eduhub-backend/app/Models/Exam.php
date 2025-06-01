@@ -10,12 +10,16 @@ class Exam extends Model
     use HasFactory;
 
     protected $fillable = [
-        'course_id', 'title', 'date', 'total_marks'
+        'group_id',
+        'title',
+        'date',
+        'time',
+        'total_marks'
     ];
 
-    public function course()
+    public function group()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Group::class);
     }
 
     public function results()

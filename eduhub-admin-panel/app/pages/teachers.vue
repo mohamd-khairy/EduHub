@@ -3,7 +3,10 @@ import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import AddModal from '~/components/teachers/AddModal.vue'
 import DeleteModal from '~/components/teachers/DeleteModal.vue'
+import EditModal from '~/components/teachers/EditModal.vue'
 import type { User } from '~/types'
+
+const teacherStore = useTeacherStore()
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -14,106 +17,82 @@ const toast = useToast()
 const table = useTemplateRef('table')
 
 const columnFilters = ref([{
-  id: 'name',
+  id: 'اسم المدرس',
   value: ''
 }])
 
 const columnVisibility = ref()
 
-const items = ref([])
-const pagination = ref({
-  page: 1,
-  pageCount: 1,
-  pageSize: 10,
-  total: 0
+onMounted(() => {
+  teacherStore.loadAllTeachers()
 })
 
-// Initial load
-await loadData()
-
-async function loadData(page = 1) {
-  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/teacher?page=${page}`, {
-    transform: (res) => res.data
-  })
-
-  if (data.value) {
-    items.value = data.value.data
-
-    pagination.value = {
-      page: data.value.current_page,
-      pageCount: data.value.last_page,
-      pageSize: data.value.per_page,
-      total: data.value.total
-    }
-  }
-}
-
-function getRowItems(row: Row<ob>) {
+function getRowItems(row: any) {
   return [
+    { type: 'label', label: 'الاجراءات' },
+    { type: 'separator' },
     {
-      type: 'label',
-      label: 'Actions'
-    },
-    {
-      label: 'Copy customer ID',
-      icon: 'i-lucide-copy',
+      label: 'تعديل المدرس',
+      icon: 'i-lucide-edit',
+      color: 'primary',
       onSelect() {
-        navigator.clipboard.writeText(row.original.id.toString())
-        toast.add({
-          title: 'Copied to clipboard',
-          description: 'Customer ID copied to clipboard'
-        })
+        teacherStore.editItem = row.original
+        teacherStore.editModalOpen = true
       }
     },
     {
-      type: 'separator'
-    },
-    {
-      label: 'View customer details',
-      icon: 'i-lucide-list'
-    },
-    {
-      label: 'View customer payments',
-      icon: 'i-lucide-wallet'
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: 'Delete customer',
+      label: 'حذف المدرس',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
-        toast.add({
-          title: 'Customer deleted',
-          description: 'The customer has been deleted.'
-        })
+        teacherStore.addId(row.original.id)
+        teacherStore.deleteModalOpen = true
       }
     }
   ]
 }
 
 const columns: TableColumn<User>[] = [
-  {
-    id: 'select',
+   {
+    id: 'اختار',
     header: ({ table }) =>
       h(UCheckbox, {
-        'modelValue': table.getIsSomePageRowsSelected()
-          ? 'indeterminate'
-          : table.getIsAllPageRowsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-          table.toggleAllPageRowsSelected(!!value),
-        'ariaLabel': 'Select all'
+        modelValue: teacherStore.selectedIds.length > 0 && teacherStore.selectedIds.length === table.getFilteredRowModel().rows.length
+          ? true
+          : teacherStore.selectedIds?.length > 0
+            ? 'indeterminate'
+            : false,
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            // Select all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              teacherStore.toggleId(r.original.id)
+            })
+          } else {
+            // Deselect all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              teacherStore.removeId(r.original.id)
+            })
+          }
+        },
+        ariaLabel: 'Select all'
       }),
     cell: ({ row }) =>
       h(UCheckbox, {
-        'modelValue': row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
-        'ariaLabel': 'Select row'
+        modelValue: teacherStore.selectedIds.includes(row.original.id),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            teacherStore.addId(row.original.id)
+          } else {
+            teacherStore.removeId(row.original.id)
+          }
+        },
+        ariaLabel: 'Select row'
       })
   },
   {
     accessorKey: 'id',
+    id: 'رقم المدرس',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -133,6 +112,7 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'name',
+    id: 'اسم المدرس',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -152,14 +132,28 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'phone',
+    id: 'التليفون',
     header: 'التليفون'
   },
   {
     accessorKey: 'email',
+    id: 'البريد الالكتروني',
     header: 'البريد الالكتروني'
+  },
+    {
+    accessorKey: 'groups',
+    id: 'عدد المجموعات',
+    header: 'عدد المجموعات',
+    cell: ({ row }) =>
+      h(
+        UBadge,
+        { class: 'capitalize', variant: 'subtle', color: 'success' },
+        () => (row.original.groups).length
+      )
   },
   {
     accessorKey: 'specialization',
+    id: 'اسم التخصص',
     header: 'اسم التخصص',
     cell: ({ row }) => {
       const color = 'warning'
@@ -171,11 +165,8 @@ const columns: TableColumn<User>[] = [
 
   },
   {
-    accessorKey: 'salary_type',
-    header: 'نوع الراتب',
-  },
-  {
     accessorKey: 'salary_amount',
+    id: 'الراتب',
     header: 'الراتب',
     cell: ({ row }) => {
       const color = 'success'
@@ -186,7 +177,9 @@ const columns: TableColumn<User>[] = [
     }
   },
   {
-    id: 'actions',
+    accessorKey: 'actions',
+    id: 'الاجراءات',
+    header: 'الاجراءات',
     cell: ({ row }) => {
       return h(
         'div',
@@ -211,7 +204,6 @@ const columns: TableColumn<User>[] = [
     }
   }
 ]
-
 </script>
 
 <template>
@@ -225,22 +217,27 @@ const columns: TableColumn<User>[] = [
         <template #right>
           <AddModal />
         </template>
+
+        <DeleteModal :count="teacherStore.selectedIds.length" v-model:open="teacherStore.deleteModalOpen" />
+
+        <EditModal :item="teacherStore.editItem" v-model:open="teacherStore.editModalOpen" />
+
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)" class="max-w-sm"
+        <UInput :model-value="(table?.tableApi?.getColumn('اسم المدرس')?.getFilterValue() as string)" class="max-w-sm"
           icon="i-lucide-search" placeholder="ابحث ..."
-          @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
+          @update:model-value="table?.tableApi?.getColumn('اسم المدرس')?.setFilterValue($event)" />
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <DeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
-            <UButton v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length" label="حذف" color="error"
+          <DeleteModal :count="teacherStore.selectedIds.length">
+            <UButton v-if="teacherStore.selectedIds.length" label="حذف" color="error"
               variant="subtle" icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
-                  {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
+                  {{ teacherStore.selectedIds.length }}
                 </UKbd>
               </template>
             </UButton>
@@ -267,7 +264,7 @@ const columns: TableColumn<User>[] = [
       </div>
 
       <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-        v-model:pagination="pagination" class="shrink-0" :data="items" :columns="columns" :ui="{
+        v-model:pagination="teacherStore.pagination" class="shrink-0" :data="teacherStore.items" :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -275,11 +272,10 @@ const columns: TableColumn<User>[] = [
           td: 'border-b border-default'
         }" />
 
-
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
-        <div class="flex items-center gap-1.5" dir="rtl">
-          <UPagination dir="rtl" :total="pagination.total" :items-per-page="pagination.pageSize"
-            :default-page="pagination.page" @update:page="(p) => loadData(p)" />
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
+        <div class="flex items-center gap-1.5" dir="ltr">
+          <UPagination dir="ltr" :total="teacherStore.pagination?.total" :items-per-page="teacherStore.pagination?.pageSize"
+            :default-page="teacherStore.pagination?.page" @update:page="(p) => teacherStore.loadAllTeachers(p)" />
         </div>
       </div>
     </template>

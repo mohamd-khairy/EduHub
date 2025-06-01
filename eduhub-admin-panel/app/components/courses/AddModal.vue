@@ -1,56 +1,69 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+
+const open = ref(false)
+const courseStore = useCourseStore()
 
 const schema = z.object({
   name: z.string().min(2, 'Too short'),
-  email: z.string().email('Invalid email')
+  description: z.string().min(2, 'Too short'),
 })
-const open = ref(false)
 
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
-  name: undefined,
-  email: undefined
+  name: null,
+  description: null
 })
 
 const toast = useToast()
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  toast.add({ title: 'Success', description: `كورس جديد ${event.data.name} تم اضافتة بنجاح`, color: 'success' })
+async function onSubmit() {
+  courseStore.addCourse(state)
+  toast.add({ title: 'Success', description: `كورس جديد ${state.name} تم اضافة بنجاح`, color: 'success' })
   open.value = false
+  resetState()
+}
+function resetState() {
+  Object.assign(state, {
+    name: null,
+    description: null
+  })
 }
 </script>
 
 <template>
-  <UModal v-model:open="open" title="اضافة كورس" description="إضافة كورس جديد">
-    <UButton label="إضافة كورس جديد" icon="i-lucide-plus" />
+  <UModal v-model:open="open" title="اضافة كورس" description="إضافة كورس جديد" dir="rtl">
+    <UButton label="إضافة كورس جديد" icon="i-lucide-plus" dir="rtl" />
 
-    <template #body>
+    <template #body dir="rtl" >
       <UForm
+        dir="rtl"
         :schema="schema"
         :state="state"
         class="space-y-4"
-        @submit="onSubmit"
       >
-        <UFormField label="Name" placeholder="John Doe" name="name">
-          <UInput v-model="state.name" class="w-full" />
+        <UFormField label="اسم الكورس" placeholder="اسم الكورس" name="name">
+          <UInput required v-model="state.name" class="w-full" />
         </UFormField>
-        <UFormField label="Email" placeholder="john.doe@example.com" name="email">
-          <UInput v-model="state.email" class="w-full" />
+
+        <UFormField label="اسم الكورس" placeholder="اسم الكورس" name="name">
+          <UTextarea  required v-model="state.description" class="w-full" />
         </UFormField>
+
         <div class="flex justify-end gap-2">
           <UButton
-            label="Cancel"
+            label="الغاء"
             color="neutral"
             variant="subtle"
             @click="open = false"
           />
           <UButton
-            label="Create"
+            label="حفظ"
             color="primary"
             variant="solid"
             type="submit"
+            loading-auto
+            @click="onSubmit"
           />
         </div>
       </UForm>

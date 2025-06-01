@@ -3,7 +3,12 @@ import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import AddModal from '~/components/results/AddModal.vue'
 import DeleteModal from '~/components/results/DeleteModal.vue'
+import EditModal from '~/components/results/EditModal.vue'
 import type { User } from '~/types'
+
+const examResultStore = useExamResultStore()
+const examStore = useExamStore()
+const teacherStore = useTeacherStore()
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -14,80 +19,39 @@ const toast = useToast()
 const table = useTemplateRef('table')
 
 const columnFilters = ref([{
-  id: 'name',
+  id: 'درجةالطالب',
   value: ''
 }])
 
 const columnVisibility = ref()
 
-const items = ref([])
-const pagination = ref({
-  page: 1,
-  pageCount: 1,
-  pageSize: 10,
-  total: 0
+onMounted(() => {
+  teacherStore.loadTeachersForSelect()
+  examStore.loadExamsForSelect()
+  examResultStore.loadAllExamResults(1) //, {exam_id: 1}
 })
 
-// Initial load
-await loadData()
-
-async function loadData(page = 1) {
-  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/examResult?relations=exam,student&page=${page}`, {
-    transform: (res) => res.data
-  })
-
-  if (data.value) {
-    items.value = data.value.data
-
-    pagination.value = {
-      page: data.value.current_page,
-      pageCount: data.value.last_page,
-      pageSize: data.value.per_page,
-      total: data.value.total
-    }
-  }
-}
-
-function getRowItems(row: Row<ob>) {
+// Adjust typing here (replace `User` or your row type)
+function getRowItems(row: any) {
   return [
+    { type: 'label', label: 'الاجراءات' },
+    { type: 'separator' },
     {
-      type: 'label',
-      label: 'Actions'
-    },
-    {
-      label: 'Copy customer ID',
-      icon: 'i-lucide-copy',
+      label: 'تعديل النتيجة',
+      icon: 'i-lucide-edit',
+      color: 'primary',
       onSelect() {
-        navigator.clipboard.writeText(row.original.id.toString())
-        toast.add({
-          title: 'Copied to clipboard',
-          description: 'Customer ID copied to clipboard'
-        })
+        examResultStore.editItem = row.original
+        examResultStore.editModalOpen = true
       }
     },
     {
-      type: 'separator'
-    },
-    {
-      label: 'View customer details',
-      icon: 'i-lucide-list'
-    },
-    {
-      label: 'View customer payments',
-      icon: 'i-lucide-wallet'
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: 'Delete customer',
+      label: 'حذف النتيجة',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
-        toast.add({
-          title: 'Customer deleted',
-          description: 'The customer has been deleted.'
-        })
+        examResultStore.addId(row.original.id)
+        examResultStore.deleteModalOpen = true
       }
     }
   ]
@@ -95,25 +59,45 @@ function getRowItems(row: Row<ob>) {
 
 const columns: TableColumn<User>[] = [
   {
-    id: 'select',
+    id: 'اختار',
     header: ({ table }) =>
       h(UCheckbox, {
-        'modelValue': table.getIsSomePageRowsSelected()
-          ? 'indeterminate'
-          : table.getIsAllPageRowsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-          table.toggleAllPageRowsSelected(!!value),
-        'ariaLabel': 'Select all'
+        modelValue: examResultStore.selectedIds.length > 0 && examResultStore.selectedIds.length === table.getFilteredRowModel().rows.length
+          ? true
+          : examResultStore.selectedIds?.length > 0
+            ? 'indeterminate'
+            : false,
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            // Select all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              examResultStore.toggleId(r.original.id)
+            })
+          } else {
+            // Deselect all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              examResultStore.removeId(r.original.id)
+            })
+          }
+        },
+        ariaLabel: 'Select all'
       }),
     cell: ({ row }) =>
       h(UCheckbox, {
-        'modelValue': row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
-        'ariaLabel': 'Select row'
+        modelValue: examResultStore.selectedIds.includes(row.original.id),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            examResultStore.addId(row.original.id)
+          } else {
+            examResultStore.removeId(row.original.id)
+          }
+        },
+        ariaLabel: 'Select row'
       })
   },
   {
     accessorKey: 'id',
+    id: 'رقم الدرجة',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -133,6 +117,7 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'exam',
+    id: 'اسم الاختبار',
     cell: ({ row }) => {
       const color = 'warning'
 
@@ -159,6 +144,7 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'student',
+    id: 'اسم الطالب',
     header: 'اسم الطالب',
     cell: ({ row }) => {
       const color = 'warning'
@@ -170,6 +156,7 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'total_marks',
+    id: 'درجة الامتحان',
     header: 'درجة الامتحان',
     cell: ({ row }) => {
       const color = 'warning'
@@ -181,7 +168,8 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'score',
-    header: 'درجة الطالب',
+    id: 'درجةالطالب',
+    header: 'درجةالطالب',
     cell: ({ row }) => {
       const color = 'success'
 
@@ -192,17 +180,20 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'date',
-    header: 'تاريخ الامتحان',
+    id: 'تاريخ ووقت الامتحان',
+    header: 'تاريخ ووقت الامتحان',
     filterFn: 'equals',
     cell: ({ row }) => {
       return h(() =>
-        row.original.exam?.date
+        row.original.exam?.time + ' - ' + row.original.exam?.date
       )
     }
 
   },
   {
-    id: 'actions',
+    accessorKey: 'actions',
+    id: 'الاجراءات',
+    header: 'الاجراءات',
     cell: ({ row }) => {
       return h(
         'div',
@@ -227,7 +218,6 @@ const columns: TableColumn<User>[] = [
     }
   }
 ]
-
 </script>
 
 <template>
@@ -241,22 +231,26 @@ const columns: TableColumn<User>[] = [
         <template #right>
           <AddModal />
         </template>
+
+        <DeleteModal :count="examResultStore.selectedIds.length" v-model:open="examResultStore.deleteModalOpen" />
+
+        <EditModal :item="examResultStore.editItem" v-model:open="examResultStore.editModalOpen" />
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput :model-value="(table?.tableApi?.getColumn('student')?.getFilterValue() as string)" class="max-w-sm"
+        <UInput :model-value="(table?.tableApi?.getColumn('درجةالطالب')?.getFilterValue() as string)" class="max-w-sm"
           icon="i-lucide-search" placeholder="ابحث ..."
-          @update:model-value="table?.tableApi?.getColumn('student')?.setFilterValue($event)" />
+          @update:model-value="table?.tableApi?.getColumn('درجةالطالب')?.setFilterValue($event)" />
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <DeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
-            <UButton v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length" label="حذف" color="error"
-              variant="subtle" icon="i-lucide-trash">
+          <DeleteModal :count="examResultStore.selectedIds.length">
+            <UButton v-if="examResultStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
-                  {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
+                  {{ examResultStore.selectedIds.length }}
                 </UKbd>
               </template>
             </UButton>
@@ -283,7 +277,8 @@ const columns: TableColumn<User>[] = [
       </div>
 
       <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-        v-model:pagination="pagination" class="shrink-0" :data="items" :columns="columns" :ui="{
+        v-model:pagination="examResultStore.pagination" class="shrink-0" :data="examResultStore.items"
+        :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -292,10 +287,11 @@ const columns: TableColumn<User>[] = [
         }" />
 
 
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
-        <div class="flex items-center gap-1.5" dir="rtl">
-          <UPagination dir="rtl" :total="pagination.total" :items-per-page="pagination.pageSize"
-            :default-page="pagination.page" @update:page="(p) => loadData(p)" />
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
+        <div class="flex items-center gap-1.5" dir="ltr">
+          <UPagination dir="ltr" :total="examResultStore.pagination?.total"
+            :items-per-page="examResultStore.pagination?.pageSize" :default-page="examResultStore.pagination?.page"
+            @update:page="(p) => examResultStore.loadAllExamResults(p)" />
         </div>
       </div>
     </template>

@@ -1,9 +1,32 @@
 <script setup lang="ts">
 import * as z from 'zod'
 
+const props = defineProps({
+  open: Boolean,
+  item: Object
+})
+
+const emit = defineEmits(['update:open'])
+
+watch(() => props.open, (val) => {
+  open.value = val
+})
+
 const open = ref(false)
 
+watch(open, (val) => {
+  emit('update:open', val)
+})
+
 const teacherStore = useTeacherStore()
+
+const toast = useToast()
+
+async function onSubmit() {
+  teacherStore.editTeacher(state, props.item?.id)
+  toast.add({ title: 'Success', description: `مدرس  ${state.name} تم تعديل بنجاح`, color: 'success' })
+  open.value = false
+}
 
 const schema = z.object({
   name: z.string().min(2, 'Too short'),
@@ -22,38 +45,22 @@ const state = reactive<Partial<Schema>>({
   salary_amount: null
 })
 
-const toast = useToast()
+watch(() => props.item, (val) => {
+  if (!val) return
+  state.name = val.name || ''
+  state.email = val.email || null
+  state.phone = val.phone || null
+  state.specialization = val.specialization || null
+  state.salary_amount = val.salary_amount || null
+}, { immediate: true, deep: true })
 
-async function onSubmit() {
-  // Add teacher to the store
-  await teacherStore.addTeacher(state)
-  
-  // Show success toast
-  toast.add({ title: 'Success', description: `مدرس جديد ${state.name} تم اضافة بنجاح`, color: 'success' })
-  
-  // Reset state after submission
-  resetState()
-  // Close the modal
-  open.value = false
-}
-
-function resetState() {
-  Object.assign(state, {
-    name: null,
-    phone: null,
-    email: null,
-    specialization: null,
-    salary_amount: null
-  })
-}
 </script>
 
 <template>
-  <UModal v-model:open="open" title="اضافة مدرس" description="إضافة مدرس جديد" dir="rtl">
-    <UButton label="إضافة مدرس جديد" icon="i-lucide-plus" dir="rtl" />
-
+  <UModal v-model:open="open" title="تعديل مجموعة" description="تعديل مدرس جديد" dir="rtl">
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">
+
         <UFormField label="اسم المدرس" placeholder="اسم المدرس" name="name">
           <UInput required v-model="state.name" class="w-full" />
         </UFormField>
@@ -63,7 +70,7 @@ function resetState() {
         </UFormField>
 
         <UFormField label="رقم تليفون المدرس" placeholder="رقم تليفون المدرس" name="phone">
-          <UInput type="tel" required v-model="state.phone" class="w-full" />
+          <UInput type="tle" required v-model="state.phone" class="w-full" />
         </UFormField>
 
         <UFormField label="تخصص المدرس" placeholder="تخصص المدرس" name="specialization">
@@ -75,20 +82,8 @@ function resetState() {
         </UFormField>
 
         <div class="flex justify-end gap-2">
-          <UButton
-            label="الغاء"
-            color="neutral"
-            variant="subtle"
-            @click="open = false"
-          />
-          <UButton
-            label="حفظ"
-            color="primary"
-            variant="solid"
-            type="submit"
-            loading-auto
-            @click="onSubmit"
-          />
+          <UButton label="الغاء" color="neutral" variant="subtle" @click="open = false" />
+          <UButton label="حفظ" color="primary" variant="solid" type="submit" loading-auto @click="onSubmit" />
         </div>
       </UForm>
     </template>
