@@ -1,76 +1,49 @@
+
+// File: components/students/StudentList.vue
 <script setup lang="ts">
 import { format, isToday } from 'date-fns'
+import { useRouter } from 'vue-router'
 import type { Mail } from '~/types'
 
 const props = defineProps<{
-  mails: Mail[]
+  students: Mail[]
 }>()
 
 const mailsRefs = ref<Element[]>([])
+const selectedStudent = defineModel<Mail | null>()
+const router = useRouter()
 
-const selectedMail = defineModel<Mail | null>()
+function handleClick(mail: Mail) {
+  selectedStudent.value = mail
+  router.push(`/students/${mail.id}`)
+}
 
-watch(selectedMail, () => {
-  if (!selectedMail.value) {
-    return
-  }
-  const ref = mailsRefs.value[selectedMail.value.id]
-  if (ref) {
-    ref.scrollIntoView({ block: 'nearest' })
-  }
-})
-
-defineShortcuts({
-  arrowdown: () => {
-    const index = props.mails.findIndex(mail => mail.id === selectedMail?.value?.id)
-
-    if (index === -1) {
-      selectedMail.value = props?.mails[0]
-    } else if (index < props?.mails.length - 1) {
-      selectedMail.value = props?.mails[index + 1]
-    }
-  },
-  arrowup: () => {
-    const index = props.mails.findIndex(mail => mail.id === selectedMail.value?.id)
-
-    if (index === -1) {
-      selectedMail.value = props.mails[props.mails.length - 1]
-    } else if (index > 0) {
-      selectedMail.value = props.mails[index - 1]
-    }
-  }
+watch(selectedStudent, () => {
+  if (!selectedStudent.value) return
+  const ref = mailsRefs.value[selectedStudent.value.id]
+  if (ref) ref.scrollIntoView({ block: 'nearest' })
 })
 </script>
 
 <template>
   <div class="overflow-y-auto divide-y divide-default">
     <div
-      v-for="(mail, index) in mails"
+      v-for="(mail, index) in students"
       :key="index"
       :ref="el => { mailsRefs[mail.id] = el as Element }"
+      class="p-4 sm:px-6 text-sm cursor-pointer border-l-2 transition-colors"
+      :class="[
+        mail?.unread ? 'text-highlighted' : 'text-toned)',
+        selectedStudent && selectedStudent.id === mail.id ? 'border-primary bg-primary/10' : 'border-(--ui-bg) hover:border-primary hover:bg-primary/5'
+      ]"
+      @click="handleClick(mail)"
     >
-      <div
-        class="p-4 sm:px-6 text-sm cursor-pointer border-l-2 transition-colors"
-        :class="[
-          mail?.unread ? 'text-highlighted' : 'text-toned)',
-          selectedMail && selectedMail.id === mail.id ? 'border-primary bg-primary/10' : 'border-(--ui-bg) hover:border-primary hover:bg-primary/5'
-        ]"
-        @click="selectedMail = mail"
-      >
-        <div class="flex items-center justify-between" :class="['font-semibold']">
-          <div class="flex items-center gap-3 text-lg">
-            {{ mail.name }}
-          </div>
-
-          <span>{{ isToday(new Date(mail?.created_at)) ? format(new Date(mail?.created_at), 'HH:mm') : format(new Date(mail?.created_at), 'dd MMM') }}</span>
-        </div>
-        <p class="truncate" :class="['font-semibold']">
-          ({{ mail.phone }})  -  ({{ mail.email }})
-        </p>
-        <p class="text-dimmed line-clamp-1">
-          ({{ mail.grade_level }})  -  ({{ mail.school_name }})
-        </p>
+      <div class="flex items-center justify-between font-semibold text-lg">
+        {{ mail.name }}
+        <span>{{ isToday(new Date(mail.created_at)) ? format(new Date(mail.created_at), 'HH:mm') : format(new Date(mail.created_at), 'dd MMM') }}</span>
       </div>
+      <p class="truncate font-semibold">({{ mail.phone }}) - ({{ mail.email }})</p>
+      <p class="text-dimmed line-clamp-1">({{ mail.grade_level }}) - ({{ mail.school_name }})</p>
     </div>
   </div>
 </template>

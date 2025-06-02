@@ -1,12 +1,14 @@
+// File: pages/students.vue
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { breakpointsTailwind } from '@vueuse/core'
+import { ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import type { Mail } from '~/types'
 import StudentList from '~/components/students/StudentList.vue'
 import StudentDetails from '~/components/students/StudentDetails.vue'
 
-const allStudents = ref<object[]>([]) // ← البيانات الأصلية الكاملة
-const filteredStudents = ref<object[]>([]) // ← البيانات المعروضة بعد الفلترة
+const allStudents = ref<Mail[]>([])
+const filteredStudents = ref<Mail[]>([])
 const search = ref('')
 const pagination = ref({
   page: 1,
@@ -15,19 +17,21 @@ const pagination = ref({
   total: 0
 })
 
-// Initial load
-await loadData()
+const selectedStudent = ref<Mail | null>(null)
+const isMailPanelOpen = computed({
+  get: () => !!selectedStudent.value,
+  set: (val: boolean) => {
+    if (!val) selectedStudent.value = null
+  }
+})
 
 async function loadData(page = 1) {
   const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/student?page=${page}`, {
     transform: (res) => res.data
   })
-
   if (data.value) {
-    allStudents.value = data.value?.data
+    allStudents.value = data.value.data
     filteredStudents.value = [...allStudents.value]
-
-
     pagination.value = {
       page: data.value.current_page,
       pageCount: data.value.last_page,
@@ -37,18 +41,7 @@ async function loadData(page = 1) {
   }
 }
 
-const selectedMail = ref<Mail | null>()
-
-const isMailPanelOpen = computed({
-  get() {
-    return !!selectedMail.value
-  },
-  set(value: boolean) {
-    if (!value) {
-      selectedMail.value = null
-    }
-  }
-})
+await loadData()
 
 function setFilterValue(value: string) {
   if (value?.length >= 1) {
@@ -57,7 +50,7 @@ function setFilterValue(value: string) {
       student.name.toLowerCase().includes(value.toLowerCase())
     )
   } else {
-    filteredStudents.value = allStudents
+    filteredStudents.value = allStudents.value
   }
 }
 
@@ -71,18 +64,14 @@ const isMobile = breakpoints.smaller('lg')
       <template #leading>
         <UDashboardSidebarCollapse />
       </template>
-
       <template #right>
-
-        <UInput class="max-w-sm" icon="i-lucide-search" placeholder="ابحث ..."
-          @update:model-value="setFilterValue($event)" />
-
+        <UInput class="max-w-sm" icon="i-lucide-search" placeholder="ابحث ..." @update:model-value="setFilterValue($event)" />
       </template>
     </UDashboardNavbar>
-    <StudentList v-model="selectedMail" :mails="filteredStudents" />
+    <StudentList v-model="selectedStudent" :students="filteredStudents" />
   </UDashboardPanel>
 
-  <StudentDetails v-if="selectedMail" :mail="selectedMail" @close="selectedMail = null" />
+  <StudentDetails v-if="selectedStudent" :student="selectedStudent" />
   <div v-else class="hidden lg:flex flex-1 items-center justify-center">
     <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
   </div>
@@ -90,7 +79,7 @@ const isMobile = breakpoints.smaller('lg')
   <ClientOnly>
     <USlideover v-if="isMobile" v-model:open="isMailPanelOpen">
       <template #content>
-        <StudentDetails v-if="selectedMail" :mail="selectedMail" @close="selectedMail = null" />
+        <StudentDetails v-if="selectedStudent" :student="selectedStudent" />
       </template>
     </USlideover>
   </ClientOnly>
