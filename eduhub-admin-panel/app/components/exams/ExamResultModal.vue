@@ -1,25 +1,20 @@
 <script setup lang="ts">
 
-const examResultStore = useExamResultStore()
-const examStore = useExamStore()
-const studentStore = useStudentStore()
-
-
 const props = withDefaults(defineProps<{
   exam?: object
 }>(), {
   exam: null
 })
 
-const table = useTemplateRef('table')
+const examResultStore = useExamResultStore()
+const examStore = useExamStore()
+const studentStore = useStudentStore()
 
 const open = ref(false)
-
 const exam_id = ref(null)
 const student_id = ref(null)
 const searchExamTerm = ref('')
 const searchStudentTerm = ref('')
-
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 
