@@ -121,23 +121,24 @@ const columns: TableColumn<User>[] = [
   }
 ]
 
-watch(searchExamTerm, (newVal) => {
-  if (newVal.length >= 3 || newVal.length < 1)
-    // For example, debounce here if needed to avoid too many requests
-    examStore.loadExamsForSelect(newVal)
-})
-
-watch(searchStudentTerm, (newVal) => {
-  if (newVal.length >= 3 || newVal.length < 1)
-    // For example, debounce here if needed to avoid too many requests
-    studentStore.loadStudentsForSelect(newVal)
-})
-
+//load all result for props exam
 watch(() => props.exam, (val) => {
   if (!val) return
   examResultStore.loadAllExamResults(1, { exam_id: props.exam?.id || 1 })
 }, { immediate: true, deep: true })
 
+//for search inside select menus
+watch(searchExamTerm, (newVal) => {
+  if (newVal.length >= 3 || newVal.length < 1)
+    examStore.loadExamsForSelect(newVal)
+})
+
+watch(searchStudentTerm, (newVal) => {
+  if (newVal.length >= 3 || newVal.length < 1)
+    studentStore.loadStudentsForSelect(newVal)
+})
+
+//for filtering exam results by exam and student
 watch(() => exam_id?.value, (val) => {
   if (!val) return
   examResultStore.loadAllExamResults(1, { exam_id: val?.value, student_id: student_id?.value?.value })
@@ -148,7 +149,6 @@ watch(() => student_id?.value, (val) => {
 
   examResultStore.loadAllExamResults(1, { student_id: val?.value, exam_id: exam_id?.value?.value })
 }, { immediate: true, deep: true })
-
 </script>
 
 <template>
