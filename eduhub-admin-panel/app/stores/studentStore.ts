@@ -2,6 +2,9 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useStudentStore = defineStore("student", () => {
+  const BASE_URL =
+    import.meta.env.NUXT_API_BASE_URL ||
+    "http://localhost/EduHub/eduhub-backend/public/api";
   const items = ref<object[]>([]);
   const studentOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -24,11 +27,11 @@ export const useStudentStore = defineStore("student", () => {
 
     const relations = "";
 
-    if(params || search) {
+    if (params || search) {
       page = 1; // Reset to first page if params or search are provided
     }
 
-    let url = `http://localhost/EduHub/eduhub-backend/public/api/student?page=${page}`;
+    let url = `${BASE_URL}/student?page=${page}`;
 
     if (relations) {
       url += `&relations=${relations}`;
@@ -67,9 +70,7 @@ export const useStudentStore = defineStore("student", () => {
   async function loadStudents(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `http://localhost/EduHub/eduhub-backend/public/api/student/all?search=${search}`
-    );
+    const res = await fetch(`${BASE_URL}/student/all?search=${search}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -80,9 +81,7 @@ export const useStudentStore = defineStore("student", () => {
   async function loadStudentsForSelect(search = null) {
     try {
       const response = await fetch(
-        `http://localhost/EduHub/eduhub-backend/public/api/student/all?search=${
-          search || ""
-        }`
+        `${BASE_URL}/student/all?search=${search || ""}`
       );
 
       if (!response.ok) {
@@ -112,16 +111,13 @@ export const useStudentStore = defineStore("student", () => {
   }
 
   async function addStudent(data) {
-    const res = await fetch(
-      "http://localhost/EduHub/eduhub-backend/public/api/student",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const res = await fetch(`${BASE_URL}/student`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
     if (res.ok) {
       await loadAllStudents();
@@ -131,16 +127,13 @@ export const useStudentStore = defineStore("student", () => {
   }
 
   async function editStudent(data, id) {
-    const res = await fetch(
-      `http://localhost/EduHub/eduhub-backend/public/api/student/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const res = await fetch(`${BASE_URL}/student/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
     if (res.ok) {
       await loadAllStudents();
@@ -154,16 +147,13 @@ export const useStudentStore = defineStore("student", () => {
   async function deleteSelectedStudents() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(
-      "http://localhost/EduHub/eduhub-backend/public/api/student/delete-all",
-      {
-        method: "POST", // Adjust method as your API requires
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ids: selectedIds.value }),
-      }
-    );
+    const res = await fetch(`${BASE_URL}/student/delete-all`, {
+      method: "POST", // Adjust method as your API requires
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: selectedIds.value }),
+    });
 
     if (res.ok) {
       // Remove deleted items locally

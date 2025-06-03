@@ -1,160 +1,184 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { defineStore } from "pinia";
+import { ref } from "vue";
 
-export const useCourseStore = defineStore('course', () => {
-  const items = ref<object[]>([])
-  const courseOptions = ref<object[]>([])
-  const selectedIds = ref<number[]>([])
-  const deleteModalOpen = ref(false)
-  const idsToDelete = ref<number[]>([])
-  const editModalOpen = ref(false)
-  const editItem = ref({})
+export const useCourseStore = defineStore("course", () => {
+  const BASE_URL =
+    import.meta.env.NUXT_API_BASE_URL ||
+    "http://localhost/EduHub/eduhub-backend/public/api";
+  const items = ref<object[]>([]);
+  const courseOptions = ref<object[]>([]);
+  const selectedIds = ref<number[]>([]);
+  const deleteModalOpen = ref(false);
+  const idsToDelete = ref<number[]>([]);
+  const editModalOpen = ref(false);
+  const editItem = ref({});
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
     pageCount: 1,
     pageSize: 10,
-    total: 0
-  })
+    total: 0,
+  });
 
   // Load all pages from backend, combine all items into one array
   async function loadAllCourses(page = 1) {
-    items.value = [] // clear current items
+    items.value = []; // clear current items
 
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/course?relations=groups&page=${page}`)
-    const json = await res.json()
+    const res = await fetch(
+      `${BASE_URL}/course?relations=groups&page=${page}`
+    );
+    const json = await res.json();
 
     if (json?.data) {
-      items.value = json?.data?.data
+      items.value = json?.data?.data;
 
       // Update pagination info from last response
-      pagination.value.page = json.data.current_page
-      pagination.value.pageCount = json.data.last_page
-      pagination.value.pageSize = json.data.per_page
-      pagination.value.total = json.data.total
+      pagination.value.page = json.data.current_page;
+      pagination.value.pageCount = json.data.last_page;
+      pagination.value.pageSize = json.data.per_page;
+      pagination.value.total = json.data.total;
     }
   }
 
   async function loadCourses(search = null) {
-    items.value = [] // clear current items
+    items.value = []; // clear current items
 
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/course/all?search=${search}`)
-    const json = await res.json()
+    const res = await fetch(
+      `${BASE_URL}/course/all?search=${search}`
+    );
+    const json = await res.json();
 
     if (json?.data) {
-      items.value = json.data
+      items.value = json.data;
     }
   }
 
   async function loadCoursesForSelect(search = null) {
     try {
-      const response = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/course/all?search=${search || ''}`)
+      const response = await fetch(
+        `${BASE_URL}/course/all?search=${
+          search || ""
+        }`
+      );
 
       if (!response.ok) {
-        console.error('Failed to load courses:', response.statusText)
-        return []
+        console.error("Failed to load courses:", response.statusText);
+        return [];
       }
 
-      const json = await response.json()
+      const json = await response.json();
 
       // Assuming the API response has a structure like { data: [...] }
       if (!json.data || !Array.isArray(json.data)) {
-        console.error('Invalid data format received')
-        return []
+        console.error("Invalid data format received");
+        return [];
       }
 
       // Map data to the format expected by your select
-      courseOptions.value = json.data.map((item: { id: number, name: string }) => ({
-        label: item.name,
-        value: String(item.id)
-      }))
+      courseOptions.value = json.data.map(
+        (item: { id: number; name: string }) => ({
+          label: item.name,
+          value: String(item.id),
+        })
+      );
     } catch (error) {
-      console.error('Error loading courses:', error)
-      return []
+      console.error("Error loading courses:", error);
+      return [];
     }
   }
 
   async function addCourse(data) {
-    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/course', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
+    const res = await fetch(
+      `${BASE_URL}/course`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     if (res.ok) {
-      await loadAllCourses()
+      await loadAllCourses();
     } else {
-      throw new Error('Failed to delete groups')
+      throw new Error("Failed to delete groups");
     }
   }
 
   async function editCourse(data, id) {
-    const res = await fetch(`http://localhost/EduHub/eduhub-backend/public/api/course/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
+    const res = await fetch(
+      `${BASE_URL}/course/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     if (res.ok) {
-      await loadAllCourses()
-      editModalOpen.value = false
+      await loadAllCourses();
+      editModalOpen.value = false;
     } else {
-      throw new Error('Failed to delete groups')
+      throw new Error("Failed to delete groups");
     }
   }
 
   // Delete selected courses from backend, then update local items and selection
   async function deleteSelectedcourses() {
-    if (selectedIds.value.length === 0) return
+    if (selectedIds.value.length === 0) return;
 
-    const res = await fetch('http://localhost/EduHub/eduhub-backend/public/api/course/delete-all', {
-      method: 'POST', // Adjust method as your API requires
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ ids: selectedIds.value })
-    })
+    const res = await fetch(
+      `${BASE_URL}/course/delete-all`,
+      {
+        method: "POST", // Adjust method as your API requires
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids: selectedIds.value }),
+      }
+    );
 
     if (res.ok) {
       // Remove deleted items locally
-      items.value = items.value.filter(item => !selectedIds.value.includes(item.id))
-      await loadAllCourses()
-      deleteModalOpen.value = false
-      clearSelection()
+      items.value = items.value.filter(
+        (item) => !selectedIds.value.includes(item.id)
+      );
+      await loadAllCourses();
+      deleteModalOpen.value = false;
+      clearSelection();
     } else {
-      throw new Error('Failed to delete courses')
+      throw new Error("Failed to delete courses");
     }
   }
 
   // Toggle selection for a single ID
   function toggleId(id: number) {
     if (selectedIds.value.includes(id)) {
-      selectedIds.value = selectedIds.value.filter(i => i !== id)
+      selectedIds.value = selectedIds.value.filter((i) => i !== id);
     } else {
-      selectedIds.value.push(id)
+      selectedIds.value.push(id);
     }
   }
 
   // Add an ID if not present
   function addId(id: number) {
     if (!selectedIds.value.includes(id)) {
-      selectedIds.value.push(id)
+      selectedIds.value.push(id);
     }
   }
 
   // Remove an ID if present
   function removeId(id: number) {
-    selectedIds.value = selectedIds.value.filter(i => i !== id)
+    selectedIds.value = selectedIds.value.filter((i) => i !== id);
   }
 
   // Clear all selections
   function clearSelection() {
-    selectedIds.value = []
+    selectedIds.value = [];
   }
 
   return {
@@ -175,6 +199,6 @@ export const useCourseStore = defineStore('course', () => {
     addId,
     removeId,
     clearSelection,
-    deleteSelectedcourses
-  }
-})
+    deleteSelectedcourses,
+  };
+});
