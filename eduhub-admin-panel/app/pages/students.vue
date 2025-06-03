@@ -3,21 +3,19 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
-import type { Mail } from '~/types'
 import StudentList from '~/components/students/StudentList.vue'
 import StudentDetails from '~/components/students/StudentDetails.vue'
 
-const allStudents = ref<Mail[]>([])
-const filteredStudents = ref<Mail[]>([])
-const search = ref('')
-const pagination = ref({
-  page: 1,
-  pageCount: 1,
-  pageSize: 10,
-  total: 0
-})
+const studentStore = useStudentStore()
+const currentPage = ref(1)
+const pageSize = 20 // or whatever you want
+const isLoading = ref(false)
+const hasMore = ref(true)
 
-const selectedStudent = ref<Mail | null>(null)
+const allStudents = ref<object[]>([])
+const filteredStudents = ref<object[]>([])
+const search = ref('')
+const selectedStudent = ref<object | null>(null)
 const isMailPanelOpen = computed({
   get: () => !!selectedStudent.value,
   set: (val: boolean) => {
@@ -25,30 +23,24 @@ const isMailPanelOpen = computed({
   }
 })
 
-async function loadData(page = 1) {
-  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/student?page=${page}`, {
-    transform: (res) => res.data
-  })
-  if (data.value) {
-    allStudents.value = data.value.data
-    filteredStudents.value = [...allStudents.value]
-    pagination.value = {
-      page: data.value.current_page,
-      pageCount: data.value.last_page,
-      pageSize: data.value.per_page,
-      total: data.value.total
-    }
-  }
-}
+onMounted(async () => {
+  isLoading.value = true
+  await studentStore.loadAllStudents(currentPage.value)
+  allStudents.value = studentStore.items
+  filteredStudents.value = allStudents.value
+  currentPage.value++
+  isLoading.value = false
+})
 
-await loadData()
-
-function setFilterValue(value: string) {
+async function setFilterValue(value: string) {
   if (value?.length >= 1) {
     search.value = value
-    filteredStudents.value = allStudents.value.filter(student =>
-      student.name.toLowerCase().includes(value.toLowerCase())
-    )
+    await studentStore.loadAllStudents(currentPage.value, null, { name: value.toLowerCase()})
+    filteredStudents.value = studentStore.items
+
+    // filteredStudents.value = allStudents.value.filter(student =>
+    //   student.name.toLowerCase().includes(value.toLowerCase())
+    // )
   } else {
     filteredStudents.value = allStudents.value
   }
@@ -56,6 +48,37 @@ function setFilterValue(value: string) {
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('lg')
+
+const scrollContainer = ref<HTMLElement | null>(null)
+
+function onScroll() {
+  if (!scrollContainer.value) return
+
+  const { scrollTop, scrollHeight, clientHeight } = scrollContainer.value
+
+  // Trigger loading when scrolled within 150px of bottom
+  if (scrollTop + clientHeight >= scrollHeight - 150) {
+    loadNextPage()
+  }
+}
+
+async function loadNextPage() {
+  if (isLoading.value || !hasMore.value) return
+  isLoading.value = true
+
+  await studentStore.loadAllStudents(currentPage.value)
+  const newStudents = studentStore.items
+
+  if (newStudents?.length < pageSize) {
+    hasMore.value = false // no more data
+  }
+
+  allStudents.value.push(...newStudents)
+  filteredStudents.value = allStudents.value // or reapply filter if needed
+  currentPage.value++
+  isLoading.value = false
+}
+
 </script>
 
 <template>
@@ -65,10 +88,16 @@ const isMobile = breakpoints.smaller('lg')
         <UDashboardSidebarCollapse />
       </template>
       <template #right>
-        <UInput class="max-w-sm" icon="i-lucide-search" placeholder="ابحث ..." @update:model-value="setFilterValue($event)" />
+        <UInput class="max-w-sm" icon="i-lucide-search" placeholder="ابحث ..."
+          @update:model-value="setFilterValue($event)" />
       </template>
     </UDashboardNavbar>
-    <StudentList v-model="selectedStudent" :students="filteredStudents" />
+
+    <div ref="scrollContainer" @scroll="onScroll" style="overflow-y: auto;">
+      <StudentList v-model="selectedStudent" :students="filteredStudents" />
+      <div v-if="isLoading" class="text-center p-2">Loading...</div>
+    </div>
+
   </UDashboardPanel>
 
   <StudentDetails v-if="selectedStudent" :student="selectedStudent" />

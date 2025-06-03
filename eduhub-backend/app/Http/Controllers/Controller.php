@@ -28,6 +28,15 @@ abstract class Controller
                     }
                 }
 
+            if ($request->search && !empty($request->search))
+            foreach ($this->parseFilterString($request->search) as $filter) {
+                if (count($filter) == 2) {
+                    $column = $filter[0];
+                    $value = $filter[1];
+                    $model = $model->where($column, 'like', '%' . $value . '%');
+                }
+            }
+
             $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate();
 
             return  $this->success($data);
@@ -136,7 +145,7 @@ abstract class Controller
 
             return  $this->success($data);
         } catch (\Throwable $th) {
-            throw $th;
+            // throw $th;
             return  $this->fail([]);
         }
     }
@@ -146,13 +155,17 @@ abstract class Controller
     {
         $filtersArray = [];
 
-        // Check if the string is in the format filter=[[exam_id,1],...]
-        // Use regex to properly match the key-value pairs inside square brackets
-        preg_match_all('/\[(\w+),\s*(\d+)\]/', $filters, $matches);
+        // Match [key,value] pairs, allowing string values
+        preg_match_all('/\[(\w+),\s*([^\]]+)\]/', $filters, $matches);
 
-        // Iterate through the matches and prepare the filters array
         foreach ($matches[1] as $index => $key) {
-            $filtersArray[] = [$key, $matches[2][$index]];
+            // Trim whitespace from value
+            $value = trim($matches[2][$index]);
+
+            // Optional: remove quotes if present
+            $value = trim($value, "\"'");
+
+            $filtersArray[] = [$key, $value];
         }
 
         return $filtersArray;
