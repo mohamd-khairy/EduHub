@@ -80,9 +80,24 @@ abstract class Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
-        //
+        try {
+            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
+
+            //relations
+            if ($request->relations)
+                $relations = explode(',', $request->relations);
+
+            $data = $model->with($relations ?? [])->orderBy('id', 'desc')
+                ->where('id', $id)
+                ->first();
+
+            return  $this->success($data);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return  $this->fail([]);
+        }
     }
 
     /**
