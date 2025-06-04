@@ -44,9 +44,7 @@ export const useParentStore = defineStore("parent", () => {
   async function loadParents(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/parentModel/all?search=${search}`
-    );
+    const res = await fetch(`${BASE_URL}/parentModel/all?search=${search}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -57,9 +55,7 @@ export const useParentStore = defineStore("parent", () => {
   async function loadParentsForSelect(search = null) {
     try {
       const response = await fetch(
-        `${BASE_URL}/parentModel/all?search=${
-          search || ""
-        }`
+        `${BASE_URL}/parentModel/all?search=${search || ""}`
       );
 
       if (!response.ok) {
@@ -89,16 +85,13 @@ export const useParentStore = defineStore("parent", () => {
   }
 
   async function addParent(data) {
-    const res = await fetch(
-      `${BASE_URL}/parentModel`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const res = await fetch(`${BASE_URL}/parentModel`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
     if (res.ok) {
       await loadAllParents();
@@ -108,16 +101,13 @@ export const useParentStore = defineStore("parent", () => {
   }
 
   async function editParent(data, id) {
-    const res = await fetch(
-      `${BASE_URL}/parentModel/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const res = await fetch(`${BASE_URL}/parentModel/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
     if (res.ok) {
       await loadAllParents();
@@ -131,16 +121,13 @@ export const useParentStore = defineStore("parent", () => {
   async function deleteSelectedParents() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(
-      `${BASE_URL}/parentModel/delete-all`,
-      {
-        method: "POST", // Adjust method as your API requires
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ids: selectedIds.value }),
-      }
-    );
+    const res = await fetch(`${BASE_URL}/parentModel/delete-all`, {
+      method: "POST", // Adjust method as your API requires
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: selectedIds.value }),
+    });
 
     if (res.ok) {
       // Remove deleted items locally

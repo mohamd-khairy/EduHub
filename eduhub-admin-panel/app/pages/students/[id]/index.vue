@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import { defineEmits } from "vue";
+
+const parentStore = useParentStore();
+const studentStore = useStudentStore();
+const emit = defineEmits(["updateStudent"]);
 
 const props = defineProps<{
-  student: object
-}>()
+  student: object;
+}>();
 
 const fileRef = ref<HTMLInputElement>();
 
@@ -15,36 +20,50 @@ const profileSchema = z.object({
   grade_level: z.string().optional(),
   phone: z.string().optional(),
   image: z.string().optional(),
-  school_name: z.string().optional()
+  school_name: z.string().optional(),
 });
 
 type ProfileSchema = z.output<typeof profileSchema>;
 
 const profile = reactive<Partial<ProfileSchema>>({
-  name: '',
-  email: '',
-  gender: '',
-  grade_level: '',
-  phone: '',
-  image: '',
-  school_name: ''
-})
+  name: "",
+  email: "",
+  gender: "",
+  grade_level: "",
+  phone: "",
+  image: "",
+  school_name: "",
+  parent_id: "",
+});
 
 onMounted(async () => {
-    if (props.student) {
-      Object.assign(profile, props.student);
-    }
+  if (props.student) {
+    parentStore.loadParentsForSelect();
+    Object.assign(profile, props.student);
+    profile.parent_id = {
+      label: props.student?.parent?.name,
+      value: props.student?.parent?.id,
+    };
+  }
 });
 
 const toast = useToast();
 async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
+  event.data = {
+    ...event.data,
+    parent_id: event.data.parent_id?.value,
+  };
+
+  studentStore.editStudent(event.data, props.student?.id);
+
+  emit("updateStudent", profile);
+
   toast.add({
     title: "تم تحديث المعلومات",
     description: "تم تحديث إعدادات الطالب بنجاح.",
     icon: "i-lucide-check",
     color: "success",
   });
-  console.log(event.data);
 }
 
 function onFileChange(e: Event) {
@@ -93,7 +112,11 @@ function onFileClick() {
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput v-model="profile.name" autocomplete="off" />
+        <UInput
+          v-model="profile.name"
+          autocomplete="off"
+          style="width: 300px"
+        />
       </UFormField>
       <USeparator />
       <UFormField
@@ -103,7 +126,12 @@ function onFileClick() {
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput v-model="profile.email" type="email" autocomplete="off" />
+        <UInput
+          v-model="profile.email"
+          type="email"
+          autocomplete="off"
+          style="width: 300px"
+        />
       </UFormField>
       <USeparator />
       <UFormField
@@ -113,7 +141,12 @@ function onFileClick() {
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput v-model="profile.phone" type="tel" autocomplete="off" />
+        <UInput
+          v-model="profile.phone"
+          type="tel"
+          autocomplete="off"
+          style="width: 300px"
+        />
       </UFormField>
       <USeparator />
       <UFormField
@@ -123,7 +156,11 @@ function onFileClick() {
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput v-model="profile.gender" autocomplete="off" />
+        <UInput
+          v-model="profile.gender"
+          autocomplete="off"
+          style="width: 300px"
+        />
       </UFormField>
       <USeparator />
       <UFormField
@@ -133,7 +170,11 @@ function onFileClick() {
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput v-model="profile.grade_level" autocomplete="off" />
+        <UInput
+          v-model="profile.grade_level"
+          autocomplete="off"
+          style="width: 300px"
+        />
       </UFormField>
       <USeparator />
       <UFormField
@@ -143,7 +184,26 @@ function onFileClick() {
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput v-model="profile.school_name" autocomplete="off" />
+        <UInput
+          v-model="profile.school_name"
+          autocomplete="off"
+          style="width: 300px"
+        />
+      </UFormField>
+      <USeparator />
+      <UFormField
+        name="parent_id"
+        label="ولي الأمر"
+        description="اسم ولي الأمر الفريد الخاص بالطالب ."
+        required
+        class="flex max-sm:flex-col justify-between items-start gap-4"
+      >
+        <USelectMenu
+          :items="parentStore.parentOptions"
+          v-model="profile.parent_id"
+          autocomplete="off"
+          style="width: 300px"
+        />
       </UFormField>
       <USeparator />
       <UFormField
@@ -154,7 +214,12 @@ function onFileClick() {
       >
         <div class="flex flex-wrap items-center gap-3">
           <UAvatar :src="profile.image" :alt="profile.name" size="lg" />
-          <UButton label="اختر صورة" color="neutral" @click="onFileClick" />
+          <UButton
+            label="اختر صورة"
+            color="neutral"
+            @click="onFileClick"
+            style="width: 300px"
+          />
           <input
             ref="fileRef"
             type="file"

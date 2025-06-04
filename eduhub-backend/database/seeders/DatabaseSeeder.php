@@ -28,17 +28,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        UserFactory::new()->count(20)->create();
-        GroupFactory::new()->count(20)->create();
-        StudentFactory::new()->count(20)->create();
-        EnrollmentFactory::new()->count(20)->create();
-        ParentModelFactory::new()->count(20)->create();
-        TeacherFactory::new()->count(20)->create();
-        TeacherAttendanceFactory::new()->count(20)->create();
-        PaymentFactory::new()->count(20)->create();
-        AttendanceFactory::new()->count(20)->create();
-        ExamFactory::new()->count(20)->create();
-        ExamResultFactory::new()->count(20)->create();
+        UserFactory::new()->count(100)->create();
+        GroupFactory::new()->count(100)->create();
+        StudentFactory::new()->count(100)->create();
+        EnrollmentFactory::new()->count(100)->create();
+        ParentModelFactory::new()->count(100)->create();
+        TeacherFactory::new()->count(100)->create();
+        TeacherAttendanceFactory::new()->count(100)->create();
+        PaymentFactory::new()->count(100)->create();
+        AttendanceFactory::new()->count(100)->create();
+        ExamFactory::new()->count(100)->create();
+        ExamResultFactory::new()->count(100)->create();
         CourseFactory::new()->count(50)->create();
 
         Role::create(["name" => "admin"]);

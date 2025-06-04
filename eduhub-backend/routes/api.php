@@ -21,85 +21,85 @@ Route::get('/user', function (Request $request) {
 Route::group([], function () {
 
     Route::group(['prefix' => 'group'], function () {
-        Route::get('/', [GroupController::class, 'index']);
-        Route::get('{id}', [GroupController::class, 'show']);
         Route::get('/all', [GroupController::class, 'All']);
-        Route::post('', [GroupController::class, 'store']);
-        Route::put('{id}', [GroupController::class, 'update']);
         Route::post('/delete-all', [GroupController::class, 'deleteAll']);
+        Route::get('/', [GroupController::class, 'index']);
+        Route::post('', [GroupController::class, 'store']);
+        Route::get('{id}', [GroupController::class, 'show']);
+        Route::put('{id}', [GroupController::class, 'update']);
     });
     Route::group(['prefix' => 'course'], function () {
-        Route::get('/', [CourseController::class, 'index']);
-        Route::get('{id}', [CourseController::class, 'show']);
         Route::get('/all', [CourseController::class, 'All']);
-        Route::post('', [CourseController::class, 'store']);
-        Route::put('{id}', [CourseController::class, 'update']);
         Route::post('/delete-all', [CourseController::class, 'deleteAll']);
+        Route::get('/', [CourseController::class, 'index']);
+        Route::post('', [CourseController::class, 'store']);
+        Route::get('{id}', [CourseController::class, 'show']);
+        Route::put('{id}', [CourseController::class, 'update']);
     });
     Route::group(['prefix' => 'teacher'], function () {
-        Route::get('/', [TeacherController::class, 'index']);
-        Route::get('{id}', [TeacherController::class, 'update']);
         Route::get('/all', [TeacherController::class, 'All']);
-        Route::post('', [TeacherController::class, 'store']);
-        Route::put('{id}', [TeacherController::class, 'update']);
         Route::post('/delete-all', [TeacherController::class, 'deleteAll']);
+        Route::get('/', [TeacherController::class, 'index']);
+        Route::post('', [TeacherController::class, 'store']);
+        Route::get('{id}', [TeacherController::class, 'update']);
+        Route::put('{id}', [TeacherController::class, 'update']);
     });
 
     Route::group(['prefix' => 'user'], function () {
-        Route::get('/', [UserController::class, 'index']);
-        Route::get('{id}', [UserController::class, 'show']);
         Route::get('/all', [UserController::class, 'All']);
-        Route::post('', [UserController::class, 'store']);
-        Route::put('{id}', [UserController::class, 'update']);
         Route::post('/delete-all', [UserController::class, 'deleteAll']);
+        Route::get('/', [UserController::class, 'index']);
+        Route::post('', [UserController::class, 'store']);
+        Route::get('{id}', [UserController::class, 'show']);
+        Route::put('{id}', [UserController::class, 'update']);
     });
     Route::group(['prefix' => 'student'], function () {
-        Route::get('/', [StudentController::class, 'index']);
-        Route::get('{id}', [StudentController::class, 'show']);
         Route::get('/all', [StudentController::class, 'All']);
-        Route::post('', [StudentController::class, 'store']);
-        Route::put('{id}', [StudentController::class, 'update']);
         Route::post('/delete-all', [StudentController::class, 'deleteAll']);
+        Route::get('/', [StudentController::class, 'index']);
+        Route::post('', [StudentController::class, 'store']);
+        Route::get('{id}', [StudentController::class, 'show']);
+        Route::put('{id}', [StudentController::class, 'update']);
     });
 
     Route::group(['prefix' => 'parentModel'], function () {
-        Route::get('/', [ParentController::class, 'index']);
-        Route::get('{id}', [ParentController::class, 'show']);
         Route::get('/all', [ParentController::class, 'All']);
-        Route::post('', [ParentController::class, 'store']);
-        Route::put('{id}', [ParentController::class, 'update']);
         Route::post('/delete-all', [ParentController::class, 'deleteAll']);
+        Route::get('/', [ParentController::class, 'index']);
+        Route::post('', [ParentController::class, 'store']);
+        Route::get('{id}', [ParentController::class, 'show']);
+        Route::put('{id}', [ParentController::class, 'update']);
     });
     Route::group(['prefix' => 'exam'], function () {
-        Route::get('/', [ExamController::class, 'index']);
-        Route::get('{id}', [ExamController::class, 'show']);
         Route::get('/all', [ExamController::class, 'All']);
-        Route::post('', [ExamController::class, 'store']);
-        Route::put('{id}', [ExamController::class, 'update']);
         Route::post('/delete-all', [ExamController::class, 'deleteAll']);
+        Route::get('/', [ExamController::class, 'index']);
+        Route::post('', [ExamController::class, 'store']);
+        Route::get('{id}', [ExamController::class, 'show']);
+        Route::put('{id}', [ExamController::class, 'update']);
     });
     Route::group(['prefix' => 'examResult'], function () {
-        Route::get('/', [ResultController::class, 'index']);
-        Route::get('{id}', [ResultController::class, 'show']);
         Route::get('/all', [ResultController::class, 'All']);
-        Route::post('', [ResultController::class, 'store']);
-        Route::put('{id}', [ResultController::class, 'update']);
         Route::post('/delete-all', [ResultController::class, 'deleteAll']);
+        Route::get('/', [ResultController::class, 'index']);
+        Route::post('', [ResultController::class, 'store']);
+        Route::get('{id}', [ResultController::class, 'show']);
+        Route::put('{id}', [ResultController::class, 'update']);
     });
     Route::group(['prefix' => 'attendance'], function () {
-        Route::get('/', [AttendanceController::class, 'index']);
-        Route::get('{id}', [AttendanceController::class, 'show']);
         Route::get('/all', [AttendanceController::class, 'All']);
-        Route::post('', [AttendanceController::class, 'store']);
-        Route::put('{id}', [AttendanceController::class, 'update']);
         Route::post('/delete-all', [AttendanceController::class, 'deleteAll']);
+        Route::get('/', [AttendanceController::class, 'index']);
+        Route::post('', [AttendanceController::class, 'store']);
+        Route::get('{id}', [AttendanceController::class, 'show']);
+        Route::put('{id}', [AttendanceController::class, 'update']);
     });
     Route::group(['prefix' => 'payment'], function () {
-        Route::get('/', [PaymentController::class, 'index']);
-        Route::get('{id}', [PaymentController::class, 'show']);
         Route::get('/all', [PaymentController::class, 'All']);
-        Route::post('', [PaymentController::class, 'store']);
-        Route::put('{id}', [PaymentController::class, 'update']);
         Route::post('/delete-all', [PaymentController::class, 'deleteAll']);
+        Route::get('/', [PaymentController::class, 'index']);
+        Route::post('', [PaymentController::class, 'store']);
+        Route::get('{id}', [PaymentController::class, 'show']);
+        Route::put('{id}', [PaymentController::class, 'update']);
     });
 });
