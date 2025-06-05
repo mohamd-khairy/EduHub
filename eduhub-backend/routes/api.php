@@ -59,7 +59,7 @@ Route::group([], function () {
         Route::get('/', [StudentController::class, 'index']);
         Route::post('', [StudentController::class, 'store']);
         Route::get('{id}', [StudentController::class, 'show']);
-        Route::put('{id}', [StudentController::class, 'update']);
+        Route::post('{id}', [StudentController::class, 'update']);
     });
 
     Route::group(['prefix' => 'parentModel'], function () {

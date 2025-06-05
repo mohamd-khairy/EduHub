@@ -13,8 +13,8 @@ class ParentModel extends Model
 
     protected $fillable = ['name', 'phone', 'email', 'address'];
 
-    public function student()
+    public function students()
     {
-        return $this->hasOne(Student::class, 'parent_id');
+        return $this->hasMany(Student::class, 'parent_id');
     }
 }

@@ -25,7 +25,7 @@ export const useStudentStore = defineStore("student", () => {
   async function loadAllStudents(page = 1, params = null, search = null) {
     items.value = []; // clear current items
 
-    const relations = "parent";
+    const relations = "parent,groups.teacher,groups.course";
 
     if (params || search) {
       page = 1; // Reset to first page if params or search are provided
@@ -128,11 +128,8 @@ export const useStudentStore = defineStore("student", () => {
 
   async function editStudent(data, id) {
     const res = await fetch(`${BASE_URL}/student/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      method: "POST",
+      body: data,
     });
 
     if (res.ok) {

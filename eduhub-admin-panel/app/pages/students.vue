@@ -22,6 +22,24 @@ const isMailPanelOpen = computed({
   },
 });
 
+let debounceTimer: ReturnType<typeof setTimeout>;
+
+async function setFilterValue(value: string) {
+  clearTimeout(debounceTimer); // Clear previous timer
+
+  debounceTimer = setTimeout(async () => {
+    if (value?.length >= 3) {
+      search.value = value;
+      await studentStore.loadAllStudents(1, null, {
+        name: value.toLowerCase(),
+      });
+      filteredStudents.value = studentStore.items;
+    } else {
+      filteredStudents.value = allStudents.value;
+    }
+  }, 1000); // 1000 ms = 1 second
+}
+
 // Handle the update event from StudentDetails component
 function handleUpdateStudent(updatedStudent: object) {
   // Find the index of the student that was updated
@@ -47,6 +65,36 @@ onMounted(async () => {
   currentPage.value++;
   isLoading.value = false;
 });
+
+const scrollContainer = ref<HTMLElement | null>(null);
+
+function onScroll() {
+  if (!scrollContainer.value) return;
+
+  const { scrollTop, scrollHeight, clientHeight } = scrollContainer.value;
+
+  // Trigger loading when scrolled within 150px of bottom
+  if (scrollTop + clientHeight >= scrollHeight - 150 && hasMore.value) {
+    loadNextPage();
+  }
+}
+
+async function loadNextPage() {
+  if (isLoading.value || !hasMore.value) return;
+  isLoading.value = true;
+
+  await studentStore.loadAllStudents(currentPage.value);
+  const newStudents = studentStore.items;
+
+  if (allStudents.value?.length >= studentStore.pagination?.total) {
+    hasMore.value = false; // no more data
+  }
+
+  allStudents.value.push(...newStudents);
+  filteredStudents.value = allStudents.value; // or reapply filter if needed
+  currentPage.value++;
+  isLoading.value = false;
+}
 </script>
 
 <template>

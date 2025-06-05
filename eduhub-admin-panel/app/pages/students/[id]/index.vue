@@ -48,13 +48,25 @@ onMounted(async () => {
 });
 
 const toast = useToast();
-async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
-  event.data = {
-    ...event.data,
-    parent_id: event.data.parent_id?.value,
-  };
 
-  studentStore.editStudent(event.data, props.student?.id);
+async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
+  const formData = new FormData();
+
+  // Append text fields
+  formData.append("name", event.data?.name || "");
+  formData.append("email", event.data?.email || "");
+  formData.append("gender", event.data?.gender || "");
+  formData.append("grade_level", event.data?.grade_level || "");
+  formData.append("phone", event.data?.phone || "");
+  formData.append("school_name", event.data?.school_name || "");
+  formData.append("parent_id", event.data?.parent_id?.value || "");
+
+  // Append the image file if exists
+  if (fileRef.value?.files?.[0]) {
+    formData.append("image", fileRef.value.files[0]);
+  }
+
+  studentStore.editStudent(formData, props.student?.id);
 
   emit("updateStudent", profile);
 
@@ -94,6 +106,7 @@ function onFileClick() {
       variant="naked"
       orientation="horizontal"
       class="mb-4"
+      style="font-size: 20px"
     >
       <UButton
         form="settings"
@@ -101,6 +114,7 @@ function onFileClick() {
         color="neutral"
         type="submit"
         class="w-fit lg:ms-auto"
+        style="font-size: 18px"
       />
     </UPageCard>
 
@@ -108,9 +122,10 @@ function onFileClick() {
       <UFormField
         name="name"
         label="اسم الطالب"
-        description="اسم الطالب المستخدم في تسجيل الدخول واسم المستخدم الخاص بك."
+        description="اسم الطالب المستخدم الخاص بك."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
+        style="font-size: 18px"
       >
         <UInput
           v-model="profile.name"
@@ -122,9 +137,10 @@ function onFileClick() {
       <UFormField
         name="email"
         label="البريد الإلكتروني"
-        description="البريد الإلكتروني الفريد الخاص بك لتسجيل الدخول ورابط ملفك الشخصي."
+        description="البريد الإلكتروني الفريد الخاص بك لتسجيل الدخول ."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
+        style="font-size: 18px"
       >
         <UInput
           v-model="profile.email"
@@ -137,9 +153,10 @@ function onFileClick() {
       <UFormField
         name="phone"
         label="رقم الهاتف"
-        description="رقم الهاتف الفريد الخاص بك لتسجيل الدخول ورابط ملفك الشخصي."
+        description="رقم الهاتف الفريد الخاص بك في ملفك الشخصي."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
+        style="font-size: 18px"
       >
         <UInput
           v-model="profile.phone"
@@ -152,9 +169,10 @@ function onFileClick() {
       <UFormField
         name="gender"
         label="الجنس"
-        description="جنسك المستخدم في تسجيل الدخول ورابط ملفك الشخصي."
+        description="جنسك المستخدمالخاص بك في ملفك الشخصي."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
+        style="font-size: 18px"
       >
         <UInput
           v-model="profile.gender"
@@ -166,9 +184,10 @@ function onFileClick() {
       <UFormField
         name="grade_level"
         label="السنة الدراسية"
-        description="السنة الدراسية الخاصة بك لتسجيل الدخول ورابط ملفك الشخصي."
+        description="السنة الدراسية الخاصة بك في ملفك الشخصي."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
+        style="font-size: 18px"
       >
         <UInput
           v-model="profile.grade_level"
@@ -180,9 +199,10 @@ function onFileClick() {
       <UFormField
         name="school_name"
         label="اسم المدرسة"
-        description="اسم المدرسة الفريد الخاص بك لتسجيل الدخول ورابط ملفك الشخصي."
+        description="اسم المدرسة الفريد الخاص بك في ملفك الشخصي."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
+        style="font-size: 18px"
       >
         <UInput
           v-model="profile.school_name"
@@ -197,6 +217,7 @@ function onFileClick() {
         description="اسم ولي الأمر الفريد الخاص بالطالب ."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
+        style="font-size: 18px"
       >
         <USelectMenu
           :items="parentStore.parentOptions"
@@ -211,6 +232,7 @@ function onFileClick() {
         label="صورة الملف الشخصي"
         description="JPG, GIF or PNG. 1MB Max."
         class="flex max-sm:flex-col justify-between sm:items-center gap-4"
+        style="font-size: 18px"
       >
         <div class="flex flex-wrap items-center gap-3">
           <UAvatar :src="profile.image" :alt="profile.name" size="lg" />

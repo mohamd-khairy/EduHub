@@ -13,7 +13,7 @@ const links = [[{
 }, {
 
   class: 'text-lg',
-  label: 'المواد',
+  label: 'المواد الدراسية',
   icon: 'i-lucide-users',
   to: '/courses',
   onSelect: () => {

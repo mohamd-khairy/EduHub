@@ -21,17 +21,17 @@ const links = computed(() => [
       exact: true,
     },
     {
-      label: "Members",
+      label: "المجموعات",
       icon: "i-lucide-users",
+      to: `/students/${studentId.value}/groups`,
+    },
+    {
+      label: "الامتحانات",
+      icon: "i-lucide-bell",
       to: `/students/${studentId.value}/members`,
     },
     {
-      label: "Notifications",
-      icon: "i-lucide-bell",
-      to: `/students/${studentId.value}/notifications`,
-    },
-    {
-      label: "Security",
+      label: "الحضور والانصراف",
       icon: "i-lucide-shield",
       to: `/students/${studentId.value}/security`,
     },
@@ -41,12 +41,29 @@ const links = computed(() => [
 function handleUpdateStudent(updatedStudent: object) {
   emit("updateStudent", updatedStudent);
 }
+
+function onAddStudent() {
+  // Logic to add a new student
+  console.log("Add Student button clicked");
+}
 </script>
 
 <template>
   <UDashboardPanel id="inbox-2">
     <template #header>
-      <UDashboardNavbar title="تفاصيل الطالب" :toggle="false" />
+      <UDashboardNavbar title="تفاصيل الطالب" :toggle="false">
+        <template #right>
+          <UButton
+            label="إضافة طالب"
+            color="neutral"
+            type="button"
+            @click="onAddStudent"
+            class="w-fit"
+            style="font-size: 18px"
+          />
+        </template>
+      </UDashboardNavbar>
+
       <UDashboardToolbar>
         <UNavigationMenu :items="links" highlight class="-mx-1 flex-1" />
       </UDashboardToolbar>

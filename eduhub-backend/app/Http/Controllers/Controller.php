@@ -29,13 +29,13 @@ abstract class Controller
                 }
 
             if ($request->search && !empty($request->search))
-            foreach ($this->parseFilterString($request->search) as $filter) {
-                if (count($filter) == 2) {
-                    $column = $filter[0];
-                    $value = $filter[1];
-                    $model = $model->where($column, 'like', '%' . $value . '%');
+                foreach ($this->parseFilterString($request->search) as $filter) {
+                    if (count($filter) == 2) {
+                        $column = $filter[0];
+                        $value = $filter[1];
+                        $model = $model->where($column, 'like', '%' . $value . '%');
+                    }
                 }
-            }
 
             $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate();
 
@@ -115,11 +115,17 @@ abstract class Controller
     public function update(Request $request, string $id)
     {
         try {
+            $data = $request->all();
             $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
 
             $model = $model->where('id', $id)->first();
 
-            $model->update($request->all());
+            if ($request->image) {
+                $image = $request->image->store('images', 'public');
+                $data['image'] = url('/storage/' . $image);
+            }
+
+            $model->update($data);
 
             return $this->success($model);
         } catch (\Throwable $th) {

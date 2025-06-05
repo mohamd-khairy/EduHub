@@ -32,7 +32,7 @@ class Student extends Model
 
     public function groups()
     {
-        return $this->belongsToMany(Course::class, 'enrollments',  'student_id', 'group_id')
+        return $this->belongsToMany(Group::class, 'enrollments',  'student_id', 'group_id')
             ->withPivot('start_date', 'end_date', 'status');
     }
 
