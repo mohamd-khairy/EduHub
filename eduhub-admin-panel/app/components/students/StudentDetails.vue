@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
+import AddModal from '~/components/students/AddModal.vue'
 
 const emit = defineEmits(["updateStudent"]);
 
@@ -53,14 +54,7 @@ function onAddStudent() {
     <template #header>
       <UDashboardNavbar title="تفاصيل الطالب" :toggle="false">
         <template #right>
-          <UButton
-            label="إضافة طالب"
-            color="neutral"
-            type="button"
-            @click="onAddStudent"
-            class="w-fit"
-            style="font-size: 18px"
-          />
+            <AddModal />
         </template>
       </UDashboardNavbar>
 
