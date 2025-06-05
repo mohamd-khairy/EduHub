@@ -10,7 +10,7 @@ const currentPage = ref(1);
 const pageSize = 10;
 const isLoading = ref(false);
 const hasMore = ref(true);
-
+const router = useRouter();
 const allStudents = ref<object[]>([]);
 const filteredStudents = ref<object[]>([]);
 const search = ref("");
@@ -64,6 +64,12 @@ onMounted(async () => {
   filteredStudents.value = allStudents.value;
   currentPage.value++;
   isLoading.value = false;
+
+  // 👇 Select the first student automatically
+  if (allStudents.value.length > 0) {
+    selectedStudent.value = allStudents.value[0];
+    router.push(`/students/${selectedStudent.value.id}`);
+  }
 });
 
 const scrollContainer = ref<HTMLElement | null>(null);
@@ -99,6 +105,7 @@ async function loadNextPage() {
 
 <template>
   <UDashboardPanel
+    v-if="selectedStudent"
     id="inbox-1"
     :default-size="25"
     :min-size="20"
@@ -131,8 +138,30 @@ async function loadNextPage() {
     @updateStudent="handleUpdateStudent"
   />
 
-  <div v-else class="hidden lg:flex flex-1 items-center justify-center">
-    <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
+  <div
+    v-else
+    class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+  >
+    <!-- Icon -->
+    <UIcon name="i-lucide-inbox" class="size-32 text-gray-400" />
+
+    <!-- Description -->
+    <div>
+      <h2 class="text-xl font-semibold text-gray-600 mb-1">لا يوجد طلاب</h2>
+      <p class="text-sm text-gray-500">
+        لم يتم إضافة أي طالب بعد. يمكنك البدء الآن.
+      </p>
+    </div>
+
+    <!-- Action Button -->
+    <UButton
+      label="إضافة طالب"
+      color="primary"
+      icon="i-lucide-plus"
+      @click="onAddStudent"
+      size="lg"
+      class="mt-2"
+    />
   </div>
 
   <ClientOnly>
