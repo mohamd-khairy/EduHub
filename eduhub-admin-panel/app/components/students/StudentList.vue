@@ -40,7 +40,7 @@ watch(selectedStudent, () => {
     >
       <div class="flex items-center justify-between font-semibold text-lg">
         {{ mail.name }}
-        <span>{{ isToday(new Date(mail.created_at)) ? format(new Date(mail.created_at), 'HH:mm') : format(new Date(mail.created_at), 'dd MMM') }}</span>
+        <span>{{ format(new Date(mail.created_at), 'MMM-yyyy', { locale: arSA }) }}</span>
       </div>
       <p class="truncate font-semibold">({{ mail.phone }}) - ({{ mail.email }})</p>
       <p class="text-dimmed line-clamp-1">({{ mail.grade_level }}) - ({{ mail.school_name }})</p>

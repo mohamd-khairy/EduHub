@@ -113,10 +113,7 @@ export const useStudentStore = defineStore("student", () => {
   async function addStudent(data) {
     const res = await fetch(`${BASE_URL}/student`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      body: data,
     });
 
     if (res.ok) {

@@ -4,6 +4,11 @@ import * as z from "zod";
 const open = ref(false);
 
 const studentStore = useStudentStore();
+const parentStore = useParentStore();
+
+onMounted(async () => {
+  parentStore.loadParentsForSelect();
+});
 
 const schema = z.object({
   name: z.string().min(2, "Too short"),
@@ -30,8 +35,23 @@ const state = reactive<Partial<Schema>>({
 const toast = useToast();
 
 async function onSubmit() {
+  const formData = new FormData();
+  // Append text fields
+  formData.append("name", state?.name || "");
+  formData.append("email", state?.email || "");
+  formData.append("gender", state?.gender || "");
+  formData.append("grade_level", state?.grade_level || "");
+  formData.append("phone", state?.phone || "");
+  formData.append("school_name", state?.school_name || "");
+  formData.append("parent_id", state?.parent_id?.value || "");
+
+  // Append the image file if exists
+  if (fileRef.value?.files?.[0]) {
+    formData.append("image", fileRef.value.files[0]);
+  }
+
   // Add teacher to the store
-  await studentStore.addStudent(state);
+  await studentStore.addStudent(formData);
 
   // Show success toast
   toast.add({
@@ -136,7 +156,12 @@ function onFileClick() {
           name="parent_id"
           style="font-size: 18px"
         >
-          <UInput required v-model="state.parent_id" class="w-full" />
+          <USelectMenu
+            :items="parentStore.parentOptions"
+            v-model="state.parent_id"
+            autocomplete="off"
+            class="w-full"
+          />
         </UFormField>
         <UFormField
           label="الصف الدراسي"
@@ -155,11 +180,7 @@ function onFileClick() {
         >
           <div class="flex flex-wrap items-center gap-3">
             <UAvatar :src="state.image" :alt="state.name" size="lg" />
-            <UButton
-              label="اختر صورة"
-              color="neutral"
-              @click="onFileClick"
-            />
+            <UButton label="اختر صورة" color="neutral" @click="onFileClick" />
             <input
               ref="fileRef"
               type="file"

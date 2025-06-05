@@ -75,9 +75,16 @@ abstract class Controller
     public function store(Request $request)
     {
         try {
+            $inpput = $request->all();
+
             $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
 
-            $data = $model->create($request->all());
+             if ($request->image) {
+                $image = $request->image->store('images', 'public');
+                $inpput['image'] = url('/storage/' . $image);
+            }
+
+            $data = $model->create($inpput);
 
             return $this->success($data);
         } catch (\Throwable $th) {
@@ -115,17 +122,17 @@ abstract class Controller
     public function update(Request $request, string $id)
     {
         try {
-            $data = $request->all();
+            $input = $request->all();
             $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
 
             $model = $model->where('id', $id)->first();
 
             if ($request->image) {
                 $image = $request->image->store('images', 'public');
-                $data['image'] = url('/storage/' . $image);
+                $input['image'] = url('/storage/' . $image);
             }
 
-            $model->update($data);
+            $model->update($input);
 
             return $this->success($model);
         } catch (\Throwable $th) {

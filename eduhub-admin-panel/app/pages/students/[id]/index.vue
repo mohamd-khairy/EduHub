@@ -51,7 +51,6 @@ const toast = useToast();
 
 async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
   const formData = new FormData();
-
   // Append text fields
   formData.append("name", event.data?.name || "");
   formData.append("email", event.data?.email || "");
