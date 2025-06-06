@@ -2,9 +2,9 @@
 <script setup lang="ts">
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
-import AddModal from '~/components/students/AddModal.vue'
+import AddModal from "~/components/students/AddModal.vue";
 
-const emit = defineEmits(["updateStudent"]);
+const emit = defineEmits(["updateStudent", "addStudent"]);
 
 const props = defineProps<{
   student: object;
@@ -43,9 +43,9 @@ function handleUpdateStudent(updatedStudent: object) {
   emit("updateStudent", updatedStudent);
 }
 
-function onAddStudent() {
+function handleAddStudent(addStudent: object) {
   // Logic to add a new student
-  console.log("Add Student button clicked");
+  emit("addStudent", addStudent);
 }
 </script>
 
@@ -54,7 +54,7 @@ function onAddStudent() {
     <template #header>
       <UDashboardNavbar title="تفاصيل الطالب" :toggle="false">
         <template #right>
-            <AddModal />
+          <AddModal @addStudent="handleAddStudent" />
         </template>
       </UDashboardNavbar>
 

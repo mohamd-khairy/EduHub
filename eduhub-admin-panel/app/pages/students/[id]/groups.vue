@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import AddGroup from "~/components/students/AddGroup.vue";
+
+const studentStore = useStudentStore();
+
+const toast = useToast();
+
 const props = defineProps<{
   student: object;
 }>();
@@ -8,27 +14,52 @@ const groups = ref([]);
 onMounted(async () => {
   if (props.student) {
     groups.value = props.student?.groups || [];
-
-    console.log("Groups:", groups.value);
   }
 });
 
-const state = reactive<{ [key: string]: boolean }>({
-  name: true,
-  schedule: false,
-  start_date: true,
-  end_date: false,
-  teacher: true,
-});
+async function onGroupActiveChange(field, value) {
+  await studentStore.enrollmentStatusChange({
+    status: value,
+    student_id: field.pivot.student_id,
+    group_id: field.pivot.group_id,
+  });
 
-async function onChange() {
-  // Do something with data
-  console.log(state);
+  // Find the group in the local list and update its pivot.status
+  const groupToUpdate = groups.value.find((group) => group.id === field.id);
+
+  if (groupToUpdate && groupToUpdate.pivot) {
+    groupToUpdate.pivot.status = value;
+  }
+
+  toast.add({
+    title: "Success",
+    description: `تم تغير حالة المجموعة بنجاح`,
+    color: "success",
+  });
 }
 
-async function onDelete() {
+async function onGroupEnrollmentDelete(field) {
   // Do something with data
-  console.log(state);
+  await studentStore.deleteEnrollment({
+    student_id: field.pivot.student_id,
+    group_id: field.pivot.group_id,
+  });
+
+  const index = groups.value.findIndex((group) => group.id === field.id);
+  if (index !== -1) {
+    groups.value.splice(index, 1);
+
+    toast.add({
+      title: "Success",
+      description: `تم جذف المجموعة بنجاح`,
+      color: "success",
+    });
+  }
+}
+
+async function handleUpdateStudent(updatedStudent: object) {
+  await studentStore.loadOneStudent(props.student.id);
+  groups.value = studentStore.item?.groups || [];
 }
 </script>
 
@@ -40,14 +71,7 @@ async function onDelete() {
     orientation="horizontal"
     class="m-2"
   >
-    <UButton
-      form="settings"
-      label="اضافة مجموعة"
-      color="neutral"
-      type="submit"
-      class="w-fit lg:ms-auto"
-      style="font-size: 18px"
-    />
+    <AddGroup :student="student" @updateStudent="handleUpdateStudent" />
   </UPageCard>
 
   <UPageCard
@@ -101,15 +125,15 @@ async function onDelete() {
 
       <div class="pt-2 sm:pt-0 flex items-center gap-4">
         <USwitch
-          :model-value="field.active"
-          @update:model-value="(value) => onChange(field, value)"
+          :model-value="field.pivot.status"
+          @update:model-value="(value) => onGroupActiveChange(field, value)"
         />
         <UButton
           icon="i-lucide-trash"
           color="red"
           variant="soft"
           size="lg"
-          @click="onDelete(field)"
+          @click="onGroupEnrollmentDelete(field)"
           class="hover:bg-red-100 hover:text-red-700 transition-colors duration-200"
         />
       </div>

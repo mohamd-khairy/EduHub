@@ -12,6 +12,7 @@ export const useStudentStore = defineStore("student", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
+  const item = ref({});
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -78,6 +79,19 @@ export const useStudentStore = defineStore("student", () => {
     }
   }
 
+  async function loadOneStudent(id = null) {
+    item.value = []; // clear current items
+
+    const res = await fetch(
+      `${BASE_URL}/student/${id}?relations=groups.teacher,groups.course`
+    );
+    const json = await res.json();
+
+    if (json?.data) {
+      item.value = json.data;
+    }
+  }
+
   async function loadStudentsForSelect(search = null) {
     try {
       const response = await fetch(
@@ -121,6 +135,36 @@ export const useStudentStore = defineStore("student", () => {
     } else {
       throw new Error("Failed to delete groups");
     }
+  }
+
+  async function addEnrollment(data) {
+    const res = await fetch(`${BASE_URL}/enrollment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+  }
+
+  async function enrollmentStatusChange(data) {
+    const res = await fetch(`${BASE_URL}/enrollment/change-status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+  }
+
+  async function deleteEnrollment(data) {
+    const res = await fetch(`${BASE_URL}/enrollment/delete`, {
+      method: "POST",
+       headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
   }
 
   async function editStudent(data, id) {
@@ -197,6 +241,11 @@ export const useStudentStore = defineStore("student", () => {
     pagination,
     editModalOpen,
     editItem,
+    item,
+    deleteEnrollment,
+    enrollmentStatusChange,
+    loadOneStudent,
+    addEnrollment,
     addStudent,
     editStudent,
     loadAllStudents,

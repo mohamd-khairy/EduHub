@@ -24,7 +24,7 @@ class EnrollmentFactory extends Factory
             'group_id' => \App\Models\Group::inRandomOrder()->value('id') ?? \App\Models\Group::factory()->create()->id,
             'start_date' => $start->format('Y-m-d'),
             'end_date' => $end->format('Y-m-d'),
-            'status' => $this->faker->randomElement(['active', 'completed', 'paused']),
+            'status' => true,
         ];
     }
 }

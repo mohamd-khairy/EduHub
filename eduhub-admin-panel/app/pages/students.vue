@@ -101,6 +101,25 @@ async function loadNextPage() {
   currentPage.value++;
   isLoading.value = false;
 }
+
+
+async function handleAddStudent(addStudent: object) {
+  // Logic to add a new student
+  console.log("addStudent", addStudent);
+  isLoading.value = true;
+  currentPage.value = 1
+  await studentStore.loadAllStudents(currentPage.value);
+  allStudents.value = studentStore.items;
+  filteredStudents.value = allStudents.value;
+  currentPage.value++;
+  isLoading.value = false;
+
+  // 👇 Select the first student automatically
+  if (allStudents.value.length > 0) {
+    selectedStudent.value = allStudents.value[0];
+    router.push(`/students/${selectedStudent.value.id}`);
+  }
+}
 </script>
 
 <template>
@@ -136,6 +155,7 @@ async function loadNextPage() {
     v-if="selectedStudent"
     :student="selectedStudent"
     @updateStudent="handleUpdateStudent"
+    @addStudent="handleAddStudent"
   />
 
   <div
@@ -171,6 +191,7 @@ async function loadNextPage() {
           v-if="selectedStudent"
           :student="selectedStudent"
           @updateStudent="handleUpdateStudent"
+          @addStudent="handleAddStudent"
         />
       </template>
     </USlideover>

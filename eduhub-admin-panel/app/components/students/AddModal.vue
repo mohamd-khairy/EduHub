@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import * as z from "zod";
+import { defineEmits } from "vue";
+
+const emit = defineEmits(["addStudent"]);
 
 const open = ref(false);
 
@@ -52,6 +55,8 @@ async function onSubmit() {
 
   // Add teacher to the store
   await studentStore.addStudent(formData);
+
+  emit("addStudent", formData);
 
   // Show success toast
   toast.add({

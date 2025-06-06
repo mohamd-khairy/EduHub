@@ -5,7 +5,6 @@ import { ref, computed, onMounted } from 'vue'
 import AddModal from '~/components/groups/AddModal.vue'
 import DeleteModal from '~/components/groups/DeleteModal.vue'
 import EditModal from '~/components/groups/EditModal.vue'
-import type { User } from '~/types'
 
 const groupStore = useGroupStore()
 const courseStore = useCourseStore()
@@ -22,7 +21,6 @@ const table = useTemplateRef('table') // Make sure this returns a reactive ref
 const columnFilters = ref([{ id: 'اسم المجموعة', value: '' }])
 const columnVisibility = ref()
 
-// Adjust typing here (replace `User` or your row type)
 function getRowItems(row: any) {
   return [
     { type: 'label', label: 'الاجراءات' },
@@ -52,7 +50,7 @@ function getRowItems(row: any) {
   ]
 }
 
-const columns: TableColumn<User>[] = [
+const columns: TableColumn[] = [
   {
     id: 'اختار',
     header: ({ table }) =>

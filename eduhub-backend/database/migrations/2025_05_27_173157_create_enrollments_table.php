@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('group_id');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->enum('status', ['active', 'completed', 'paused'])->default('active');
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

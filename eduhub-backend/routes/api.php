@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\CourseController;
+use App\Http\Controllers\API\EnrollmentController;
 use App\Http\Controllers\API\ExamController;
 use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\GroupController;
@@ -60,6 +61,16 @@ Route::group([], function () {
         Route::post('', [StudentController::class, 'store']);
         Route::get('{id}', [StudentController::class, 'show']);
         Route::post('{id}', [StudentController::class, 'update']);
+    });
+    Route::group(['prefix' => 'enrollment'], function () {
+        Route::get('/all', [EnrollmentController::class, 'All']);
+        Route::post('/delete', [EnrollmentController::class, 'delete']);
+        Route::post('/delete-all', [EnrollmentController::class, 'deleteAll']);
+        Route::put('/change-status', [EnrollmentController::class, 'changeStatus']);
+        Route::get('/', [EnrollmentController::class, 'index']);
+        Route::post('', [EnrollmentController::class, 'store']);
+        Route::get('{id}', [EnrollmentController::class, 'show']);
+        Route::post('{id}', [EnrollmentController::class, 'update']);
     });
 
     Route::group(['prefix' => 'parentModel'], function () {
