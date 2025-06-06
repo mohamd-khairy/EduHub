@@ -22,6 +22,12 @@ const links = computed(() => [
       exact: true,
     },
     {
+      label: "ولي الامر",
+      icon: "i-lucide-user",
+      to: `/students/${studentId.value}/parent`,
+      exact: true,
+    },
+    {
       label: "المجموعات",
       icon: "i-lucide-users",
       to: `/students/${studentId.value}/groups`,

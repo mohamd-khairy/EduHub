@@ -101,7 +101,7 @@ function onFileClick() {
   >
     <UPageCard
       title="معلومات الطالب"
-      description="جميع المعلومات الشخصيه التي تخص الطالب"
+      :description="profile.name"
       variant="naked"
       orientation="horizontal"
       class="mb-4"

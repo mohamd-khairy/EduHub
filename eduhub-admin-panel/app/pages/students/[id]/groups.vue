@@ -65,8 +65,8 @@ async function handleUpdateStudent(updatedStudent: object) {
 
 <template>
   <UPageCard
-    title="المجموعات"
-    description="المجموعات الخاصة بالطالب"
+    title="المجموعات الخاصة بالطالب"
+    :description="student?.name"
     variant="naked"
     orientation="horizontal"
     class="m-2"
