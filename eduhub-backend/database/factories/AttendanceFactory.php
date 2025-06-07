@@ -19,6 +19,7 @@ class AttendanceFactory extends Factory
         return [
             'student_id' => \App\Models\Student::inRandomOrder()->value('id'),
             'group_id' => \App\Models\Group::inRandomOrder()->value('id'),
+            'schedule_id' => \App\Models\Schedule::inRandomOrder()->value('id'),
             'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
             'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
             'note' => $this->faker->sentence(),

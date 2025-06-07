@@ -70,16 +70,11 @@ onMounted(async () => {
   const idInRoute = studentIdFromRoute.value;
   // 🧠 Try to match route param
   if (idInRoute) {
-    const match = allStudents.value.find((s: any) => s.id == idInRoute);
-    if (match) {
-      selectedStudent.value = match;
-    } else {
-      // fallback if not found
-      selectedStudent.value = allStudents.value[0];
-      router.push(`/students/${selectedStudent.value.id}`);
-    }
+    await studentStore.loadInformation(idInRoute);
+    selectedStudent.value = studentStore.information;
   } else if (allStudents.value.length > 0) {
-    selectedStudent.value = allStudents.value[0];
+    await studentStore.loadInformation(allStudents.value[0].id);
+    selectedStudent.value = studentStore.information;
     router.push(`/students/${selectedStudent.value.id}`);
   }
 });

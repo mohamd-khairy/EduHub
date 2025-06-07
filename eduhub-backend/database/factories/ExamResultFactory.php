@@ -19,7 +19,7 @@ class ExamResultFactory extends Factory
         $exam = \App\Models\Exam::inRandomOrder()->first() ?? \App\Models\Exam::factory()->create();
 
         return [
-            'student_id' => \App\Models\Student::inRandomOrder()->value('id') ?? \App\Models\Student::factory()->create()->id,
+            'student_id' => \App\Models\Student::inRandomOrder()->value('id'),
             'exam_id' => $exam->id,
             'score' => $this->faker->randomFloat(2, 0, $exam->total_marks ?? 100),
         ];

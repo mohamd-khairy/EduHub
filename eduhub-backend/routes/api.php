@@ -56,6 +56,7 @@ Route::group([], function () {
     });
     Route::group(['prefix' => 'student'], function () {
         Route::get('/all', [StudentController::class, 'All']);
+        Route::get('/information/{id}', [StudentController::class, 'information']);
         Route::post('/delete-all', [StudentController::class, 'deleteAll']);
         Route::get('/', [StudentController::class, 'index']);
         Route::post('', [StudentController::class, 'store']);

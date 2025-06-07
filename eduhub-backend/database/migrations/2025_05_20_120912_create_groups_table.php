@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedBigInteger('teacher_id');
             $table->unsignedBigInteger('course_id');
-            $table->string('schedule')->nullable();
             $table->integer('max_students')->default(30);
             $table->timestamps();
         });

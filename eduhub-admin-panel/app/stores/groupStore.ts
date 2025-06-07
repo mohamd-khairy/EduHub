@@ -26,7 +26,7 @@ export const useGroupStore = defineStore("group", () => {
     items.value = []; // clear current items
 
     const res = await fetch(
-      `${BASE_URL}/group?relations=teacher,course&page=${page}`
+      `${BASE_URL}/group?relations=teacher,course,schedules&page=${page}`
     );
     const json = await res.json();
 

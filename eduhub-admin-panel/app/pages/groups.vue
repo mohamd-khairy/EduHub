@@ -168,7 +168,7 @@ const columns: TableColumn[] = [
       h(
         UBadge,
         { class: 'capitalize', variant: 'subtle', color: 'success' },
-        () => row.original.schedule
+        () => row.original.schedule || 'لا يوجد مواعيد محددة'
       )
   },
   {

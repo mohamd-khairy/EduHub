@@ -23,7 +23,7 @@ class CourseFactory extends Factory
                 'لغة عربية 2',
                 'لغة إنجليزية 1',
                 'كيمياء تطبيقية'
-            ]),
+            ]) . rand(1, 1000),
             'description' => $this->faker->sentence()
         ];
     }

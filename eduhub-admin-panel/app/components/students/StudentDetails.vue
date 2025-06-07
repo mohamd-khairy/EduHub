@@ -5,6 +5,7 @@ import { useRoute } from "vue-router";
 import AddModal from "~/components/students/AddModal.vue";
 
 const emit = defineEmits(["updateStudent", "addStudent"]);
+const studentStore = useStudentStore();
 
 const props = defineProps<{
   student: object;

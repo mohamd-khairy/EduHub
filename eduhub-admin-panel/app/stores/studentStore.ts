@@ -13,6 +13,7 @@ export const useStudentStore = defineStore("student", () => {
   const editModalOpen = ref(false);
   const editItem = ref({});
   const item = ref({});
+  const information = ref({});
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -26,7 +27,8 @@ export const useStudentStore = defineStore("student", () => {
   async function loadAllStudents(page = 1, params = null, search = null) {
     items.value = []; // clear current items
 
-    const relations = "parent,groups.teacher,groups.course,groups.attendance";
+    const relations =
+      "";
 
     if (params || search) {
       page = 1; // Reset to first page if params or search are provided
@@ -89,6 +91,17 @@ export const useStudentStore = defineStore("student", () => {
 
     if (json?.data) {
       item.value = json.data;
+    }
+  }
+
+  async function loadInformation(id = null) {
+    information.value = []; // clear current items
+
+    const res = await fetch(`${BASE_URL}/student/information/${id}`);
+    const json = await res.json();
+
+    if (json?.data) {
+      information.value = json.data;
     }
   }
 
@@ -160,7 +173,7 @@ export const useStudentStore = defineStore("student", () => {
   async function deleteEnrollment(data) {
     const res = await fetch(`${BASE_URL}/enrollment/delete`, {
       method: "POST",
-       headers: {
+      headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
@@ -242,6 +255,8 @@ export const useStudentStore = defineStore("student", () => {
     editModalOpen,
     editItem,
     item,
+    information,
+    loadInformation,
     deleteEnrollment,
     enrollmentStatusChange,
     loadOneStudent,

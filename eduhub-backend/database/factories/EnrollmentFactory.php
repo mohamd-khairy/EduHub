@@ -20,8 +20,8 @@ class EnrollmentFactory extends Factory
         $end = $this->faker->dateTimeBetween($start, '+2 months');
 
         return [
-            'student_id' => \App\Models\Student::inRandomOrder()->value('id') ?? \App\Models\Student::factory()->create()->id,
-            'group_id' => \App\Models\Group::inRandomOrder()->value('id') ?? \App\Models\Group::factory()->create()->id,
+            'student_id' => \App\Models\Student::inRandomOrder()->value('id'),
+            'group_id' => \App\Models\Group::inRandomOrder()->value('id'),
             'start_date' => $start->format('Y-m-d'),
             'end_date' => $end->format('Y-m-d'),
             'status' => true,

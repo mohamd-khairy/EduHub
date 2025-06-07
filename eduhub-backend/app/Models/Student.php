@@ -25,11 +25,6 @@ class Student extends Model
         return $this->belongsTo(ParentModel::class, 'parent_id');
     }
 
-    public function attendance()
-    {
-        return $this->hasMany(StudentAttendance::class);
-    }
-
     public function groups()
     {
         return $this->belongsToMany(Group::class, 'enrollments',  'student_id', 'group_id')
@@ -49,5 +44,10 @@ class Student extends Model
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 }

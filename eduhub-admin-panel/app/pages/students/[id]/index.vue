@@ -38,6 +38,8 @@ const profile = reactive<Partial<ProfileSchema>>({
 
 onMounted(async () => {
   if (props.student) {
+    console.log("props.student:", props.student);
+    
     parentStore.loadParentsForSelect();
     Object.assign(profile, props.student);
     profile.parent_id = {

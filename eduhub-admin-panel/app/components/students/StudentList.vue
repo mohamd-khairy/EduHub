@@ -3,6 +3,8 @@
 import { format, isToday } from "date-fns";
 import { useRouter } from "vue-router";
 
+const studentStore = useStudentStore();
+
 const props = defineProps<{
   students: [];
 }>();
@@ -11,8 +13,9 @@ const studentsRefs = ref<Element[]>([]);
 const selectedStudent = defineModel<null>();
 const router = useRouter();
 
-function handleClick(student) {
-  selectedStudent.value = student;
+async function handleClick(student) {
+  await studentStore.loadInformation(student.id);
+  selectedStudent.value = studentStore.information;
   router.push(`/students/${student.id}`);
 }
 
@@ -44,7 +47,7 @@ watch(selectedStudent, () => {
       >
         <div class="flex gap-4">
           <span>{{ student.id }}#</span>
-        
+
           <UAvatar :src="student.image" :alt="student.name" size="lg" />
           {{ student.name }}
         </div>

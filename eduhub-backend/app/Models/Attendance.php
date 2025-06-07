@@ -8,11 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Attendance extends Model
 {
     use HasFactory;
-    protected $fillable = ['student_id', 'group_id', 'date', 'status', 'note'];
+
+    protected $fillable = ['student_id', 'group_id',  'schedule_id', 'date', 'status', 'note'];
 
     public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function schedule()
+    {
+        return $this->belongsTo(Schedule::class);
     }
 
     public function group()

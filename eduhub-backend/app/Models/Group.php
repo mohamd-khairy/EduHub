@@ -9,7 +9,18 @@ class Group extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'teacher_id', 'course_id', 'schedule', 'max_students'];
+    protected $fillable = ['name', 'teacher_id', 'course_id', 'max_students'];
+
+    protected $appends = ['schedule'];
+
+    public function getScheduleAttribute()
+    {
+        // Get related schedules
+        $schedules = $this->schedules()->get(); // Or use $this->schedules if it's eager-loaded
+
+        return $schedules->map(fn($s) => "{$s->day} {$s->start_time} ")
+                 ->implode(', ');
+    }
 
     public function teacher()
     {
@@ -30,6 +41,11 @@ class Group extends Model
     public function attendance()
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 
     public function course()
