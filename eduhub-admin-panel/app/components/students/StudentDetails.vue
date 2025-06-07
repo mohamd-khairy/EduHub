@@ -25,7 +25,6 @@ const links = computed(() => [
       label: "ولي الامر",
       icon: "i-lucide-user",
       to: `/students/${studentId.value}/parent`,
-      exact: true,
     },
     {
       label: "المجموعات",
@@ -40,7 +39,7 @@ const links = computed(() => [
     {
       label: "الحضور والانصراف",
       icon: "i-lucide-shield",
-      to: `/students/${studentId.value}/security`,
+      to: `/students/${studentId.value}/attendance`,
     },
   ],
 ]);

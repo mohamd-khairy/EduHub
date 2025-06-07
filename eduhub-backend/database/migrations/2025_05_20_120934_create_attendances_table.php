@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('group_id');
             $table->date('date');
-            $table->enum('status', ['present', 'absent', 'late']);
+            $table->enum('status', ['حضر', 'غائب', 'متأخر']);
             $table->text('note')->nullable();
             $table->timestamps();
         });

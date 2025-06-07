@@ -15,6 +15,8 @@ const allStudents = ref<object[]>([]);
 const filteredStudents = ref<object[]>([]);
 const search = ref("");
 const selectedStudent = ref<object | null>(null);
+const route = useRoute();
+const studentIdFromRoute = computed(() => route.params.id);
 const isMailPanelOpen = computed({
   get: () => !!selectedStudent.value,
   set: (val: boolean) => {
@@ -65,8 +67,18 @@ onMounted(async () => {
   currentPage.value++;
   isLoading.value = false;
 
-  // 👇 Select the first student automatically
-  if (allStudents.value.length > 0) {
+  const idInRoute = studentIdFromRoute.value;
+  // 🧠 Try to match route param
+  if (idInRoute) {
+    const match = allStudents.value.find((s: any) => s.id == idInRoute);
+    if (match) {
+      selectedStudent.value = match;
+    } else {
+      // fallback if not found
+      selectedStudent.value = allStudents.value[0];
+      router.push(`/students/${selectedStudent.value.id}`);
+    }
+  } else if (allStudents.value.length > 0) {
     selectedStudent.value = allStudents.value[0];
     router.push(`/students/${selectedStudent.value.id}`);
   }
@@ -102,12 +114,11 @@ async function loadNextPage() {
   isLoading.value = false;
 }
 
-
 async function handleAddStudent(addStudent: object) {
   // Logic to add a new student
   console.log("addStudent", addStudent);
   isLoading.value = true;
-  currentPage.value = 1
+  currentPage.value = 1;
   await studentStore.loadAllStudents(currentPage.value);
   allStudents.value = studentStore.items;
   filteredStudents.value = allStudents.value;
@@ -120,6 +131,9 @@ async function handleAddStudent(addStudent: object) {
     router.push(`/students/${selectedStudent.value.id}`);
   }
 }
+const isEmpty = computed(
+  () => !isLoading.value && filteredStudents.value.length === 0
+);
 </script>
 
 <template>
@@ -158,8 +172,16 @@ async function handleAddStudent(addStudent: object) {
     @addStudent="handleAddStudent"
   />
 
+  <!-- 🔄 Loading spinner or text -->
   <div
-    v-else
+    v-else-if="isLoading"
+    class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+  >
+    <p class="text-gray-500 text-lg">جارٍ تحميل الطلاب...</p>
+  </div>
+
+  <div
+    v-else-if="isEmpty"
     class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
   >
     <!-- Icon -->

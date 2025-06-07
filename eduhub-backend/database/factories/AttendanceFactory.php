@@ -20,8 +20,8 @@ class AttendanceFactory extends Factory
             'student_id' => \App\Models\Student::inRandomOrder()->value('id'),
             'group_id' => \App\Models\Group::inRandomOrder()->value('id'),
             'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
-            'status' => $this->faker->randomElement(['present', 'absent', 'late']),
-            'note' => $this->faker->optional()->sentence(),
+            'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
+            'note' => $this->faker->sentence(),
         ];
     }
 }
