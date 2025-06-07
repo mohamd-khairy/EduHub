@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Attendance;
 use App\Models\Enrollment;
+use App\Models\ExamResult;
 use App\Models\Group;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -28,7 +29,19 @@ class StudentFactory extends Factory
             'parent_id' => \App\Models\ParentModel::inRandomOrder()->value('id'),
             'phone' => $this->faker->phoneNumber(),
             'email' => $this->faker->unique()->safeEmail(),
-            'image' => $this->faker->imageUrl(200, 200, 'people'),
+            'image' => [
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/antfu',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/larbish',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/benjamincanac',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/celinedumerc',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/danielroe',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/farnabaz',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/FerdinandCoumau',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/hugorcd',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/pi0',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/SarahM19',
+                'https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/atinux'
+            ][rand(0, 10)]
         ];
     }
 
@@ -48,17 +61,32 @@ class StudentFactory extends Factory
                     'end_date' => $end->format('Y-m-d'),
                     'status' => true,
                 ]);
+
+                for ($i = 0; $i < 10; $i++) {
+                    Attendance::factory()->create([
+                        'student_id' => $student->id,
+                        'group_id' => $groupId,
+                        'schedule_id' => \App\Models\Schedule::inRandomOrder()->where('group_id', $groupId)->value('id'),
+                        'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
+                        'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
+                        'note' => $this->faker->sentence(),
+                    ]);
+                }
             }
-            for ($i = 0; $i < 10; $i++) {
-                Attendance::factory()->create([
-                    'student_id' => $student->id,
-                    'group_id' => $groupId,
-                    'schedule_id' => \App\Models\Schedule::inRandomOrder()->where('group_id', $groupId)->value('id'),
-                    'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
-                    'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
-                    'note' => $this->faker->sentence(),
-                ]);
-            }
+
+            //exam Results
+            Enrollment::where('student_id', $student->id)->get()
+                ->each(function ($enrollment) {
+                    $enrollment->group->exams()->each(function ($exam) use ($enrollment) {
+                        for ($i = 0; $i < 3; $i++) {
+                            ExamResult::factory()->create([
+                                'student_id' => $enrollment->student_id,
+                                'exam_id' => $exam->id,
+                                'score' => $this->faker->randomFloat(2, 0, $exam->total_marks ?? 100),
+                            ]);
+                        }
+                    });
+                });
         });
     }
 }

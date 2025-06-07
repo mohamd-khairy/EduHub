@@ -19,7 +19,7 @@ class Group extends Model
         $schedules = $this->schedules()->get(); // Or use $this->schedules if it's eager-loaded
 
         return $schedules->map(fn($s) => "{$s->day} {$s->start_time} ")
-                 ->implode(', ');
+            ->implode(', ');
     }
 
     public function teacher()
@@ -46,6 +46,11 @@ class Group extends Model
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    public function exams()
+    {
+        return $this->hasMany(Exam::class);
     }
 
     public function course()

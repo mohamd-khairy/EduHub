@@ -11,13 +11,17 @@ class StudentController extends Controller
 {
     public function information($id)
     {
-        $student = Student::with(['parent', 'groups.schedules', 'groups.course', 'groups.teacher'])->findOrFail($id);
+        $student = Student::with(['parent', 'groups.schedules', 'groups.course', 'groups.teacher', 'groups.exams'])->findOrFail($id);
 
-        foreach ($student->groups as $key => $group) {
-            foreach ($group->schedules as $schedule) {
+        foreach ($student->groups ?? [] as $group) {
+            foreach ($group->schedules ?? [] as $schedule) {
+                $schedule->attendances = $schedule->attendances()
+                    ->where('student_id', $student->id)
+                    ->get();
+            }
 
-                $schedule->attendances = Attendance::where('group_id', $group->id)
-                    ->where('schedule_id', $schedule->id)
+            foreach ($group->exams ?? [] as $exam) {
+                $exam->results = $exam->results()
                     ->where('student_id', $student->id)
                     ->get();
             }

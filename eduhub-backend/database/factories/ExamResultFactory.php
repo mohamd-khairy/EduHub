@@ -16,7 +16,7 @@ class ExamResultFactory extends Factory
      */
     public function definition(): array
     {
-        $exam = \App\Models\Exam::inRandomOrder()->first() ?? \App\Models\Exam::factory()->create();
+        $exam = \App\Models\Exam::inRandomOrder()->first();
 
         return [
             'student_id' => \App\Models\Student::inRandomOrder()->value('id'),

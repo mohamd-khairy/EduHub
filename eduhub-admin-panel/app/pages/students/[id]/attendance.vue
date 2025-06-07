@@ -34,9 +34,29 @@ onMounted(() => {
   }
 });
 
+function getStatusColor(status: string): string {
+  switch (status) {
+    case "حضر":
+      return "success";
+    case "غائب":
+      return "error";
+    case "متأخر":
+      return "warning";
+    default:
+      return "neutral";
+  }
+}
 </script>
 
 <template>
+    <UPageCard
+    title="الحضور والغياب الخاص بالطالب"
+    :description="student.name"
+    variant="naked"
+    orientation="horizontal"
+    class="mt-2"
+  >
+  </UPageCard>
   <UTabs
     v-model="activeGroupTab"
     :items="items"
@@ -56,7 +76,6 @@ onMounted(() => {
             <thead class="bg-gray-200">
               <tr>
                 <th class="border px-4 py-2 text-gray-800">التاريخ</th>
-                <th class="border px-4 py-2 text-gray-800">اليوم</th>
                 <th class="border px-4 py-2 text-gray-800">الوقت</th>
                 <th class="border px-4 py-2 text-gray-800">الحضور</th>
                 <th class="border px-4 py-2 text-gray-800">ملاحظات</th>
@@ -64,39 +83,31 @@ onMounted(() => {
             </thead>
             <tbody class="divide-y">
               <tr v-for="attendance in item.attendances" :key="attendance.id">
-                <td class="border px-4 py-2">{{ attendance.date }}</td>
                 <td class="border px-4 py-2">
                   {{
-                    new Date(attendance.date).toLocaleDateString("ar-EG", {
-                      weekday: "long",
+                    new Date(attendance.created_at).toLocaleString("ar-EG", {
+                      weekday: "long", 
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })
                   }}
                 </td>
                 <td class="border px-4 py-2">
                   {{
-                    new Date(attendance.created_at).toLocaleTimeString(
-                      "ar-EG",
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )
+                    new Date(attendance.created_at).toLocaleString("ar-EG", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
                   }}
                 </td>
-                <td class="border px-4 py-2">{{ attendance.status }}</td>
+                <td class="border px-4 py-2"><UBadge :color="getStatusColor(attendance.status)">{{ attendance.status }}</UBadge></td>
                 <td class="border px-4 py-2">{{ attendance.note }}</td>
               </tr>
             </tbody>
           </table>
         </template>
       </UTabs>
-      <!-- <template #content="{ item }"> -->
-      <!-- <UTable :data="item?.attendance" class="flex-1" />
-           
-          -->
-
-      <!-- </template> -->
-      <!-- </UTabs> -->
     </template>
   </UTabs>
 </template>

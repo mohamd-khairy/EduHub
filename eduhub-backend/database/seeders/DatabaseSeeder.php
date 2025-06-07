@@ -35,8 +35,8 @@ class DatabaseSeeder extends Seeder
         StudentFactory::new()->count(50)->create();
         TeacherAttendanceFactory::new()->count(50)->create();
         PaymentFactory::new()->count(50)->create();
-        ExamFactory::new()->count(50)->create();
-        ExamResultFactory::new()->count(50)->create();
+        // ExamFactory::new()->count(50)->create();
+        // ExamResultFactory::new()->count(50)->create();
         // EnrollmentFactory::new()->count(50)->create();
         // AttendanceFactory::new()->count(50)->create();
         Role::create(["name" => "admin"]);

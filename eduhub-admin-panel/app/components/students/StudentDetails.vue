@@ -17,7 +17,7 @@ const studentId = computed(() => route.params.id as string);
 const links = computed(() => [
   [
     {
-      label: "الملف الشخصي",
+      label: "بيانات الطالب",
       icon: "i-lucide-user",
       to: `/students/${studentId.value}`,
       exact: true,
@@ -29,18 +29,23 @@ const links = computed(() => [
     },
     {
       label: "المجموعات",
-      icon: "i-lucide-users",
+      icon: "i-lucide-folders",
       to: `/students/${studentId.value}/groups`,
     },
     {
-      label: "الامتحانات",
+      label: "الاختبارات",
       icon: "i-lucide-bell",
-      to: `/students/${studentId.value}/members`,
+      to: `/students/${studentId.value}/exams`,
     },
     {
-      label: "الحضور والانصراف",
+      label: "الحضور والغياب",
       icon: "i-lucide-shield",
       to: `/students/${studentId.value}/attendance`,
+    },
+    {
+      label: "المصاريف",
+      icon: "i-lucide-dollar-sign",
+      to: `/students/${studentId.value}/parent`,
     },
   ],
 ]);
