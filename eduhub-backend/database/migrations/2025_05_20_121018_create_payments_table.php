@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id');
             $table->decimal('amount', 8, 2);
             $table->date('payment_date');
-            $table->enum('method', ['cash', 'bank_transfer', 'card']);
+            $table->enum('method', ['كاش', 'تحويل بنكي', 'فيزا']);
             $table->enum('status', ['paid', 'pending', 'cancelled'])->default('paid');
             $table->text('note')->nullable();
             $table->timestamps();

@@ -9,6 +9,7 @@ const studentStore = useStudentStore();
 const currentPage = ref(1);
 const pageSize = 10;
 const isLoading = ref(false);
+const isEmpty = ref(false);
 const hasMore = ref(true);
 const router = useRouter();
 const allStudents = ref<object[]>([]);
@@ -66,6 +67,9 @@ onMounted(async () => {
   filteredStudents.value = allStudents.value;
   currentPage.value++;
   isLoading.value = false;
+  if (allStudents.value.length === 0) {
+    isEmpty.value = true;
+  }
 
   const idInRoute = studentIdFromRoute.value;
   // 🧠 Try to match route param
@@ -126,9 +130,6 @@ async function handleAddStudent(addStudent: object) {
     router.push(`/students/${selectedStudent.value.id}`);
   }
 }
-const isEmpty = computed(
-  () => !isLoading.value && filteredStudents.value.length === 0
-);
 </script>
 
 <template>

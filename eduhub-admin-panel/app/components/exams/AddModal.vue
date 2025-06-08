@@ -75,12 +75,12 @@ async function onSubmit() {
         </UFormField>
 
         <UFormField label="درجة الاختبار" placeholder="درجة الاختبار" name="total_marks">
-          <UInput required v-model="state.total_marks" max="100" type="number" placeholder="اختر الوقت"
+          <UInput required v-model="state.total_marks" max="100" type="number" placeholder="درجة الاختبار"
                 class="w-full" />
         </UFormField>
         
         <UFormField label="تاريخ الاختبار" placeholder="تاريخ الاختبار" name="date">
-          <UInput required v-model="state.date" type="date" placeholder="اختر الوقت"
+          <UInput required v-model="state.date" type="date" placeholder="اختر التاريخ"
                 class="w-full" />
         </UFormField>
 

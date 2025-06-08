@@ -17,10 +17,10 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'student_id' => \App\Models\Student::inRandomOrder()->value('id') ?? \App\Models\Student::factory()->create()->id,
+            'student_id' => \App\Models\Student::inRandomOrder()->value('id'),
             'amount' => $this->faker->randomFloat(2, 100, 1000), // بين 100 و1000 ريال مثلاً
             'payment_date' => $this->faker->dateTimeBetween('-2 months', 'now')->format('Y-m-d'),
-            'method' => $this->faker->randomElement(['cash', 'bank_transfer', 'card']),
+            'method' => $this->faker->randomElement(['كاش', 'تحويل بنكي', 'فيزا']),
             'status' => $this->faker->randomElement(['paid', 'pending', 'cancelled']),
             'note' => $this->faker->optional()->sentence(),
         ];

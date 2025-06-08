@@ -43,9 +43,9 @@ const links = computed(() => [
       to: `/students/${studentId.value}/attendance`,
     },
     {
-      label: "المصاريف",
+      label: "المدفوعات",
       icon: "i-lucide-dollar-sign",
-      to: `/students/${studentId.value}/parent`,
+      to: `/students/${studentId.value}/payments`,
     },
   ],
 ]);
@@ -63,7 +63,7 @@ function handleAddStudent(addStudent: object) {
 <template>
   <UDashboardPanel id="inbox-2">
     <template #header>
-      <UDashboardNavbar title="تفاصيل الطالب" :toggle="false">
+      <UDashboardNavbar title="تفاصيل الطالب" :toggle="true">
         <template #right>
           <AddModal @addStudent="handleAddStudent" />
         </template>
@@ -75,7 +75,7 @@ function handleAddStudent(addStudent: object) {
     </template>
     <template #body>
       <div
-        class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-2xl mx-auto"
+        class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-3xl mx-auto"
       >
         <NuxtPage :student="student" @updateStudent="handleUpdateStudent" />
       </div>

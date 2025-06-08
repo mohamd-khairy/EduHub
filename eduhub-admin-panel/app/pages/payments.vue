@@ -1,260 +1,301 @@
 <script setup lang="ts">
-import type { TableColumn } from '@nuxt/ui'
-import { upperFirst } from 'scule'
-import AddModal from '~/components/payments/AddModal.vue'
-import DeleteModal from '~/components/payments/DeleteModal.vue'
-import type { User } from '~/types'
+import type { TableColumn } from "@nuxt/ui";
+import { upperFirst } from "scule";
+import AddModal from "~/components/payments/AddModal.vue";
+import DeleteModal from "~/components/payments/DeleteModal.vue";
+import EditModal from "~/components/payments/EditModal.vue";
 
-const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const UCheckbox = resolveComponent('UCheckbox')
+const paymentStore = usePaymentStore();
+const studentStore = useStudentStore();
 
-const toast = useToast()
-const table = useTemplateRef('table')
+const UButton = resolveComponent("UButton");
+const UBadge = resolveComponent("UBadge");
+const UDropdownMenu = resolveComponent("UDropdownMenu");
+const UCheckbox = resolveComponent("UCheckbox");
+const toast = useToast();
+const table = useTemplateRef("table");
 
-const columnFilters = ref([{
-  id: 'name',
-  value: ''
-}])
-
-const columnVisibility = ref()
-
-const items = ref([])
-const pagination = ref({
-  page: 1,
-  pageCount: 1,
-  pageSize: 10,
-  total: 0
-})
-
-// Initial load
-await loadData()
-
-async function loadData(page = 1) {
-  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/payment?relations=student&page=${page}`, {
-    transform: (res) => res.data
-  })
-
-  if (data.value) {
-    items.value = data.value.data
-
-    pagination.value = {
-      page: data.value.current_page,
-      pageCount: data.value.last_page,
-      pageSize: data.value.per_page,
-      total: data.value.total
-    }
-  }
-}
-
-function getRowItems(row: Row<ob>) {
-  return [
-    {
-      type: 'label',
-      label: 'Actions'
-    },
-    {
-      label: 'Copy customer ID',
-      icon: 'i-lucide-copy',
-      onSelect() {
-        navigator.clipboard.writeText(row.original.id.toString())
-        toast.add({
-          title: 'Copied to clipboard',
-          description: 'Customer ID copied to clipboard'
-        })
-      }
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: 'View customer details',
-      icon: 'i-lucide-list'
-    },
-    {
-      label: 'View customer payments',
-      icon: 'i-lucide-wallet'
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: 'حذف',
-      icon: 'i-lucide-trash',
-      color: 'error',
-      onSelect() {
-        toast.add({
-          title: 'Customer deleted',
-          description: 'The customer has been deleted.'
-        })
-      }
-    }
-  ]
-}
-
-const columns: TableColumn<User>[] = [
+const columnFilters = ref([
   {
-    id: 'select',
+    id: "حالة الدفع",
+    value: "",
+  },
+]);
+
+const columnVisibility = ref();
+
+onMounted(() => {
+  paymentStore.loadAllPayments();
+  studentStore.loadStudentsForSelect();
+});
+
+function getRowItems(row: any) {
+  return [
+    { type: "label", label: "الاجراءات" },
+    { label: "مشاهدة الفاتورة", icon: "i-lucide-wallet" },
+    { type: "separator" },
+    {
+      label: "تعديل الدفع",
+      icon: "i-lucide-edit",
+      color: "primary",
+      onSelect() {
+        paymentStore.editItem = row.original;
+        paymentStore.editModalOpen = true;
+      },
+    },
+    {
+      label: "حذف الدفع",
+      icon: "i-lucide-trash",
+      color: "error",
+      onSelect() {
+        paymentStore.addId(row.original.id);
+        paymentStore.deleteModalOpen = true;
+      },
+    },
+  ];
+}
+
+const getColorByStatus = (status) => {
+  return {
+    paid: "success",
+    cancelled: "error",
+    pending: "warning",
+  }[status];
+};
+
+
+const getStatus = (status) => {
+  return {
+    paid: "تم الدفع",
+    cancelled: "لم يتم الدفع",
+    pending: "في انتظار الدفع",
+  }[status];
+};
+
+const columns: TableColumn[] = [
+  {
+    id: "اختار",
     header: ({ table }) =>
       h(UCheckbox, {
-        'modelValue': table.getIsSomePageRowsSelected()
-          ? 'indeterminate'
-          : table.getIsAllPageRowsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-          table.toggleAllPageRowsSelected(!!value),
-        'ariaLabel': 'Select all'
+        modelValue:
+          paymentStore.selectedIds.length > 0 &&
+          paymentStore.selectedIds.length ===
+            table.getFilteredRowModel().rows.length
+            ? true
+            : paymentStore.selectedIds?.length > 0
+            ? "indeterminate"
+            : false,
+        "onUpdate:modelValue": (value: boolean | "indeterminate") => {
+          if (value) {
+            // Select all visible rows
+            table.getFilteredRowModel().rows.forEach((r) => {
+              paymentStore.toggleId(r.original.id);
+            });
+          } else {
+            // Deselect all visible rows
+            table.getFilteredRowModel().rows.forEach((r) => {
+              paymentStore.removeId(r.original.id);
+            });
+          }
+        },
+        ariaLabel: "Select all",
       }),
     cell: ({ row }) =>
       h(UCheckbox, {
-        'modelValue': row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
-        'ariaLabel': 'Select row'
-      })
+        modelValue: paymentStore.selectedIds.includes(row.original.id),
+        "onUpdate:modelValue": (value: boolean | "indeterminate") => {
+          if (value) {
+            paymentStore.addId(row.original.id);
+          } else {
+            paymentStore.removeId(row.original.id);
+          }
+        },
+        ariaLabel: "Select row",
+      }),
   },
   {
-    accessorKey: 'id',
+    accessorKey: "id",
+    id: "الرقم",
+    header: "الرقم",
     header: ({ column }) => {
-      const isSorted = column.getIsSorted()
+      const isSorted = column.getIsSorted();
 
       return h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        label: 'الرقم ',
+        color: "neutral",
+        variant: "ghost",
+        label: "الرقم ",
         icon: isSorted
-          ? isSorted === 'asc'
-            ? 'i-lucide-arrow-up-narrow-wide'
-            : 'i-lucide-arrow-down-wide-narrow'
-          : 'i-lucide-arrow-up-down',
-        class: '-mx-2.5',
-        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-      })
-    }
+          ? isSorted === "asc"
+            ? "i-lucide-arrow-up-narrow-wide"
+            : "i-lucide-arrow-down-wide-narrow"
+          : "i-lucide-arrow-up-down",
+        class: "-mx-2.5",
+        onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      });
+    },
   },
   {
-    accessorKey: 'student',
+    accessorKey: "student",
+    id: "اسم الطالب",
     cell: ({ row }) => {
-      return h(() =>
-        row.original.student?.name
-      )
+      return h(() => row.original.student?.name);
     },
     header: ({ column }) => {
-      const isSorted = column.getIsSorted()
+      const isSorted = column.getIsSorted();
 
       return h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        label: 'اسم الطالب',
+        color: "neutral",
+        variant: "ghost",
+        label: "اسم الطالب",
         icon: isSorted
-          ? isSorted === 'asc'
-            ? 'i-lucide-arrow-up-narrow-wide'
-            : 'i-lucide-arrow-down-wide-narrow'
-          : 'i-lucide-arrow-up-down',
-        class: '-mx-2.5',
-        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-      })
-    }
+          ? isSorted === "asc"
+            ? "i-lucide-arrow-up-narrow-wide"
+            : "i-lucide-arrow-down-wide-narrow"
+          : "i-lucide-arrow-up-down",
+        class: "-mx-2.5",
+        onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      });
+    },
   },
   {
-    accessorKey: 'amount',
-    header: 'المبلغ المدفوع',
+    accessorKey: "amount",
+    id: "المبلغ المدفوع",
+    header: "المبلغ المدفوع",
     cell: ({ row }) => {
-      const color = 'warning'
+      const color = "warning";
 
-      return h(() =>
-        row.original.amount
-      )
-    }
+      return h(() => row.original.amount);
+    },
   },
   {
-    accessorKey: 'method',
-    header: 'طريقة الدفع',
+    accessorKey: "method",
+    id: "طريقة الدفع",
+    header: "طريقة الدفع",
     cell: ({ row }) => {
-      const color = 'warning'
+      const color = "warning";
 
-      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.original.method
-      )
-    }
+      return h(
+        () => row.original.method
+      );
+    },
   },
   {
-    accessorKey: 'status',
-    header: 'حالة الدفع'
-  },
-  {
-    accessorKey: 'payment_date',
-    header: 'التاريخ',
-    filterFn: 'equals',
+    accessorKey: "status",
+    id: "حالة الدفع",
+    header: "حالة الدفع",
     cell: ({ row }) => {
-      const color = 'success'
-
-      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.original.payment_date
-      )
-    }
+      const state = row.original.status;
+      const color = getColorByStatus(state);
+      return h(
+        UBadge,
+        {
+          color: color,
+          class: "capitalize",
+        },
+        () => getStatus(state)
+      );
+    },
   },
   {
-    id: 'actions',
+    accessorKey: "payment_date",
+    id: "تاريخ الدفع",
+    header: "تاريخ الدفع",
+    filterFn: "equals",
+    cell: ({ row }) => {
+      const color = "success";
+
+      return h(
+        UBadge,
+        { class: "capitalize", variant: "subtle", color },
+        () => row.original.payment_date
+      );
+    },
+  },
+  {
+    accessorKey: "actions",
+    id: "الاجراءات",
+    header: "الاجراءات",
     cell: ({ row }) => {
       return h(
-        'div',
-        { class: 'text-right' },
+        "div",
+        { class: "text-right" },
         h(
           UDropdownMenu,
           {
             content: {
-              align: 'end'
+              align: "end",
             },
-            items: getRowItems(row)
+            items: getRowItems(row),
           },
           () =>
             h(UButton, {
-              icon: 'i-lucide-ellipsis-vertical',
-              color: 'neutral',
-              variant: 'ghost',
-              class: 'ml-auto'
+              icon: "i-lucide-ellipsis-vertical",
+              color: "neutral",
+              variant: "ghost",
+              class: "ml-auto",
             })
         )
-      )
-    }
-  }
-]
-
+      );
+    },
+  },
+];
 </script>
 
 <template>
   <UDashboardPanel id="customers">
     <template #header>
-      <UDashboardNavbar title="الكورسات">
+      <UDashboardNavbar title="المدفوعات">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
 
         <template #right>
-          <AddModal  />
+          <AddModal />
+
+          <DeleteModal
+            :count="paymentStore.selectedIds.length"
+            v-model:open="paymentStore.deleteModalOpen"
+          />
+
+          <EditModal
+            :item="paymentStore.editItem"
+            v-model:open="paymentStore.editModalOpen"
+          />
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)" class="max-w-sm"
-          icon="i-lucide-search" placeholder="ابحث ..."
-          @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
+        <UInput
+          :model-value="(table?.tableApi?.getColumn('حالة الدفع')?.getFilterValue() as string)"
+          class="max-w-sm"
+          icon="i-lucide-search"
+          placeholder="ابحث ..."
+          @update:model-value="
+            table?.tableApi?.getColumn('حالة الدفع')?.setFilterValue($event)
+          "
+        />
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <DeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
-            <UButton v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length" label="حذف" color="error"
-              variant="subtle" icon="i-lucide-trash">
+          <DeleteModal :count="paymentStore.selectedIds.length">
+            <UButton
+              v-if="paymentStore.selectedIds.length"
+              label="حذف"
+              color="error"
+              variant="subtle"
+              icon="i-lucide-trash"
+            >
               <template #trailing>
                 <UKbd>
-                  {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
+                  {{ paymentStore.selectedIds.length }}
                 </UKbd>
               </template>
             </UButton>
           </DeleteModal>
 
-          <UDropdownMenu :items="table?.tableApi
+          <UDropdownMenu
+            :items="table?.tableApi
             ?.getAllColumns()
             .filter((column) => column.getCanHide())
             .map((column) => ({
@@ -268,26 +309,48 @@ const columns: TableColumn<User>[] = [
                 e?.preventDefault()
               }
             }))
-            " :content="{ align: 'end' }">
-            <UButton label="الاعمدة" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
+            "
+            :content="{ align: 'end' }"
+          >
+            <UButton
+              label="الاعمدة"
+              color="neutral"
+              variant="outline"
+              trailing-icon="i-lucide-settings-2"
+            />
           </UDropdownMenu>
         </div>
       </div>
 
-      <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-         v-model:pagination="pagination" class="shrink-0" :data="items" :columns="columns" :ui="{
+      <UTable
+        ref="table"
+        v-model:column-filters="columnFilters"
+        v-model:column-visibility="columnVisibility"
+        v-model:pagination="paymentStore.pagination"
+        class="shrink-0"
+        :data="paymentStore.items"
+        :columns="columns"
+        :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
           th: 'py-2  border-y border-default ',
-          td: 'border-b border-default'
-        }" />
+          td: 'border-b border-default',
+        }"
+      />
 
-
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
-        <div class="flex items-center gap-1.5"  dir="rtl">
-          <UPagination  dir="rtl" :total="pagination.total" :items-per-page="pagination.pageSize" :default-page="pagination.page"
-            @update:page="(p) => loadData(p)" />
+      <div
+        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
+        dir="ltr"
+      >
+        <div class="flex items-center gap-1.5" dir="ltr">
+          <UPagination
+            dir="ltr"
+            :total="paymentStore.pagination?.total"
+            :items-per-page="paymentStore.pagination?.pageSize"
+            :default-page="paymentStore.pagination?.page"
+            @update:page="(p) => paymentStore.loadAllPayments(p)"
+          />
         </div>
       </div>
     </template>

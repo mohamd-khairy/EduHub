@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\Enrollment;
 use App\Models\ExamResult;
 use App\Models\Group;
+use App\Models\Payment;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +23,7 @@ class StudentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => 'الطالب ' . $this->faker->firstName(),
             'gender' => $this->faker->randomElement(['ذكر', 'أنثى']),
             'grade_level' => $this->faker->randomElement(['الصف الأول', 'الصف الثاني', 'الصف الثالث']),
             'school_name' => $this->faker->company() . ' School',
@@ -70,6 +71,15 @@ class StudentFactory extends Factory
                         'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
                         'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
                         'note' => $this->faker->sentence(),
+                    ]);
+
+                    Payment::factory()->create([
+                        'student_id' => $student->id,
+                        'amount' => $this->faker->randomFloat(2, 100, 1000), // Between 100 and 1000
+                        'payment_date' => $this->faker->dateTimeBetween('-2 months', 'now')->format('Y-m-d'),
+                        'method' => $this->faker->randomElement(['كاش', 'تحويل بنكي', 'فيزا']),
+                        'status' => $this->faker->randomElement(['paid', 'pending', 'cancelled']),
+                        'note' => 'فلوس شهر ' . $this->faker->monthName(),
                     ]);
                 }
             }

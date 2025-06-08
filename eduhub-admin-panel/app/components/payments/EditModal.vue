@@ -1,24 +1,32 @@
 <script setup lang="ts">
 import * as z from "zod";
-import type { FormSubmitEvent } from "@nuxt/ui";
 
 const paymentStore = usePaymentStore();
 const studentStore = useStudentStore();
 
-const toast = useToast();
-const schema = z.object({});
+const props = defineProps({
+  open: Boolean,
+  item: Object,
+});
+
+const emit = defineEmits(["update:open"]);
+
+watch(
+  () => props.open,
+  (val) => {
+    open.value = val;
+  }
+);
+
 const open = ref(false);
+const schema = z.object({});
+const toast = useToast();
+
+watch(open, (val) => {
+  emit("update:open", val);
+});
 
 type Schema = z.output<typeof schema>;
-
-const state = reactive<Partial<Schema>>({
-  student_id: null,
-  amount: null,
-  payment_date: null,
-  method: null,
-  status: null,
-  note: null,
-});
 
 async function onSubmit() {
   const payload = {
@@ -30,29 +38,25 @@ async function onSubmit() {
     student_id: state.student_id?.value,
   };
 
-  paymentStore.addPayment(payload);
+  paymentStore.editPayment(payload, props.item?.id);
 
   toast.add({
     title: "Success",
-    description: `دفع جديد تم بنجاح`,
+    description: `تم تعديل بنجاح`,
     color: "success",
   });
 
   open.value = false;
-
-  resetState();
 }
 
-function resetState() {
-  Object.assign(state, {
-    student_id: null,
-    amount: null,
-    payment_date: null,
-    method: null,
-    status: null,
-    note: null,
-  });
-}
+const state = reactive<Partial<Schema>>({
+  student_id: null,
+  amount: null,
+  payment_date: null,
+  method: null,
+  status: null,
+  note: null,
+});
 
 const methods = ["كاش", "تحويل بنكي", "فيزا"];
 const statuses = [
@@ -69,13 +73,29 @@ watch(searchStudentTerm, (newVal) => {
     studentStore.loadStudentsForSelect(newVal);
 });
 
+watch(
+  () => props.item,
+  (val) => {
+    if (!val) return;
+    state.payment_date = val.payment_date || "";
+    state.amount = val.amount || null;
+    state.method = val.method || null;
+    state.status = val.status || null;
+    state.note = val.note || null;
+    state.student_id = val.student?.name || null;
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <template>
-  <UModal v-model:open="open" title="اضافة دفع" description="إضافة دفع جديد">
-    <UButton label="إضافة دفع جديد" icon="i-lucide-plus" />
-
-    <template #body>
+  <UModal
+    v-model:open="open"
+    title="تعديل كورس"
+    description="تعديل كورس "
+    dir="rtl"
+  >
+    <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">
         <UFormField
           label="اسم الطالب"

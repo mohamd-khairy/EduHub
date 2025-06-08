@@ -11,16 +11,17 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'invoice_number', 'total', 'due_date', 'status', 'note'
+        'student_id',
+        'invoice_number',
+        'total',
+        'due_date',
+        'status',
+        'note',
+        'payment_id'
     ];
 
     public function student()
     {
         return $this->belongsTo(Student::class);
-    }
-
-    public function payments()
-    {
-        return $this->hasMany(Payment::class);
     }
 }

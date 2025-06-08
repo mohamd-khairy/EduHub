@@ -11,7 +11,14 @@ class StudentController extends Controller
 {
     public function information($id)
     {
-        $student = Student::with(['parent', 'groups.schedules', 'groups.course', 'groups.teacher', 'groups.exams'])->findOrFail($id);
+        $student = Student::with([
+            'parent',
+            'payments',
+            'groups.schedules',
+            'groups.course',
+            'groups.teacher',
+            'groups.exams'
+        ])->findOrFail($id);
 
         foreach ($student->groups ?? [] as $group) {
             foreach ($group->schedules ?? [] as $schedule) {
