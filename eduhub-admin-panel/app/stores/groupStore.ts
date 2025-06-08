@@ -10,7 +10,10 @@ export const useGroupStore = defineStore("group", () => {
   const selectedIds = ref<number[]>([]);
   const deleteModalOpen = ref(false);
   const editModalOpen = ref(false);
+  const showGroupStudentsModal = ref(false);
+  const showGroupExamsModal = ref(false);
   const editItem = ref({});
+  const selectedItem = ref({});
   const idsToDelete = ref<number[]>([]);
 
   // Pagination state — optional if you want to track for UI
@@ -26,7 +29,7 @@ export const useGroupStore = defineStore("group", () => {
     items.value = []; // clear current items
 
     const res = await fetch(
-      `${BASE_URL}/group?relations=teacher,course,schedules&page=${page}`
+      `${BASE_URL}/group?relations=teacher,course,schedules,students.parent,exams&page=${page}`
     );
     const json = await res.json();
 
@@ -170,6 +173,9 @@ export const useGroupStore = defineStore("group", () => {
     idsToDelete,
     pagination,
     groupOptions,
+    selectedItem,
+    showGroupStudentsModal,
+    showGroupExamsModal,
     loadGroupsForSelect,
     loadAllGroups,
     addGroup,
