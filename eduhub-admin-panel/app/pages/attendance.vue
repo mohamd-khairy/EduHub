@@ -5,19 +5,40 @@
                 <template #leading>
                     <UDashboardSidebarCollapse />
                 </template>
-                <template #trailing>
+                <template #right>
                     <div class="flex items-center gap-2">
                         <UBadge color="green" variant="soft" class="text-base">
                             {{ currentDate }}
                         </UBadge>
                         <UButton @click="switchMode(currentMode === 'qrScan' ? 'manualEntry' : 'qrScan')"
                             :icon="currentMode === 'qrScan' ? 'i-heroicons-pencil-square' : 'i-heroicons-qr-code'"
-                            color="gray" variant="ghost"
+                            color="primary" 
                             :label="currentMode === 'qrScan' ? 'التبديل للوضع اليدوي' : 'التبديل للمسح الضوئي'"
                             class="text-base" />
                     </div>
                 </template>
             </UDashboardNavbar>
+            <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                <UTabs v-model="selectedClassTab" :items="classTabItems" :ui="{
+                    wrapper: 'relative space-x-4',
+                    container: 'relative w-full',
+                    list: {
+                        base: 'relative',
+                        background: 'bg-gray-100 dark:bg-gray-800',
+                        rounded: 'rounded-lg',
+                        shadow: '',
+                        padding: 'p-1',
+                        height: 'h-10',
+                        button: {
+                            base: 'relative inline-flex items-center justify-center flex-shrink-0 w-full ui-focus-visible:outline-none ui-focus-visible:ring-2 ui-focus-visible:ring-primary-500 dark:ui-focus-visible:ring-primary-400 ui-not-focus-visible:outline-none focus:outline-none disabled:cursor-not-allowed disabled:opacity-75 transition-colors duration-200 ease-out text-sm gap-x-1.5 px-2.5 py-2 rounded-md font-semibold',
+                            active: 'text-gray-900 dark:text-white',
+                            inactive: 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
+                            // Custom active tab styling
+                            activeClass: 'bg-white dark:bg-gray-900 shadow border-b-2 border-green-500 text-green-600 dark:text-green-400'
+                        }
+                    }
+                }" />
+            </div>
         </template>
 
         <template #body>
@@ -84,9 +105,12 @@
                         <!-- Search and Filters -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                             <UInput v-model="searchQuery" icon="i-heroicons-magnifying-glass"
-                                placeholder="ابحث بالاسم أو الرقم..." size="xl" class="md:col-span-2 text-lg" />
-                            <USelect v-model="classFilter" :items="classOptions" placeholder="جميع الصفوف" size="xl"
+                                placeholder="ابحث بالاسم أو الرقم..." size="xl" class="md:col-span-1 text-lg" />
+                            <UButton @click="markAllPresent" color="success" variant="outline"
+                                icon="i-heroicons-check-circle" label="تحديد الكل حاضر" block size="xl"
                                 class="text-lg" />
+                            <UButton @click="markAllAbsent" color="error" variant="outline" icon="i-heroicons-x-circle"
+                                label="تحديد الكل غائب" block size="xl" class="text-lg" />
                         </div>
 
                         <!-- Student Table -->
@@ -105,7 +129,7 @@
                                 عرض {{ paginatedStudents.length }} من {{ filteredStudents.length }} طالب
                             </div>
                             <UPagination v-model="page" :page-count="pageCount" :total="filteredStudents.length"
-                                class="text-lg" />
+                                class="text-lg" dir="ltr" />
                         </div>
                     </UCard>
                 </div>
@@ -155,24 +179,6 @@
                         </div>
                     </UCard>
 
-                    <!-- Quick Actions -->
-                    <UCard>
-                        <template #header>
-                            <h2 class="text-2xl font-semibold">إجراءات سريعة</h2>
-                        </template>
-
-                        <div class="space-y-3">
-                            <UButton @click="markAllPresent" icon="i-heroicons-check-circle" color="green"
-                                variant="solid" label="تحديد الكل حاضر" block size="xl" class="text-lg" />
-
-                            <UButton @click="markAllAbsent" icon="i-heroicons-x-circle" color="red" variant="outline"
-                                label="تحديد الكل غائب" block size="xl" class="text-lg" />
-
-                            <UButton @click="exportAttendance" icon="i-heroicons-document-arrow-down" color="gray"
-                                variant="outline" label="تصدير البيانات" block size="xl" class="text-lg" />
-                        </div>
-                    </UCard>
-
                     <!-- Recent Activity -->
                     <UCard>
                         <template #header>
@@ -198,41 +204,6 @@
     </UDashboardPanel>
 </template>
 
-<style>
-/* Custom RTL styles */
-[dir="rtl"] .rtl\:text-right {
-    text-align: right;
-}
-
-[dir="rtl"] .rtl\:text-left {
-    text-align: left;
-}
-
-/* Increase base font size */
-html {
-    font-size: 17px;
-}
-
-/* Larger badge text */
-.badge-text {
-    font-size: 0.8rem;
-}
-
-/* Larger table text */
-.table-text {
-    font-size: 1rem;
-}
-
-/* Larger button text */
-.button-text {
-    font-size: 1rem;
-}
-
-/* Larger input text */
-.input-text {
-    font-size: 1rem;
-}
-</style>
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 
@@ -241,6 +212,15 @@ const currentMode = ref('qrScan');
 const switchMode = (mode) => {
     currentMode.value = mode;
 };
+
+// Group Tabs State
+const selectedClassTab = ref(0); // Index of the selected tab, 0 for 'الكل'
+const classTabItems = computed(() => {
+    const uniqueClasses = [...new Set(students.value.map(s => s.class))];
+    const tabs = [{ label: 'الكل', value: null }]; // 'الكل' tab
+    uniqueClasses.forEach(c => tabs.push({ label: c, value: c }));
+    return tabs;
+});
 
 // Date Handling
 const currentDate = ref('');
@@ -398,13 +378,14 @@ const columns = [
     { accessorKey: 'id', id: 'id', header: 'الرقم الجامعي', sortable: true },
     { accessorKey: 'name', id: 'name', header: 'اسم الطالب', sortable: true },
     { accessorKey: 'class', id: 'class', header: 'الصف', sortable: true },
-    { accessorKey: 'status', id: 'status', header: 'حالة الحضور' ,
-    cell: ({ row }) =>
-      h(
-        UBadge,
-        { class: 'capitalize', variant: 'subtle', color: statusColors[row.original.status] },
-        () => (row.original.status)
-      )
+    {
+        accessorKey: 'status', id: 'status', header: 'حالة الحضور',
+        cell: ({ row }) =>
+            h(
+                UBadge,
+                { class: 'capitalize', variant: 'subtle', color: statusColors[row.original.status] },
+                () => (row.original.status)
+            )
     },
     {
         accessorKey: 'actions', id: 'actions', header: 'إجراءات',
@@ -509,3 +490,32 @@ onMounted(() => {
     });
 });
 </script>
+<style>
+/* Custom RTL styles for text alignment if not handled by Nuxt UI/Tailwind */
+/* These are general purpose and might need adjustment based on specific component behavior */
+html[dir="rtl"] .rtl\:text-right {
+    text-align: right;
+}
+
+html[dir="rtl"] .rtl\:text-left {
+    text-align: left;
+}
+
+/* Base font size for the entire app */
+html {
+    font-size: 16px;
+    /* A good base, you can adjust */
+}
+
+/* Custom styles for UTabs to match the green line effect on active tab */
+/* Ensure these styles are correctly applied in your Nuxt UI configuration
+     or in a global CSS file that's loaded after Nuxt UI's defaults.
+     The `ui` prop on UTabs is often preferred for direct component customization. */
+.tabs-custom .tab-active {
+    border-color: #10B981;
+    /* Tailwind green-500 */
+    color: #059669;
+    /* Tailwind green-600 */
+    font-weight: 600;
+}
+</style>
