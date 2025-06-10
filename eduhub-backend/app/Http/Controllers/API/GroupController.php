@@ -5,9 +5,51 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Schedule;
+use Carbon\Carbon;
 
 class GroupController extends Controller
 {
+
+    public function getGroupsByTime(Request $request)
+    {
+        try {
+            $today = Carbon::today();
+            $dayName = $today->format('l'); // l is the format for the full weekday name
+
+            // or in Arabic
+            $dayNameArabic = [
+                'Saturday' => "السبت",
+                'Sunday' => "الأحد",
+                'Monday' => " الإثنين",
+                'Tuesday' => "الثلاثاء",
+                'Wednesday' => "الأربعاء",
+                'Thursday' => "الخميس",
+                'Friday' => "الجمعة",
+            ][$dayName];
+
+            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
+
+            $currentTime = Carbon::now()->format('H:i:s');
+
+            $data = $model->with('schedules')
+                ->whereHas('schedules', function ($query) use ($dayNameArabic, $currentTime) {
+                    $query->where('day', $dayNameArabic);
+                    // ->where(
+                    //     function ($query) use ($currentTime) {
+                    //         $query->where('start_time', '<=', $currentTime)
+                    //             ->where('end_time', '>=', $currentTime);
+                    //     }
+                    // );
+                })->take(9)
+                ->get();
+
+            return $this->success($data);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return  $this->fail([]);
+        }
+    }
+
     public function store(Request $request)
     {
         try {

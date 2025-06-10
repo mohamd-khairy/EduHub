@@ -1,21 +1,17 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useGroupStore = defineStore("group", () => {
+export const useAttendanceStore = defineStore("attendance", () => {
   const BASE_URL =
     import.meta.env.NUXT_API_BASE_URL ||
     "http://localhost/EduHub/eduhub-backend/public/api";
   const items = ref<object[]>([]);
-  const groupsByTime = ref<object[]>([]);
-  const groupOptions = ref<object[]>([]);
+  const attendanceOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
   const deleteModalOpen = ref(false);
-  const editModalOpen = ref(false);
-  const showGroupStudentsModal = ref(false);
-  const showGroupExamsModal = ref(false);
-  const editItem = ref({});
-  const selectedItem = ref({});
   const idsToDelete = ref<number[]>([]);
+  const editModalOpen = ref(false);
+  const editItem = ref({});
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -26,11 +22,11 @@ export const useGroupStore = defineStore("group", () => {
   });
 
   // Load all pages from backend, combine all items into one array
-  async function loadAllGroups(page = 1) {
+  async function loadAllAttendances(page = 1) {
     items.value = []; // clear current items
 
     const res = await fetch(
-      `${BASE_URL}/group?relations=teacher,course,schedules,students.parent,exams&page=${page}`
+      `${BASE_URL}/attendance?relations=student&page=${page}`
     );
     const json = await res.json();
 
@@ -45,29 +41,25 @@ export const useGroupStore = defineStore("group", () => {
     }
   }
 
-  async function loadAllGroupsByTime() {
-    groupsByTime.value = []; // clear current items
+  async function loadAttendances(search = null) {
+    items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/group/groups-by-time`);
+    const res = await fetch(`${BASE_URL}/attendance/all?search=${search}`);
     const json = await res.json();
 
     if (json?.data) {
-      groupsByTime.value = json.data;
+      items.value = json.data;
     }
   }
 
-  async function loadGroupsForSelect(search = null) {
+  async function loadAttendancesForSelect(search = null) {
     try {
-      let url = `${BASE_URL}/group/all`;
-
-      if (search) {
-        url += `?search=${search || ""}`;
-      }
-
-      const response = await fetch(url);
+      const response = await fetch(
+        `${BASE_URL}/attendance/all?search=${search || ""}`
+      );
 
       if (!response.ok) {
-        console.error("Failed to load courses:", response.statusText);
+        console.error("Failed to load attendances:", response.statusText);
         return [];
       }
 
@@ -80,21 +72,21 @@ export const useGroupStore = defineStore("group", () => {
       }
 
       // Map data to the format expected by your select
-      groupOptions.value = json.data.map(
+      attendanceOptions.value = json.data.map(
         (item: { id: number; name: string }) => ({
           label: item.name,
           value: String(item.id),
         })
       );
     } catch (error) {
-      console.error("Error loading courses:", error);
+      console.error("Error loading attendances:", error);
       return [];
     }
   }
 
-  async function addGroup(data) {
-    const res = await fetch(`${BASE_URL}/group`, {
-      method: "POST", // Adjust method as your API requires
+  async function addAttendance(data) {
+    const res = await fetch(`${BASE_URL}/attendance`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
@@ -102,15 +94,15 @@ export const useGroupStore = defineStore("group", () => {
     });
 
     if (res.ok) {
-      await loadAllGroups();
+      await loadAllAttendances();
     } else {
       throw new Error("Failed to delete groups");
     }
   }
 
-  async function editGroup(data, id) {
-    const res = await fetch(`${BASE_URL}/group/${id}`, {
-      method: "PUT", // Adjust method as your API requires
+  async function editAttendance(data, id) {
+    const res = await fetch(`${BASE_URL}/attendance/${id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -118,18 +110,18 @@ export const useGroupStore = defineStore("group", () => {
     });
 
     if (res.ok) {
-      await loadAllGroups();
+      await loadAllAttendances();
       editModalOpen.value = false;
     } else {
       throw new Error("Failed to delete groups");
     }
   }
 
-  // Delete selected groups from backend, then update local items and selection
-  async function deleteSelectedGroups() {
+  // Delete selected attendances from backend, then update local items and selection
+  async function deleteSelectedattendances() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/group/delete-all`, {
+    const res = await fetch(`${BASE_URL}/attendance/delete-all`, {
       method: "POST", // Adjust method as your API requires
       headers: {
         "Content-Type": "application/json",
@@ -142,11 +134,11 @@ export const useGroupStore = defineStore("group", () => {
       items.value = items.value.filter(
         (item) => !selectedIds.value.includes(item.id)
       );
-      await loadAllGroups();
+      await loadAllAttendances();
       deleteModalOpen.value = false;
       clearSelection();
     } else {
-      throw new Error("Failed to delete groups");
+      throw new Error("Failed to delete attendances");
     }
   }
 
@@ -178,26 +170,22 @@ export const useGroupStore = defineStore("group", () => {
 
   return {
     items,
+    attendanceOptions,
     selectedIds,
     deleteModalOpen,
-    editModalOpen,
-    editItem,
     idsToDelete,
     pagination,
-    groupOptions,
-    selectedItem,
-    showGroupStudentsModal,
-    showGroupExamsModal,
-    groupsByTime,
-    loadAllGroupsByTime,
-    loadGroupsForSelect,
-    loadAllGroups,
-    addGroup,
-    editGroup,
-    deleteSelectedGroups,
+    editModalOpen,
+    editItem,
+    editAttendance,
+    addAttendance,
+    loadAllAttendances,
+    loadAttendances,
+    loadAttendancesForSelect,
     toggleId,
     addId,
     removeId,
     clearSelection,
+    deleteSelectedattendances,
   };
 });

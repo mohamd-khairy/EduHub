@@ -11,7 +11,17 @@ class Group extends Model
 
     protected $fillable = ['name', 'teacher_id', 'course_id', 'max_students'];
 
-    protected $appends = ['schedule'];
+    protected $appends = ['schedule', 'label', 'value'];
+
+    public function getLabelAttribute()
+    {
+        return $this->name;
+    }
+
+    public function getValueAttribute()
+    {
+        return $this->id;
+    }
 
     public function getScheduleAttribute()
     {
