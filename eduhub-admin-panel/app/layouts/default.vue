@@ -96,6 +96,15 @@ const links = [
         open.value = false;
       },
     },
+    {
+      class: "text-lg",
+      label: "الحضور والغياب",
+      icon: "i-lucide-check-check",
+      to: "/attendance",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
   ],
   [
     {
