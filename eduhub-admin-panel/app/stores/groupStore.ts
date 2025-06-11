@@ -16,6 +16,8 @@ export const useGroupStore = defineStore("group", () => {
   const editItem = ref({});
   const selectedItem = ref({});
   const idsToDelete = ref<number[]>([]);
+  const todayGroupAttendance = ref([]);
+  const isLoading = ref(false);
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -53,6 +55,29 @@ export const useGroupStore = defineStore("group", () => {
 
     if (json?.data) {
       groupsByTime.value = json.data;
+    }
+  }
+
+  async function loadGroupTodayAttendance(group_id, schedule_id) {
+    todayGroupAttendance.value = []; // Clear current items
+
+    const res = await fetch(`${BASE_URL}/group/group-attendance`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        schedule_id: schedule_id,
+        group_id: group_id,
+      }),
+    });
+
+    const json = await res.json();
+
+    if (json?.data) {
+      todayGroupAttendance.value = json.data;
+    } else {
+      console.error("Failed to load group attendance", json);
     }
   }
 
@@ -189,6 +214,9 @@ export const useGroupStore = defineStore("group", () => {
     showGroupStudentsModal,
     showGroupExamsModal,
     groupsByTime,
+    todayGroupAttendance,
+    isLoading,
+    loadGroupTodayAttendance,
     loadAllGroupsByTime,
     loadGroupsForSelect,
     loadAllGroups,

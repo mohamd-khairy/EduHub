@@ -5,8 +5,35 @@ const groupStore = useGroupStore();
 
 const currentDate = ref("");
 const dashboardTitle = ref("نظام الحضور والغياب");
-const selectedClassTab = ref(null);
 const items = ref([]);
+const selectedHistoryDate = ref(""); // For historical attendance date picker
+const searchQuery = ref("");
+const classFilter = ref(null);
+const page = ref(1);
+const pageCount = ref(10);
+const selectedGroupTab = ref(null);
+const selectedScheduleTab = ref(null);
+const students = ref([]);
+const paginatedStudents = ref([]);
+const currentMode = ref("manualEntry");
+const switchMode = (mode) => {
+  currentMode.value = mode;
+};
+const isScanning = ref(false);
+const scanSuccess = ref(false);
+const scanError = ref(false);
+const scanErrorMessage = ref("");
+const lastScannedStudent = ref("");
+const statusOptions = ["حضر", "غائب", "متأخر"];
+const statusColors = {
+  حضر: "success",
+  غائب: "error",
+  متأخر: "warning",
+};
+const UButton = resolveComponent("UButton");
+const UBadge = resolveComponent("UBadge");
+const UDropdownMenu = resolveComponent("UDropdownMenu");
+const UCheckbox = resolveComponent("UCheckbox");
 
 // Initialize
 onMounted(async () => {
@@ -22,23 +49,94 @@ onMounted(async () => {
   items.value = groupStore.groupsByTime;
 
   if (items.value.length > 0) {
-    selectedClassTab.value = items.value[0].value;
+    selectedGroupTab.value = items.value[0].value;
   }
 });
 
-// Mode Management
-const currentMode = ref("qrScan");
-const switchMode = (mode) => {
-  currentMode.value = mode;
-};
-// QR Scanner State
-const isScanning = ref(false);
-const scanSuccess = ref(false);
-const scanError = ref(false);
-const scanErrorMessage = ref("");
-const lastScannedStudent = ref("");
+watch(selectedGroupTab, async (group_id) => {
+  const group = items.value.find((item) => item.id == group_id);
+  if (group.current_schedules.length > 0) {
+    selectedScheduleTab.value = group.current_schedules[0].value;
+  }
+});
+
+watch(selectedScheduleTab, async (schedule_id) => {
+  students.value = [];
+  groupStore.isLoading = true;
+  await groupStore.loadGroupTodayAttendance(
+    selectedGroupTab.value,
+    schedule_id
+  );
+  students.value = groupStore.todayGroupAttendance?.students;
+  groupStore.isLoading = false;
+});
+
+
+// Computed Properties
+const filteredStudents = computed(() => {
+  let result = students.value;
+
+  if (searchQuery.value) {
+    // updatePage(1)
+    const query = searchQuery.value.toLowerCase();
+    result = result.filter(
+      (s) =>
+        s.name.toLowerCase().includes(query) ||
+        s.attendance_status.toLowerCase().includes(query) ||
+        s.grade_level.toLowerCase().includes(query)
+    );
+  }
+
+  if (classFilter.value) {
+    result = result.filter((s) => s.class === classFilter.value);
+  }
+
+  return result;
+});
+
+function paginateStudents() {
+  const start = (page.value - 1) * pageCount.value;
+  const end = start + pageCount.value;
+  paginatedStudents.value = filteredStudents.value.slice(start, end);
+}
+
+watch([students, page], () => {
+  paginateStudents();
+});
+
+watch(filteredStudents, () => {
+  updatePage(1);
+  paginateStudents();
+});
+
+function updatePage(p) {
+  page.value = p;
+}
+
+const presentCount = computed(
+  () => students.value?.filter((s) => s.attendance_status === "حضر").length || 0
+);
+const absentCount = computed(
+  () =>
+    students.value?.filter((s) => s.attendance_status === "غائب").length || 0
+);
+const lateCount = computed(
+  () =>
+    students.value?.filter((s) => s.attendance_status === "متأخر").length || 0
+);
+
+const presentPercentage = computed(() => {
+  const total = students.value?.length || 0;
+  return total ? Math.round((presentCount.value / total) * 100) : 0;
+});
+
+const absentPercentage = computed(() => {
+  const total = students.value?.length || 0;
+  return total ? Math.round((absentCount.value / total) * 100) : 0;
+});
+
 const scannedCount = computed(
-  () => students.value.filter((s) => s.status === "حاضر").length
+  () => students.value.filter((s) => s.status === "حضر").length
 );
 
 const startScanner = () => {
@@ -51,7 +149,7 @@ const startScanner = () => {
       students.value[Math.floor(Math.random() * students.value.length)];
     if (Math.random() > 0.2) {
       // 80% success rate
-      randomStudent.status = "حاضر";
+      randomStudent.status = "حضر";
       lastScannedStudent.value = randomStudent.name;
       scanSuccess.value = true;
       addActivity(
@@ -81,97 +179,17 @@ const uploadQRImage = () => {
   console.log("QR image upload triggered");
 };
 
-// Manual Entry State
-const searchQuery = ref("");
-const classFilter = ref(null);
-const page = ref(1);
-const pageCount = ref(10);
-
-const statusOptions = ["حاضر", "غائب", "متأخر"];
-const statusColors = {
-  حاضر: "success",
-  غائب: "error",
-  متأخر: "warning",
-};
-
 const classOptions = computed(() => {
   const uniqueClasses = [...new Set(students.value.map((s) => s.class))];
   return uniqueClasses.map((c) => ({ value: c, label: c }));
 });
-
-// Student Data
-const students = ref([
-  { id: "S001", name: "أحمد محمد", class: "الصف التاسع", status: "حاضر" },
-  { id: "S002", name: "سارة علي", class: "الصف التاسع", status: "غائب" },
-  { id: "S003", name: "خالد حسن", class: "الصف العاشر", status: "متأخر" },
-  { id: "S004", name: "فاطمة إبراهيم", class: "الصف التاسع", status: "حاضر" },
-  { id: "S005", name: "عمر عبدالله", class: "الصف الحادي عشر", status: "غائب" },
-  { id: "S006", name: "نورا سعيد", class: "الصف العاشر", status: "حاضر" },
-  { id: "S007", name: "يوسف كمال", class: "الصف التاسع", status: "حاضر" },
-  { id: "S008", name: "لمى راشد", class: "الصف الحادي عشر", status: "غائب" },
-  { id: "S009", name: "زياد وائل", class: "الصف العاشر", status: "متأخر" },
-  { id: "S010", name: "هناء سمير", class: "الصف التاسع", status: "حاضر" },
-  { id: "S011", name: "محمود خالد", class: "الصف العاشر", status: "حاضر" },
-  { id: "S012", name: "ريماس فارس", class: "الصف الحادي عشر", status: "غائب" },
-  { id: "S013", name: "وسام نادر", class: "الصف التاسع", status: "متأخر" },
-  { id: "S014", name: "جنى سامي", class: "الصف العاشر", status: "حاضر" },
-  { id: "S015", name: "باسل وليد", class: "الصف الحادي عشر", status: "غائب" },
-]);
-
-// Computed Properties
-const filteredStudents = computed(() => {
-  let result = students.value;
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    result = result.filter(
-      (s) =>
-        s.name.toLowerCase().includes(query) ||
-        s.id.toLowerCase().includes(query)
-    );
-  }
-
-  if (classFilter.value) {
-    result = result.filter((s) => s.class === classFilter.value);
-  }
-
-  return result;
-});
-
-const paginatedStudents = computed(() => {
-  const start = (page.value - 1) * pageCount.value;
-  const end = start + pageCount.value;
-  return filteredStudents.value.slice(start, end);
-});
-
-const presentCount = computed(
-  () => students.value.filter((s) => s.status === "حاضر").length
-);
-const absentCount = computed(
-  () => students.value.filter((s) => s.status === "غائب").length
-);
-const lateCount = computed(
-  () => students.value.filter((s) => s.status === "متأخر").length
-);
-
-const presentPercentage = computed(() =>
-  Math.round((presentCount.value / students.value.length) * 100)
-);
-const absentPercentage = computed(() =>
-  Math.round((absentCount.value / students.value.length) * 100)
-);
-
-const UButton = resolveComponent("UButton");
-const UBadge = resolveComponent("UBadge");
-const UDropdownMenu = resolveComponent("UDropdownMenu");
-const UCheckbox = resolveComponent("UCheckbox");
 
 function getRowItems(row) {
   return [
     { type: "label", label: "الاجراءات" },
     { type: "separator" },
     {
-      label: " حاضر",
+      label: " حضر",
       icon: "i-lucide-circle-check",
       color: "primary",
       onSelect() {
@@ -201,10 +219,15 @@ function getRowItems(row) {
 const columns = [
   { accessorKey: "id", id: "id", header: "الرقم الجامعي", sortable: true },
   { accessorKey: "name", id: "name", header: "اسم الطالب", sortable: true },
-  { accessorKey: "class", id: "class", header: "الصف", sortable: true },
   {
-    accessorKey: "status",
-    id: "status",
+    accessorKey: "grade_level",
+    id: "grade_level",
+    header: "الصف",
+    sortable: true,
+  },
+  {
+    accessorKey: "attendance_status",
+    id: "attendance_status",
     header: "حالة الحضور",
     cell: ({ row }) =>
       h(
@@ -212,9 +235,9 @@ const columns = [
         {
           class: "capitalize",
           variant: "subtle",
-          color: statusColors[row.original.status],
+          color: statusColors[row.original.attendance_status],
         },
-        () => row.original.status
+        () => row.original.attendance_status
       ),
   },
   {
@@ -284,7 +307,7 @@ const addActivity = (message, icon, color) => {
 
 // Student Actions
 const markPresent = (student) => {
-  student.status = "حاضر";
+  student.status = "حضر";
   addActivity(
     `تم تسجيل حضور ${student.name}`,
     "i-heroicons-check-circle",
@@ -311,7 +334,7 @@ const markLate = (student) => {
 };
 
 const markAllPresent = () => {
-  students.value.forEach((s) => (s.status = "حاضر"));
+  students.value.forEach((s) => (s.status = "حضر"));
   addActivity(
     "تم تحديد جميع الطلاب كحاضرين",
     "i-heroicons-check-circle",
@@ -373,266 +396,322 @@ const exportAttendance = () => {
     </template>
 
     <template #body>
-      <UTabs v-model="selectedClassTab" :items="items">
-        <template #content="{ item }">
-          <main
-            class="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6 text-base"
-          >
-            <!-- Main Content Area -->
-            <div class="lg:col-span-2 space-y-6">
-              <!-- QR Scanner Card -->
-              <UCard v-if="currentMode === 'qrScan'" class="h-full">
-                <template #header>
-                  <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold">
-                      مسح رمز الاستجابة السريعة
-                    </h2>
-                    <UBadge color="green" variant="subtle" class="text-base">
-                      {{ scannedCount }} / {{ students.length }}
-                    </UBadge>
-                  </div>
-                </template>
-
-                <!-- Scanner Area -->
-                <div class="relative">
-                  <div
-                    class="border-2 border-dashed border-gray-300 rounded-xl aspect-square flex items-center justify-center bg-gray-50 mb-4"
-                    :class="{
-                      'border-green-500': scanSuccess,
-                      'border-red-500': scanError,
-                    }"
-                  >
-                    <template v-if="!isScanning">
-                      <div class="text-center p-4">
-                        <UIcon
-                          name="i-heroicons-qr-code"
-                          class="w-20 h-20 text-gray-400 mb-4"
-                        />
-                        <p class="text-lg text-gray-500 mb-4">
-                          اضغط لبدء المسح الضوئي
-                        </p>
-                        <UButton
-                          @click="startScanner"
+      <UTabs v-model="selectedGroupTab" :items="items">
+        <template #content="{ item, index }">
+          <UTabs v-model="selectedScheduleTab" :items="item.current_schedules">
+            <template #content="{ item: schedule }">
+              <main
+                v-if="!groupStore.isLoading"
+                class="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6 text-base"
+              >
+                <!-- Main Content Area -->
+                <div class="lg:col-span-2 space-y-6">
+                  <!-- QR Scanner Card -->
+                  <UCard v-if="currentMode === 'qrScan'" class="h-full">
+                    <template #header>
+                      <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold">
+                          مسح رمز الاستجابة السريعة
+                        </h2>
+                        <UBadge
                           color="green"
-                          variant="solid"
-                          label="بدء المسح"
-                          class="mt-4 text-lg"
-                          size="xl"
-                        />
-                      </div>
-                    </template>
-                    <template v-else>
-                      <div
-                        class="relative w-full h-full flex items-center justify-center"
-                      >
-                        <div
-                          class="absolute inset-0 flex items-center justify-center"
+                          variant="subtle"
+                          class="text-base"
                         >
-                          <div
-                            class="w-64 h-64 border-4 border-green-500 rounded-lg animate-pulse"
-                          ></div>
-                        </div>
-                        <UIcon
-                          name="i-heroicons-qr-code"
-                          class="w-32 h-32 text-green-500 opacity-20"
-                        />
+                          {{ scannedCount }} / {{ students.length }}
+                        </UBadge>
                       </div>
                     </template>
-                  </div>
 
-                  <!-- Scan Status -->
-                  <UAlert
-                    v-if="scanSuccess"
-                    icon="i-heroicons-check-circle"
-                    color="green"
-                    variant="subtle"
-                    :title="`تم تسجيل حضور ${lastScannedStudent}`"
-                    class="mb-4 text-lg"
-                  />
-                  <UAlert
-                    v-if="scanError"
-                    icon="i-heroicons-exclamation-circle"
-                    color="red"
-                    variant="subtle"
-                    :title="scanErrorMessage"
-                    class="mb-4 text-lg"
-                  />
-                </div>
-              </UCard>
+                    <!-- Scanner Area -->
+                    <div class="relative">
+                      <div
+                        class="border-2 border-dashed border-gray-300 rounded-xl aspect-square flex items-center justify-center bg-gray-50 mb-4"
+                        :class="{
+                          'border-green-500': scanSuccess,
+                          'border-red-500': scanError,
+                        }"
+                      >
+                        <template v-if="!isScanning">
+                          <div class="text-center p-4">
+                            <UIcon
+                              name="i-heroicons-qr-code"
+                              class="w-20 h-20 text-gray-400 mb-4"
+                            />
+                            <p class="text-lg text-gray-500 mb-4">
+                              اضغط لبدء المسح الضوئي
+                            </p>
+                            <UButton
+                              @click="startScanner"
+                              color="green"
+                              variant="solid"
+                              label="بدء المسح"
+                              class="mt-4 text-lg"
+                              size="xl"
+                            />
+                          </div>
+                        </template>
+                        <template v-else>
+                          <div
+                            class="relative w-full h-full flex items-center justify-center"
+                          >
+                            <div
+                              class="absolute inset-0 flex items-center justify-center"
+                            >
+                              <div
+                                class="w-64 h-64 border-4 border-green-500 rounded-lg animate-pulse"
+                              ></div>
+                            </div>
+                            <UIcon
+                              name="i-heroicons-qr-code"
+                              class="w-32 h-32 text-green-500 opacity-20"
+                            />
+                          </div>
+                        </template>
+                      </div>
 
-              <!-- Manual Entry Card -->
-              <UCard v-else class="h-full">
-                <template #header>
-                  <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold">
-                      الإدخال اليدوي للحضور
-                    </h2>
-                    <div class="flex items-center gap-2">
-                      <UBadge color="green" variant="subtle" class="text-base">
-                        {{ presentCount }} / {{ students.length }}
-                      </UBadge>
+                      <!-- Scan Status -->
+                      <UAlert
+                        v-if="scanSuccess"
+                        icon="i-heroicons-check-circle"
+                        color="green"
+                        variant="subtle"
+                        :title="`تم تسجيل حضور ${lastScannedStudent}`"
+                        class="mb-4 text-lg"
+                      />
+                      <UAlert
+                        v-if="scanError"
+                        icon="i-heroicons-exclamation-circle"
+                        color="red"
+                        variant="subtle"
+                        :title="scanErrorMessage"
+                        class="mb-4 text-lg"
+                      />
+                    </div>
+                  </UCard>
+
+                  <!-- Manual Entry Card -->
+                  <UCard v-else class="h-full">
+                    <template #header>
+                      <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold">
+                          الإدخال اليدوي للحضور
+                        </h2>
+                        <div class="flex items-center gap-2">
+                          <UBadge
+                            color="green"
+                            variant="subtle"
+                            class="text-base"
+                          >
+                            {{ presentCount }} / {{ students.length }}
+                          </UBadge>
+                          <UButton
+                            @click="exportAttendance"
+                            icon="i-heroicons-arrow-down-tray"
+                            color="gray"
+                            variant="ghost"
+                            size="xl"
+                            class="text-lg"
+                          />
+                        </div>
+                      </div>
+                    </template>
+
+                    <!-- Search and Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                      <UInput
+                        v-model="searchQuery"
+                        icon="i-heroicons-magnifying-glass"
+                        placeholder="ابحث بالاسم أو الرقم..."
+                        size="xl"
+                        class="md:col-span-1 text-lg"
+                      />
                       <UButton
-                        @click="exportAttendance"
-                        icon="i-heroicons-arrow-down-tray"
-                        color="gray"
-                        variant="ghost"
+                        @click="markAllPresent"
+                        color="success"
+                        variant="outline"
+                        icon="i-heroicons-check-circle"
+                        label="تحديد الكل حضر"
+                        block
+                        size="xl"
+                        class="text-lg"
+                      />
+                      <UButton
+                        @click="markAllAbsent"
+                        color="error"
+                        variant="outline"
+                        icon="i-heroicons-x-circle"
+                        label="تحديد الكل غائب"
+                        block
                         size="xl"
                         class="text-lg"
                       />
                     </div>
-                  </div>
-                </template>
 
-                <!-- Search and Filters -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                  <UInput
-                    v-model="searchQuery"
-                    icon="i-heroicons-magnifying-glass"
-                    placeholder="ابحث بالاسم أو الرقم..."
-                    size="xl"
-                    class="md:col-span-1 text-lg"
-                  />
-                  <UButton
-                    @click="markAllPresent"
-                    color="success"
-                    variant="outline"
-                    icon="i-heroicons-check-circle"
-                    label="تحديد الكل حاضر"
-                    block
-                    size="xl"
-                    class="text-lg"
-                  />
-                  <UButton
-                    @click="markAllAbsent"
-                    color="error"
-                    variant="outline"
-                    icon="i-heroicons-x-circle"
-                    label="تحديد الكل غائب"
-                    block
-                    size="xl"
-                    class="text-lg"
-                  />
+                    <!-- Student Table -->
+                    <div class="border rounded-lg overflow-hidden text-lg">
+                      <UTable
+                        :columns="columns"
+                        :data="paginatedStudents"
+                        :ui="{
+                          th: { base: 'whitespace-nowrap bg-gray-50 text-lg' },
+                          td: { base: 'max-w-[200px] truncate text-lg' },
+                          divide: 'divide-gray-200',
+                        }"
+                        class="w-full"
+                      >
+                      </UTable>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center mt-4 text-lg">
+                      <div class="text-gray-500">
+                        عرض {{ paginatedStudents.length }} من
+                        {{ filteredStudents.length }} طالب
+                      </div>
+
+                      <UPagination
+                        dir="ltr"
+                        :total="filteredStudents.length"
+                        :items-per-page="pageCount"
+                        :default-page="page"
+                        @update:page="(p) => updatePage(p)"
+                      />
+                    </div>
+                  </UCard>
                 </div>
 
-                <!-- Student Table -->
-                <div class="border rounded-lg overflow-hidden text-lg">
-                  <UTable
-                    :columns="columns"
-                    :data="paginatedStudents"
-                    :ui="{
-                      th: { base: 'whitespace-nowrap bg-gray-50 text-lg' },
-                      td: { base: 'max-w-[200px] truncate text-lg' },
-                      divide: 'divide-gray-200',
-                    }"
-                    class="w-full"
-                  >
-                  </UTable>
+                <!-- Summary Panel -->
+                <div class="space-y-6 text-lg">
+                  <!-- Attendance Stats -->
+                  <UCard>
+                    <template #header>
+                      <h2 class="text-2xl font-semibold">إحصائيات الحضور</h2>
+                    </template>
+
+                    <div class="space-y-4">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <UIcon
+                            name="i-heroicons-user-group"
+                            class="w-6 h-6 text-gray-500"
+                          />
+                          <span>إجمالي الطلاب</span>
+                        </div>
+                        <span class="font-medium">{{ students.length }}</span>
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <UIcon
+                            name="i-heroicons-check-circle"
+                            class="w-6 h-6 text-green-500"
+                          />
+                          <span>الحضور</span>
+                        </div>
+                        <span class="font-medium text-green-600"
+                          >{{ presentCount }} ({{ presentPercentage }}%)</span
+                        >
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <UIcon
+                            name="i-heroicons-x-circle"
+                            class="w-6 h-6 text-red-500"
+                          />
+                          <span>الغياب</span>
+                        </div>
+                        <span class="font-medium text-red-600"
+                          >{{ absentCount }} ({{ absentPercentage }}%)</span
+                        >
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <UIcon
+                            name="i-heroicons-clock"
+                            class="w-6 h-6 text-amber-500"
+                          />
+                          <span>المتأخرون</span>
+                        </div>
+                        <span class="font-medium text-amber-600">{{
+                          lateCount
+                        }}</span>
+                      </div>
+                    </div>
+                  </UCard>
+
+                  <!-- New: Historical Attendance Log Example -->
+                  <UCard>
+                    <template #header>
+                      <h2 class="text-2xl font-semibold">
+                        سجل الحضور التاريخي
+                      </h2>
+                    </template>
+                    <div class="space-y-4">
+                      <p class="text-gray-600">
+                        اختر تاريخًا لعرض سجل الحضور لذلك اليوم:
+                      </p>
+                      <UInput
+                        type="date"
+                        v-model="selectedHistoryDate"
+                        size="xl"
+                      />
+                      <div
+                        v-if="selectedHistoryDate"
+                        class="mt-4 p-3 bg-gray-50 rounded-lg"
+                      >
+                        <p class="font-semibold text-lg">
+                          سجل حضور يوم: {{ selectedHistoryDate }}
+                        </p>
+                        <ul class="list-disc list-inside text-gray-700 mt-2">
+                          <li>أحمد محمد: حضر</li>
+                          <li>سارة علي: غائب</li>
+                          <li>
+                            (هنا ستظهر بيانات الحضور الفعلية لهذا التاريخ)
+                          </li>
+                        </ul>
+                      </div>
+                      <div v-else class="mt-4 text-gray-500">
+                        <p>الرجاء اختيار تاريخ لعرض السجل.</p>
+                      </div>
+                    </div>
+                  </UCard>
+
+                  <!-- Recent Activity -->
+                  <UCard>
+                    <template #header>
+                      <h2 class="text-2xl font-semibold">النشاط الأخير</h2>
+                    </template>
+
+                    <div class="space-y-4">
+                      <div
+                        v-for="(activity, index) in recentActivities"
+                        :key="index"
+                        class="flex items-center justify-between"
+                      >
+                        <div class="flex items-center gap-2">
+                          <UIcon
+                            :name="activity.icon"
+                            class="w-6 h-6 mt-0.5"
+                            :class="activity.color"
+                          />
+                          <span>{{ activity.message }}</span>
+                        </div>
+                        <span class="font-medium"> {{ activity.time }}</span>
+                      </div>
+                    </div>
+                  </UCard>
                 </div>
-
-                <!-- Pagination -->
-                <div class="flex justify-between items-center mt-4 text-lg">
-                  <div class="text-gray-500">
-                    عرض {{ paginatedStudents.length }} من
-                    {{ filteredStudents.length }} طالب
-                  </div>
-                  <UPagination
-                    v-model="page"
-                    :page-count="pageCount"
-                    :total="filteredStudents.length"
-                    class="text-lg"
-                    dir="ltr"
-                  />
-                </div>
-              </UCard>
-            </div>
-
-            <!-- Summary Panel -->
-            <div class="space-y-6 text-lg">
-              <!-- Attendance Stats -->
-              <UCard>
-                <template #header>
-                  <h2 class="text-2xl font-semibold">إحصائيات الحضور</h2>
-                </template>
-
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <UIcon
-                        name="i-heroicons-user-group"
-                        class="w-6 h-6 text-gray-500"
-                      />
-                      <span>إجمالي الطلاب</span>
-                    </div>
-                    <span class="font-medium">{{ students.length }}</span>
-                  </div>
-
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <UIcon
-                        name="i-heroicons-check-circle"
-                        class="w-6 h-6 text-green-500"
-                      />
-                      <span>الحضور</span>
-                    </div>
-                    <span class="font-medium text-green-600"
-                      >{{ presentCount }} ({{ presentPercentage }}%)</span
-                    >
-                  </div>
-
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <UIcon
-                        name="i-heroicons-x-circle"
-                        class="w-6 h-6 text-red-500"
-                      />
-                      <span>الغياب</span>
-                    </div>
-                    <span class="font-medium text-red-600"
-                      >{{ absentCount }} ({{ absentPercentage }}%)</span
-                    >
-                  </div>
-
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <UIcon
-                        name="i-heroicons-clock"
-                        class="w-6 h-6 text-amber-500"
-                      />
-                      <span>المتأخرون</span>
-                    </div>
-                    <span class="font-medium text-amber-600">{{
-                      lateCount
-                    }}</span>
-                  </div>
-                </div>
-              </UCard>
-
-              <!-- Recent Activity -->
-              <UCard>
-                <template #header>
-                  <h2 class="text-2xl font-semibold">النشاط الأخير</h2>
-                </template>
-
-                <div class="space-y-4">
-                  <div
-                    v-for="(activity, index) in recentActivities"
-                    :key="index"
-                    class="flex items-center justify-between"
-                  >
-                    <div class="flex items-center gap-2">
-                      <UIcon
-                        :name="activity.icon"
-                        class="w-6 h-6 mt-0.5"
-                        :class="activity.color"
-                      />
-                      <span>المتأخرون</span>
-                    </div>
-                    <span class="font-medium"> {{ activity.time }}</span>
-                  </div>
-                </div>
-              </UCard>
-            </div>
-          </main>
+              </main>
+              <div v-else class="flex items-center justify-center h-64">
+                <span
+                  class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"
+                ></span>
+              </div>
+            </template>
+          </UTabs>
         </template>
       </UTabs>
     </template>

@@ -168,12 +168,11 @@ async function handleAddStudent(addStudent: object) {
     @addStudent="handleAddStudent"
   />
 
-  <!-- 🔄 Loading spinner or text -->
-  <div
-    v-else-if="isLoading"
-    class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
-  >
-    <p class="text-gray-500 text-lg">جارٍ تحميل الطلاب...</p>
+
+  <div v-else-if="!isEmpty && !selectedStudent" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+    <span
+      class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"
+    ></span>
   </div>
 
   <div

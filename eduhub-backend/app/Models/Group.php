@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -66,5 +67,10 @@ class Group extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function currentSchedules()
+    {
+        return $this->schedules()->where('day', get_today_day_name());
     }
 }

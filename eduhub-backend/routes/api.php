@@ -24,6 +24,9 @@ Route::group([], function () {
     Route::group(['prefix' => 'group'], function () {
         Route::get('/all', [GroupController::class, 'All']);
         Route::get('/groups-by-time', [GroupController::class, 'getGroupsByTime']);
+        Route::post('/group-attendance', [GroupController::class, 'groupAttendance']);
+
+
         Route::post('/delete-all', [GroupController::class, 'deleteAll']);
         Route::get('/', [GroupController::class, 'index']);
         Route::post('', [GroupController::class, 'store']);

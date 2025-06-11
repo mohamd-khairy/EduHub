@@ -51,7 +51,7 @@ class StudentFactory extends Factory
         return $this->afterCreating(function (Student $student) {
             $start = $this->faker->dateTimeBetween('-2 months', 'now');
             $end = $this->faker->dateTimeBetween($start, '+2 months');
-            $groupIds = Group::inRandomOrder()->limit(2)->pluck('id'); // You can change 2 to any number
+            $groupIds = Group::pluck('id'); // You can change 2 to any number
 
             foreach ($groupIds as $groupId) {
 
@@ -63,25 +63,25 @@ class StudentFactory extends Factory
                     'status' => true,
                 ]);
 
-                for ($i = 0; $i < 10; $i++) {
-                    Attendance::factory()->create([
-                        'student_id' => $student->id,
-                        'group_id' => $groupId,
-                        'schedule_id' => \App\Models\Schedule::inRandomOrder()->where('group_id', $groupId)->value('id'),
-                        'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
-                        'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
-                        'note' => $this->faker->sentence(),
-                    ]);
+                // for ($i = 0; $i < 10; $i++) {
+                // Attendance::factory()->create([
+                //     'student_id' => $student->id,
+                //     'group_id' => $groupId,
+                //     'schedule_id' => \App\Models\Schedule::inRandomOrder()->where('group_id', $groupId)->value('id'),
+                //     'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
+                //     'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
+                //     'note' => $this->faker->sentence(),
+                // ]);
 
-                    Payment::factory()->create([
-                        'student_id' => $student->id,
-                        'amount' => $this->faker->randomFloat(2, 100, 1000), // Between 100 and 1000
-                        'payment_date' => $this->faker->dateTimeBetween('-2 months', 'now')->format('Y-m-d'),
-                        'method' => $this->faker->randomElement(['كاش', 'تحويل بنكي', 'فيزا']),
-                        'status' => $this->faker->randomElement(['paid', 'pending', 'cancelled']),
-                        'note' => 'فلوس شهر ' . $this->faker->monthName(),
-                    ]);
-                }
+                // Payment::factory()->create([
+                //     'student_id' => $student->id,
+                //     'amount' => $this->faker->randomFloat(2, 100, 1000), // Between 100 and 1000
+                //     'payment_date' => $this->faker->dateTimeBetween('-2 months', 'now')->format('Y-m-d'),
+                //     'method' => $this->faker->randomElement(['كاش', 'تحويل بنكي', 'فيزا']),
+                //     'status' => $this->faker->randomElement(['paid', 'pending', 'cancelled']),
+                //     'note' => 'فلوس شهر ' . $this->faker->monthName(),
+                // ]);
+                // }
             }
 
             //exam Results
@@ -96,6 +96,26 @@ class StudentFactory extends Factory
                             ]);
                         }
                     });
+
+                    $enrollment->group->schedules()->each(function ($schedule) use ($enrollment) {
+                        Attendance::factory()->create([
+                            'student_id' => $enrollment->student_id,
+                            'group_id' =>  $enrollment->group_id,
+                            'schedule_id' => $schedule->id,
+                            'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
+                            'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
+                            'note' => $this->faker->sentence(),
+                        ]);
+                    });
+
+                    Payment::factory()->create([
+                        'student_id' => $enrollment->student_id,
+                        'amount' => $this->faker->randomFloat(2, 100, 1000), // Between 100 and 1000
+                        'payment_date' => $this->faker->dateTimeBetween('-2 months', 'now')->format('Y-m-d'),
+                        'method' => $this->faker->randomElement(['كاش', 'تحويل بنكي', 'فيزا']),
+                        'status' => $this->faker->randomElement(['paid', 'pending', 'cancelled']),
+                        'note' => 'فلوس شهر ' . $this->faker->monthName(),
+                    ]);
                 });
         });
     }

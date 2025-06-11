@@ -4,48 +4,62 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Group;
 use App\Models\Schedule;
 use Carbon\Carbon;
+
+use function App\Helpers\get_today_day_name;
 
 class GroupController extends Controller
 {
 
+    public function groupAttendance(Request $request)
+    {
+        // Validate the incoming request
+        $validated = $request->validate([
+            'group_id' => 'required|exists:groups,id',
+            'schedule_id' => 'required|exists:schedules,id',
+        ]);
+
+        // Eager load students and today's attendance for the given group
+        $group = Group::with('students')
+            ->findOrFail($validated['group_id']);
+
+        // // Match each student with attendance for the given schedule
+        // foreach ($group->students as $student) {
+        //     $attendance = $student->todayAttendance
+        //         ->firstWhere('schedule_id', $validated['schedule_id']);
+
+        //     $student->attendance_status = $attendance->status ?? 'غائب';
+
+        // unset($student->todayAttendance);
+        // }
+
+        return $this->success($group);
+    }
+
+
     public function getGroupsByTime(Request $request)
     {
         try {
-            $today = Carbon::today();
-            $dayName = $today->format('l'); // l is the format for the full weekday name
-
-            // or in Arabic
-            $dayNameArabic = [
-                'Saturday' => "السبت",
-                'Sunday' => "الأحد",
-                'Monday' => " الإثنين",
-                'Tuesday' => "الثلاثاء",
-                'Wednesday' => "الأربعاء",
-                'Thursday' => "الخميس",
-                'Friday' => "الجمعة",
-            ][$dayName];
-
-            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
-
-            $currentTime = Carbon::now()->format('H:i:s');
-
-            $data = $model->with('schedules')
-                ->whereHas('schedules', function ($query) use ($dayNameArabic, $currentTime) {
-                    $query->where('day', $dayNameArabic);
-                    // ->where(
-                    //     function ($query) use ($currentTime) {
-                    //         $query->where('start_time', '<=', $currentTime)
-                    //             ->where('end_time', '>=', $currentTime);
-                    //     }
-                    // );
-                })->take(9)
+            $data = Group::with('currentSchedules')
+                ->has('currentSchedules')
+                // ->whereHas('schedules', function ($query) {
+                //     $query->where('day', get_today_day_name())
+                //     ->where(
+                //         function ($query) use ($currentTime) {
+                //          $currentTime = Carbon::now()->format('H:i:s');
+                //             $query->where('start_time', '<=', $currentTime)
+                //                 ->where('end_time', '>=', $currentTime);
+                //         }
+                //     );
+                // })
+                ->take(9)
                 ->get();
 
             return $this->success($data);
         } catch (\Throwable $th) {
-            //throw $th;
+            throw $th;
             return  $this->fail([]);
         }
     }
@@ -55,9 +69,7 @@ class GroupController extends Controller
         try {
             $inpput = $request->all();
 
-            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
-
-            $data = $model->create($inpput);
+            $data = Group::create($inpput);
 
             if ($request->schedules) {
                 $schedules = [];
@@ -82,9 +94,8 @@ class GroupController extends Controller
     {
         try {
             $input = $request->all();
-            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
 
-            $model = $model->where('id', $id)->first();
+            $model = Group::where('id', $id)->first();
 
             $model->update($input);
 

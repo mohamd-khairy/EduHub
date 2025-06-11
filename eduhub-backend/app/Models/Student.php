@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -19,6 +20,23 @@ class Student extends Model
         'email',
         'image'
     ];
+
+    protected $appends = ['attendance_status'];
+
+    public function todayAttendance()
+    {
+        return $this->attendances()->whereDate('date', Carbon::today()); //->exists();
+    }
+
+    public function getAttendanceStatusAttribute()
+    {
+        $scheduleId = request('schedule_id'); // Be cautious — assumes request context
+        if (!$scheduleId) return null;
+
+        return $this->todayAttendance()
+            ->firstWhere('schedule_id', $scheduleId)
+            ->status ?? 'غائب';
+    }
 
     public function parent()
     {
