@@ -71,6 +71,6 @@ class Group extends Model
 
     public function currentSchedules()
     {
-        return $this->schedules()->where('day', get_today_day_name());
+        return $this->schedules()->where('day', get_day_name_by_date(request('date')));
     }
 }

@@ -47,10 +47,10 @@ export const useGroupStore = defineStore("group", () => {
     }
   }
 
-  async function loadAllGroupsByTime() {
+  async function loadAllGroupsByTime(date = null) {
     groupsByTime.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/group/groups-by-time`);
+    const res = await fetch(`${BASE_URL}/group/groups-by-time?date=${date}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -58,18 +58,15 @@ export const useGroupStore = defineStore("group", () => {
     }
   }
 
-  async function loadGroupTodayAttendance(group_id, schedule_id) {
+  async function loadGroupTodayAttendance(data, date = null) {
     todayGroupAttendance.value = []; // Clear current items
 
-    const res = await fetch(`${BASE_URL}/group/group-attendance`, {
+    const res = await fetch(`${BASE_URL}/group/group-attendance?date=${date}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        schedule_id: schedule_id,
-        group_id: group_id,
-      }),
+      body: JSON.stringify(data),
     });
 
     const json = await res.json();

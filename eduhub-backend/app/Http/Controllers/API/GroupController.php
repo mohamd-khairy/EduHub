@@ -8,7 +8,7 @@ use App\Models\Group;
 use App\Models\Schedule;
 use Carbon\Carbon;
 
-use function App\Helpers\get_today_day_name;
+use function App\Helpers\get_day_name_by_date;
 
 class GroupController extends Controller
 {
@@ -22,18 +22,7 @@ class GroupController extends Controller
         ]);
 
         // Eager load students and today's attendance for the given group
-        $group = Group::with('students')
-            ->findOrFail($validated['group_id']);
-
-        // // Match each student with attendance for the given schedule
-        // foreach ($group->students as $student) {
-        //     $attendance = $student->todayAttendance
-        //         ->firstWhere('schedule_id', $validated['schedule_id']);
-
-        //     $student->attendance_status = $attendance->status ?? 'غائب';
-
-        // unset($student->todayAttendance);
-        // }
+        $group = Group::with('students')->findOrFail($validated['group_id']);
 
         return $this->success($group);
     }
@@ -45,7 +34,7 @@ class GroupController extends Controller
             $data = Group::with('currentSchedules')
                 ->has('currentSchedules')
                 // ->whereHas('schedules', function ($query) {
-                //     $query->where('day', get_today_day_name())
+                //     $query->where('day', get_day_name_by_date())
                 //     ->where(
                 //         function ($query) use ($currentTime) {
                 //          $currentTime = Carbon::now()->format('H:i:s');
@@ -54,7 +43,7 @@ class GroupController extends Controller
                 //         }
                 //     );
                 // })
-                ->take(9)
+                // ->take(9)
                 ->get();
 
             return $this->success($data);

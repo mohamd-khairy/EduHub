@@ -97,16 +97,16 @@ class StudentFactory extends Factory
                         }
                     });
 
-                    $enrollment->group->schedules()->each(function ($schedule) use ($enrollment) {
-                        Attendance::factory()->create([
-                            'student_id' => $enrollment->student_id,
-                            'group_id' =>  $enrollment->group_id,
-                            'schedule_id' => $schedule->id,
-                            'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
-                            'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
-                            'note' => $this->faker->sentence(),
-                        ]);
-                    });
+                    // $enrollment->group->schedules()->each(function ($schedule) use ($enrollment) {
+                    //     Attendance::factory()->create([
+                    //         'student_id' => $enrollment->student_id,
+                    //         'group_id' =>  $enrollment->group_id,
+                    //         'schedule_id' => $schedule->id,
+                    //         'date' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
+                    //         'status' => $this->faker->randomElement(['حضر', 'غائب', 'متأخر']),
+                    //         'note' => $this->faker->sentence(),
+                    //     ]);
+                    // });
 
                     Payment::factory()->create([
                         'student_id' => $enrollment->student_id,

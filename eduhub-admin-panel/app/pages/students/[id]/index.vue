@@ -102,8 +102,7 @@ function onFileClick() {
     @submit="onSubmit"
   >
     <UPageCard
-      title="معلومات الطالب"
-      :description="profile.name"
+      title="تعديل بيانات الطالب"
       variant="naked"
       orientation="horizontal"
       class="mb-4"

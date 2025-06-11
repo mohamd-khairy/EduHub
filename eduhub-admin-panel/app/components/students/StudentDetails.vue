@@ -63,7 +63,10 @@ function handleAddStudent(addStudent: object) {
 <template>
   <UDashboardPanel id="inbox-2">
     <template #header>
-      <UDashboardNavbar title="تفاصيل الطالب" :toggle="true">
+      <UDashboardNavbar
+        :title="`تفاصيل الطالب :  ${student?.name || ''}`"
+        :toggle="true"
+      >
         <template #right>
           <AddModal @addStudent="handleAddStudent" />
         </template>

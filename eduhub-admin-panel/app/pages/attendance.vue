@@ -4,11 +4,14 @@ import { ref, computed, onMounted } from "vue";
 const groupStore = useGroupStore();
 const attendanceStore = useAttendanceStore();
 const toast = useToast();
+const now = new Date();
 
-const currentDate = ref("");
 const dashboardTitle = ref("نظام الحضور والغياب");
 const items = ref([]);
-const selectedHistoryDate = ref(""); // For historical attendance date picker
+
+const selectedHistoryDate = ref("");
+const currentDate = ref("");
+
 const searchQuery = ref("");
 const classFilter = ref(null);
 const page = ref(1);
@@ -17,10 +20,6 @@ const selectedGroupTab = ref(null);
 const selectedScheduleTab = ref(null);
 const students = ref([]);
 const paginatedStudents = ref([]);
-const currentMode = ref("manualEntry");
-const switchMode = (mode) => {
-  currentMode.value = mode;
-};
 const isScanning = ref(false);
 const scanSuccess = ref(false);
 const scanError = ref(false);
@@ -31,47 +30,72 @@ const statusColors = {
   حضر: "success",
   غائب: "error",
   متأخر: "warning",
+  "-": "default",
 };
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
 const UDropdownMenu = resolveComponent("UDropdownMenu");
-const UCheckbox = resolveComponent("UCheckbox");
 
 // Initialize
 onMounted(async () => {
-  const now = new Date();
-  currentDate.value = now.toLocaleDateString("ar-EG", {
+  selectedHistoryDate.value = now.toLocaleDateString("en-CA");
+
+  getAllGroups();
+});
+
+async function getAllGroups() {
+  items.value = [];
+  await groupStore.loadAllGroupsByTime(selectedHistoryDate.value);
+  items.value = groupStore.groupsByTime;
+}
+
+watch(items, () => {
+  selectedGroupTab.value = null;
+  if (items.value.length > 0) {
+    selectedGroupTab.value = items.value[0].value;
+  }
+});
+
+watch(selectedHistoryDate, async (date) => {
+  if (!date) return;
+
+  const [year, month, day] = date.split("-");
+  const dateObj = new Date(+year, +month - 1, +day);
+
+  currentDate.value = dateObj.toLocaleDateString("ar-EG", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
-  await groupStore.loadAllGroupsByTime();
-  items.value = groupStore.groupsByTime;
-
-  if (items.value.length > 0) {
-    selectedGroupTab.value = items.value[0].value;
-  }
+  getAllGroups();
 });
 
 watch(selectedGroupTab, async (group_id) => {
+  selectedScheduleTab.value = null;
   const group = items.value.find((item) => item.id == group_id);
-  if (group.current_schedules.length > 0) {
+
+  if (group?.current_schedules?.length > 0) {
     selectedScheduleTab.value = group.current_schedules[0].value;
   }
 });
 
 watch(selectedScheduleTab, async (schedule_id) => {
+  loadStudentAttendance();
+});
+
+async function loadStudentAttendance() {
   students.value = [];
   groupStore.isLoading = true;
-  await groupStore.loadGroupTodayAttendance(
-    selectedGroupTab.value,
-    schedule_id
-  );
+  const payload = {
+    group_id: selectedGroupTab.value,
+    schedule_id: selectedScheduleTab.value,
+  };
+  await groupStore.loadGroupTodayAttendance(payload, selectedHistoryDate.value);
   students.value = groupStore.todayGroupAttendance?.students;
   groupStore.isLoading = false;
-});
+}
 
 // Computed Properties
 const filteredStudents = computed(() => {
@@ -136,9 +160,11 @@ const absentPercentage = computed(() => {
   return total ? Math.round((absentCount.value / total) * 100) : 0;
 });
 
-const scannedCount = computed(
-  () => students.value.filter((s) => s.status === "حضر").length
-);
+const latePercentage = computed(() => {
+  const total = students.value?.length || 0;
+  return total ? Math.round((lateCount.value / total) * 100) : 0;
+});
+
 
 const startScanner = () => {
   isScanning.value = true;
@@ -169,21 +195,6 @@ const startScanner = () => {
 const stopScanner = () => {
   isScanning.value = false;
 };
-
-const toggleFlash = () => {
-  // Flash toggle logic
-  console.log("Flash toggled");
-};
-
-const uploadQRImage = () => {
-  // QR image upload logic
-  console.log("QR image upload triggered");
-};
-
-const classOptions = computed(() => {
-  const uniqueClasses = [...new Set(students.value.map((s) => s.class))];
-  return uniqueClasses.map((c) => ({ value: c, label: c }));
-});
 
 function getRowItems(row) {
   return [
@@ -357,32 +368,21 @@ const exportAttendance = () => {
             <UBadge color="green" variant="soft" class="text-base">
               {{ currentDate }}
             </UBadge>
-            <UButton
-              @click="
-                switchMode(currentMode === 'qrScan' ? 'manualEntry' : 'qrScan')
-              "
-              :icon="
-                currentMode === 'qrScan'
-                  ? 'i-heroicons-pencil-square'
-                  : 'i-heroicons-qr-code'
-              "
-              color="primary"
-              :label="
-                currentMode === 'qrScan'
-                  ? 'التبديل للوضع اليدوي'
-                  : 'التبديل للمسح الضوئي'
-              "
-              class="text-base"
-            />
+            <UInput type="date" v-model="selectedHistoryDate" size="xl" />
           </div>
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
-      <UTabs v-model="selectedGroupTab" :items="items">
+      <UTabs v-model="selectedGroupTab" :items="items" size="xl">
         <template #content="{ item, index }">
-          <UTabs v-model="selectedScheduleTab" :items="item.current_schedules">
+          <UTabs
+            v-model="selectedScheduleTab"
+            :items="item.current_schedules"
+            variant="link"
+            size="xl"
+          >
             <template #content="{ item: schedule }">
               <main
                 v-if="!groupStore.isLoading"
@@ -390,92 +390,8 @@ const exportAttendance = () => {
               >
                 <!-- Main Content Area -->
                 <div class="lg:col-span-2 space-y-6">
-                  <!-- QR Scanner Card -->
-                  <UCard v-if="currentMode === 'qrScan'" class="h-full">
-                    <template #header>
-                      <div class="flex items-center justify-between">
-                        <h2 class="text-2xl font-semibold">
-                          مسح رمز الاستجابة السريعة
-                        </h2>
-                        <UBadge
-                          color="green"
-                          variant="subtle"
-                          class="text-base"
-                        >
-                          {{ scannedCount }} / {{ students.length }}
-                        </UBadge>
-                      </div>
-                    </template>
-
-                    <!-- Scanner Area -->
-                    <div class="relative">
-                      <div
-                        class="border-2 border-dashed border-gray-300 rounded-xl aspect-square flex items-center justify-center bg-gray-50 mb-4"
-                        :class="{
-                          'border-green-500': scanSuccess,
-                          'border-red-500': scanError,
-                        }"
-                      >
-                        <template v-if="!isScanning">
-                          <div class="text-center p-4">
-                            <UIcon
-                              name="i-heroicons-qr-code"
-                              class="w-20 h-20 text-gray-400 mb-4"
-                            />
-                            <p class="text-lg text-gray-500 mb-4">
-                              اضغط لبدء المسح الضوئي
-                            </p>
-                            <UButton
-                              @click="startScanner"
-                              color="green"
-                              variant="solid"
-                              label="بدء المسح"
-                              class="mt-4 text-lg"
-                              size="xl"
-                            />
-                          </div>
-                        </template>
-                        <template v-else>
-                          <div
-                            class="relative w-full h-full flex items-center justify-center"
-                          >
-                            <div
-                              class="absolute inset-0 flex items-center justify-center"
-                            >
-                              <div
-                                class="w-64 h-64 border-4 border-green-500 rounded-lg animate-pulse"
-                              ></div>
-                            </div>
-                            <UIcon
-                              name="i-heroicons-qr-code"
-                              class="w-32 h-32 text-green-500 opacity-20"
-                            />
-                          </div>
-                        </template>
-                      </div>
-
-                      <!-- Scan Status -->
-                      <UAlert
-                        v-if="scanSuccess"
-                        icon="i-heroicons-check-circle"
-                        color="green"
-                        variant="subtle"
-                        :title="`تم تسجيل حضور ${lastScannedStudent}`"
-                        class="mb-4 text-lg"
-                      />
-                      <UAlert
-                        v-if="scanError"
-                        icon="i-heroicons-exclamation-circle"
-                        color="red"
-                        variant="subtle"
-                        :title="scanErrorMessage"
-                        class="mb-4 text-lg"
-                      />
-                    </div>
-                  </UCard>
-
                   <!-- Manual Entry Card -->
-                  <UCard v-else class="h-full">
+                  <UCard class="h-full">
                     <template #header>
                       <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-semibold">
@@ -629,71 +545,57 @@ const exportAttendance = () => {
                           />
                           <span>المتأخرون</span>
                         </div>
-                        <span class="font-medium text-amber-600">{{
-                          lateCount
-                        }}</span>
+                        <span class="font-medium text-amber-600"
+                          >{{ lateCount }} ({{ latePercentage }}%)</span
+                        >
                       </div>
                     </div>
                   </UCard>
 
-                  <!-- New: Historical Attendance Log Example -->
                   <UCard>
                     <template #header>
-                      <h2 class="text-2xl font-semibold">
-                        سجل الحضور التاريخي
-                      </h2>
-                    </template>
-                    <div class="space-y-4">
-                      <p class="text-gray-600">
-                        اختر تاريخًا لعرض سجل الحضور لذلك اليوم:
-                      </p>
-                      <UInput
-                        type="date"
-                        v-model="selectedHistoryDate"
-                        size="xl"
-                      />
-                      <div
-                        v-if="selectedHistoryDate"
-                        class="mt-4 p-3 bg-gray-50 rounded-lg"
-                      >
-                        <p class="font-semibold text-lg">
-                          سجل حضور يوم: {{ selectedHistoryDate }}
-                        </p>
-                        <ul class="list-disc list-inside text-gray-700 mt-2">
-                          <li>أحمد محمد: حضر</li>
-                          <li>سارة علي: غائب</li>
-                          <li>
-                            (هنا ستظهر بيانات الحضور الفعلية لهذا التاريخ)
-                          </li>
-                        </ul>
+                      <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold">
+                          مسح رمز الاستجابة السريعة
+                        </h2>
                       </div>
-                      <div v-else class="mt-4 text-gray-500">
-                        <p>الرجاء اختيار تاريخ لعرض السجل.</p>
-                      </div>
-                    </div>
-                  </UCard>
-
-                  <!-- Recent Activity -->
-                  <UCard>
-                    <template #header>
-                      <h2 class="text-2xl font-semibold">النشاط الأخير</h2>
                     </template>
-
-                    <div class="space-y-4">
+                    <div class="relative">
                       <div
-                        v-for="(activity, index) in recentActivities"
-                        :key="index"
-                        class="flex items-center justify-between"
+                        class="border-2 border-dashed border-gray-300 rounded-xl aspect-square flex items-center justify-center bg-gray-50 mb-4"
+                        :class="{
+                          'border-green-500': scanSuccess,
+                          'border-red-500': scanError,
+                        }"
                       >
-                        <div class="flex items-center gap-2">
-                          <UIcon
-                            :name="activity.icon"
-                            class="w-6 h-6 mt-0.5"
-                            :class="activity.color"
-                          />
-                          <span>{{ activity.message }}</span>
-                        </div>
-                        <span class="font-medium"> {{ activity.time }}</span>
+                        <template v-if="!isScanning">
+                          <div class="text-center p-4">
+                            <UIcon
+                              name="i-heroicons-qr-code"
+                              class="w-20 h-20 text-gray-400 mb-4"
+                            />
+                            <p class="text-lg text-gray-500 mb-4" style="cursor: pointer;" @click="startScanner">
+                              اضغط لبدء المسح الضوئي
+                            </p>
+                          </div>
+                        </template>
+                        <template v-else>
+                          <div
+                            class="relative w-full h-full flex items-center justify-center"
+                          >
+                            <div
+                              class="absolute inset-0 flex items-center justify-center"
+                            >
+                              <div
+                                class="w-64 h-64 border-4 border-green-500 rounded-lg animate-pulse"
+                              ></div>
+                            </div>
+                            <UIcon
+                              name="i-heroicons-qr-code"
+                              class="w-32 h-32 text-green-500 opacity-20"
+                            />
+                          </div>
+                        </template>
                       </div>
                     </div>
                   </UCard>

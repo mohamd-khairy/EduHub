@@ -7,15 +7,6 @@ const props = defineProps<{
 </script>
 
 <template>
-  <UPageCard
-    title="تفاصيل ولي امر الطالب"
-    :description="student.name"
-    variant="naked"
-    orientation="horizontal"
-    class="mt-2 "
-  >
-  </UPageCard>
-
   <UDashboardNavbar title="اسم ولي الامر" :toggle="false">
     <template #right>
       {{ student.parent.name }}

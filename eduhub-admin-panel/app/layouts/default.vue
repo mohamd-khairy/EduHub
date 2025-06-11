@@ -43,7 +43,7 @@ const links = [
     {
       class: "text-lg",
       label: "الطلاب",
-      icon: "i-lucide-users",
+      icon: "i-heroicons-user-group",
       to: "/students",
       // badge: '4',
       onSelect: () => {

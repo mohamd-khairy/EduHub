@@ -25,7 +25,7 @@ class Student extends Model
 
     public function todayAttendance()
     {
-        return $this->attendances()->whereDate('date', Carbon::today()); //->exists();
+        return $this->attendances()->whereDate('date', Carbon::parse(request('date', Carbon::today()))); //->exists();
     }
 
     public function getAttendanceStatusAttribute()
@@ -35,7 +35,7 @@ class Student extends Model
 
         return $this->todayAttendance()
             ->firstWhere('schedule_id', $scheduleId)
-            ->status ?? 'غائب';
+            ->status ?? '-';
     }
 
     public function parent()

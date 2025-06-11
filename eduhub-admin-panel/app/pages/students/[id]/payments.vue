@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import * as z from "zod";
-import type { TabsItem } from "@nuxt/ui";
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 const UBadge = resolveComponent("UBadge");
@@ -110,12 +107,9 @@ const columns: TableColumn<Payment>[] = [
 </script>
 
 <template>
-  <UPageCard
-    title="المدفوعات الخاصة بالطالب"
-    :description="student.name"
-    variant="naked"
-    orientation="horizontal"
-  >
-  </UPageCard>
-  <UTable :data="props.student.payments" :columns="columns" class="w-full"></UTable>
+  <UTable
+    :data="props.student.payments"
+    :columns="columns"
+    class="w-full"
+  ></UTable>
 </template>

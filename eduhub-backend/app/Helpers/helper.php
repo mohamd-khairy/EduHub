@@ -2,11 +2,10 @@
 
 use Carbon\Carbon;
 
-if (!function_exists('get_today_day_name')) {
+if (!function_exists('get_day_name_by_date')) {
 
-    function get_today_day_name()
+    function get_day_name_by_date($date = null)
     {
-        $today = Carbon::today();
         // or in Arabic
         $dayNameArabic = [
             'Saturday' => "السبت",
@@ -18,6 +17,12 @@ if (!function_exists('get_today_day_name')) {
             'Friday' => "الجمعة",
         ];
 
-        return $dayNameArabic[$today->format("l")];
+        if (is_null($date)) {
+            $day = Carbon::today();
+        } else {
+            $day = Carbon::parse($date);
+        }
+
+        return $dayNameArabic[$day->format("l")];
     }
 }

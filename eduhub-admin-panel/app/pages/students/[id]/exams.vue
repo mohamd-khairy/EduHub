@@ -118,23 +118,16 @@ const columns: TableColumn<Payment>[] = [
 
 const UButton = resolveComponent("UButton");
 
-const expanded = ref({ 0: true });
+const expanded = ref({ 0: false });
 </script>
 
 <template>
-  <UPageCard
-    title="الاختبارات الخاصة بالطالب"
-    :description="student.name"
-    variant="naked"
-    orientation="horizontal"
-    class="mt-2"
-  >
-  </UPageCard>
   <UTabs
     v-model="activeGroupTab"
     :items="items"
     class="gap-4 w-full"
     :ui="{ trigger: 'grow' }"
+    size="xl"
   >
     <template #content="{ item }">
       <UTable
