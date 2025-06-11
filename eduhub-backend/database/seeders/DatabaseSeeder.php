@@ -26,19 +26,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        UserFactory::new()->count(50)->create();
-        CourseFactory::new()->count(50)->create();
-        TeacherFactory::new()->count(50)->create();
-        ParentModelFactory::new()->count(50)->create();
-        GroupFactory::new()->count(50)->create();
-        // ScheduleFactory::new()->count(50)->create();
-        StudentFactory::new()->count(50)->create();
-        TeacherAttendanceFactory::new()->count(50)->create();
-        // PaymentFactory::new()->count(50)->create();
-        // ExamFactory::new()->count(50)->create();
-        // ExamResultFactory::new()->count(50)->create();
-        // EnrollmentFactory::new()->count(50)->create();
-        // AttendanceFactory::new()->count(50)->create();
+        UserFactory::new()->count(10)->create();
+        CourseFactory::new()->count(10)->create();
+        TeacherFactory::new()->count(10)->create();
+        ParentModelFactory::new()->count(10)->create();
+        GroupFactory::new()->count(7)->create();
+        // ScheduleFactory::new()->count(10)->create();
+        StudentFactory::new()->count(20)->create();
+        TeacherAttendanceFactory::new()->count(10)->create();
+        // PaymentFactory::new()->count(10)->create();
+        // ExamFactory::new()->count(10)->create();
+        // ExamResultFactory::new()->count(10)->create();
+        // EnrollmentFactory::new()->count(10)->create();
+        // AttendanceFactory::new()->count(10)->create();
         Role::create(["name" => "admin"]);
         User::get()->each(function (User $user) {
             $user->assignRole("admin");

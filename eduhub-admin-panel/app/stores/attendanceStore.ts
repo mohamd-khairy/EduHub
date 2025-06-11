@@ -84,6 +84,22 @@ export const useAttendanceStore = defineStore("attendance", () => {
     }
   }
 
+  async function updateAllAttendance(data) {
+    const res = await fetch(`${BASE_URL}/attendance/update-all-attendance`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (res.ok) {
+      // await loadAllAttendances();
+    } else {
+      throw new Error("Failed to delete groups");
+    }
+  }
+
   async function addAttendance(data) {
     const res = await fetch(`${BASE_URL}/attendance`, {
       method: "POST",
@@ -94,7 +110,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
     });
 
     if (res.ok) {
-      await loadAllAttendances();
+      // await loadAllAttendances();
     } else {
       throw new Error("Failed to delete groups");
     }
@@ -177,6 +193,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
     pagination,
     editModalOpen,
     editItem,
+    updateAllAttendance,
     editAttendance,
     addAttendance,
     loadAllAttendances,

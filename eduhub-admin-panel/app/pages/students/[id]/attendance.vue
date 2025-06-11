@@ -1,36 +1,29 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import * as z from "zod";
-import type { TabsItem } from "@nuxt/ui";
 
 const props = defineProps<{
   student: any; // use `any` or define a type if available
 }>();
 
-const items = ref<TabsItem[]>([]);
-const activeGroupTab = ref<string | number | null>(null); // model for selected tab
-const activeScheduleTab = ref<string | number | null>(null); // model for selected tab
+const items = ref([]);
+const activeGroupTab = ref(null); // model for selected tab
+const activeScheduleTab = ref(null); // model for selected tab
 
 onMounted(() => {
   if (props.student?.groups && Array.isArray(props.student.groups)) {
-    // transform groups to include label/value for UTabs
-    const mappedGroups = props.student?.groups.map((group) => ({
-      ...group,
-      label: group.name, // used for UTabs display
-      value: group.id, // used for UTabs v-model
-    }));
 
-    items.value = mappedGroups;
+    items.value =  props.student?.groups;    
 
-    // ✅ Set the first tab as active
     if (items.value.length > 0) {
-      activeGroupTab.value = items.value[0].value;
+      activeGroupTab.value = items.value[0]?.value;
     }
+  }
+});
 
-    if (items.value[0]?.schedules && items.value[0].schedules.length > 0) {
-      // Set the first schedule tab as active
-      activeScheduleTab.value = items.value[0].schedules[0].value;
-    }
+watch(activeGroupTab, async (id) => {
+  const obj = items.value.find((item) => item.id == id);
+  if (obj?.schedules.length > 0) {
+    activeScheduleTab.value = obj?.schedules[0]?.value;
   }
 });
 
@@ -49,7 +42,7 @@ function getStatusColor(status: string): string {
 </script>
 
 <template>
-    <UPageCard
+  <UPageCard
     title="الحضور والغياب الخاص بالطالب"
     :description="student.name"
     variant="naked"
@@ -60,8 +53,6 @@ function getStatusColor(status: string): string {
   <UTabs
     v-model="activeGroupTab"
     :items="items"
-    class="gap-4 w-full"
-    :ui="{ trigger: 'grow' }"
   >
     <template #content="{ item }">
       <UTabs
@@ -86,7 +77,7 @@ function getStatusColor(status: string): string {
                 <td class="border px-4 py-2">
                   {{
                     new Date(attendance.created_at).toLocaleString("ar-EG", {
-                      weekday: "long", 
+                      weekday: "long",
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -101,7 +92,11 @@ function getStatusColor(status: string): string {
                     })
                   }}
                 </td>
-                <td class="border px-4 py-2"><UBadge :color="getStatusColor(attendance.status)">{{ attendance.status }}</UBadge></td>
+                <td class="border px-4 py-2">
+                  <UBadge :color="getStatusColor(attendance.status)">{{
+                    attendance.status
+                  }}</UBadge>
+                </td>
                 <td class="border px-4 py-2">{{ attendance.note }}</td>
               </tr>
             </tbody>

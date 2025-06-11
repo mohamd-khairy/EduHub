@@ -103,6 +103,7 @@ Route::group([], function () {
         Route::put('{id}', [ResultController::class, 'update']);
     });
     Route::group(['prefix' => 'attendance'], function () {
+        Route::post('/update-all-attendance', [AttendanceController::class, 'updateAllAttendance']);
         Route::get('/all', [AttendanceController::class, 'All']);
         Route::post('/delete-all', [AttendanceController::class, 'deleteAll']);
         Route::get('/', [AttendanceController::class, 'index']);

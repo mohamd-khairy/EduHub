@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from "vue";
 
 const groupStore = useGroupStore();
+const attendanceStore = useAttendanceStore();
+const toast = useToast()
 
 const currentDate = ref("");
 const dashboardTitle = ref("نظام الحضور والغياب");
@@ -70,7 +72,6 @@ watch(selectedScheduleTab, async (schedule_id) => {
   students.value = groupStore.todayGroupAttendance?.students;
   groupStore.isLoading = false;
 });
-
 
 // Computed Properties
 const filteredStudents = computed(() => {
@@ -193,7 +194,7 @@ function getRowItems(row) {
       icon: "i-lucide-circle-check",
       color: "primary",
       onSelect() {
-        markPresent(row);
+        markPresent(row.original);
       },
     },
     {
@@ -201,7 +202,7 @@ function getRowItems(row) {
       icon: "i-lucide-circle-x",
       color: "error",
       onSelect() {
-        markAbsent(row);
+        markAbsent(row.original);
       },
     },
     {
@@ -209,7 +210,7 @@ function getRowItems(row) {
       icon: "i-lucide-clock",
       color: "warning",
       onSelect() {
-        markLate(row);
+        markLate(row.original);
       },
     },
   ];
@@ -306,8 +307,22 @@ const addActivity = (message, icon, color) => {
 };
 
 // Student Actions
-const markPresent = (student) => {
-  student.status = "حضر";
+const markPresent = async (student) => {
+  await attendanceStore.addAttendance({
+    student_id: student.id,
+    group_id: selectedGroupTab.value,
+    schedule_id: selectedScheduleTab.value,
+    status: "حضر",
+  });
+
+  student.attendance_status = "حضر";
+
+  toast.add({
+    title: "نجاح",
+    description: `تم تسجيل حضور ${student.name}`,
+    color: "success",
+  });
+
   addActivity(
     `تم تسجيل حضور ${student.name}`,
     "i-heroicons-check-circle",
@@ -315,8 +330,20 @@ const markPresent = (student) => {
   );
 };
 
-const markAbsent = (student) => {
-  student.status = "غائب";
+const markAbsent = async (student) => {
+  await attendanceStore.addAttendance({
+    student_id: student.id,
+    group_id: selectedGroupTab.value,
+    schedule_id: selectedScheduleTab.value,
+    status: "غائب",
+  });
+  student.attendance_status = "غائب";
+  toast.add({
+    title: "نجاح",
+    description: `تم تسجيل غياب ${student.name}`,
+    color: "success",
+  });
+
   addActivity(
     `تم تسجيل غياب ${student.name}`,
     "i-heroicons-x-circle",
@@ -324,8 +351,20 @@ const markAbsent = (student) => {
   );
 };
 
-const markLate = (student) => {
-  student.status = "متأخر";
+const markLate = async (student) => {
+  await attendanceStore.addAttendance({
+    student_id: student.id,
+    group_id: selectedGroupTab.value,
+    schedule_id: selectedScheduleTab.value,
+    status: "متأخر",
+  });
+  student.attendance_status = "متأخر";
+  toast.add({
+    title: "نجاح",
+    description: `تم تسجيل تأخر ${student.name}`,
+    color: "success",
+  });
+
   addActivity(
     `تم تسجيل تأخر ${student.name}`,
     "i-heroicons-clock",
@@ -333,8 +372,20 @@ const markLate = (student) => {
   );
 };
 
-const markAllPresent = () => {
-  students.value.forEach((s) => (s.status = "حضر"));
+const markAllPresent = async () => {
+  await attendanceStore.updateAllAttendance({
+    group_id: selectedGroupTab.value,
+    schedule_id: selectedScheduleTab.value,
+    status: "حضر",
+  });
+
+  students.value.forEach((s) => (s.attendance_status = "حضر"));
+  toast.add({
+    title: "نجاح",
+    description: "تم تحديد جميع الطلاب كحاضرين",
+    color: "success",
+  });
+
   addActivity(
     "تم تحديد جميع الطلاب كحاضرين",
     "i-heroicons-check-circle",
@@ -342,10 +393,43 @@ const markAllPresent = () => {
   );
 };
 
-const markAllAbsent = () => {
-  students.value.forEach((s) => (s.status = "غائب"));
+const markAllAbsent = async () => {
+  await attendanceStore.updateAllAttendance({
+    group_id: selectedGroupTab.value,
+    schedule_id: selectedScheduleTab.value,
+    status: "غائب",
+  });
+  students.value.forEach((s) => (s.attendance_status = "غائب"));
+
+  toast.add({
+    title: "نجاح",
+    description: "تم تحديد جميع الطلاب كغائبين",
+    color: "success",
+  });
+
   addActivity(
     "تم تحديد جميع الطلاب كغائبين",
+    "i-heroicons-x-circle",
+    "text-red-500"
+  );
+};
+
+const markAllLate = async () => {
+  await attendanceStore.updateAllAttendance({
+    group_id: selectedGroupTab.value,
+    schedule_id: selectedScheduleTab.value,
+    status: "متأخر",
+  });
+  students.value.forEach((s) => (s.attendance_status = "متأخر"));
+
+  toast.add({
+    title: "نجاح",
+    description: "تم تحديد جميع الطلاب متأخرين",
+    color: "success",
+  });
+
+  addActivity(
+    "تم تحديد جميع الطلاب متأخرين",
     "i-heroicons-x-circle",
     "text-red-500"
   );
@@ -518,7 +602,7 @@ const exportAttendance = () => {
                     </template>
 
                     <!-- Search and Filters -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
                       <UInput
                         v-model="searchQuery"
                         icon="i-heroicons-magnifying-glass"
@@ -533,7 +617,17 @@ const exportAttendance = () => {
                         icon="i-heroicons-check-circle"
                         label="تحديد الكل حضر"
                         block
-                        size="xl"
+                        size="md"
+                        class="text-lg"
+                      />
+                      <UButton
+                        @click="markAllLate"
+                        color="warning"
+                        variant="outline"
+                        icon="i-heroicons-x-circle"
+                        label="تحديد الكل متأخر"
+                        block
+                        size="md"
                         class="text-lg"
                       />
                       <UButton
@@ -543,7 +637,7 @@ const exportAttendance = () => {
                         icon="i-heroicons-x-circle"
                         label="تحديد الكل غائب"
                         block
-                        size="xl"
+                        size="md"
                         class="text-lg"
                       />
                     </div>
@@ -555,7 +649,7 @@ const exportAttendance = () => {
                         :data="paginatedStudents"
                         :ui="{
                           th: { base: 'whitespace-nowrap bg-gray-50 text-lg' },
-                          td: { base: 'max-w-[200px] truncate text-lg' },
+                          td: { base: 'max-w-[200px] text-lg' },
                           divide: 'divide-gray-200',
                         }"
                         class="w-full"
