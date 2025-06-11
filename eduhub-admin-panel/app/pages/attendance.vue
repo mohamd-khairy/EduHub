@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from "vue";
 
 const groupStore = useGroupStore();
 const attendanceStore = useAttendanceStore();
-const toast = useToast()
+const toast = useToast();
 
 const currentDate = ref("");
 const dashboardTitle = ref("نظام الحضور والغياب");
@@ -194,7 +194,7 @@ function getRowItems(row) {
       icon: "i-lucide-circle-check",
       color: "primary",
       onSelect() {
-        markPresent(row.original);
+        markAttendance(row.original, "حضر");
       },
     },
     {
@@ -202,7 +202,7 @@ function getRowItems(row) {
       icon: "i-lucide-circle-x",
       color: "error",
       onSelect() {
-        markAbsent(row.original);
+        markAttendance(row.original, "غائب");
       },
     },
     {
@@ -210,7 +210,7 @@ function getRowItems(row) {
       icon: "i-lucide-clock",
       color: "warning",
       onSelect() {
-        markLate(row.original);
+        markAttendance(row.original, "متأخر");
       },
     },
   ];
@@ -306,133 +306,33 @@ const addActivity = (message, icon, color) => {
   }
 };
 
-// Student Actions
-const markPresent = async (student) => {
+const markAttendance = async (student, status) => {
   await attendanceStore.addAttendance({
     student_id: student.id,
     group_id: selectedGroupTab.value,
     schedule_id: selectedScheduleTab.value,
-    status: "حضر",
+    status,
   });
-
-  student.attendance_status = "حضر";
-
+  student.attendance_status = status;
   toast.add({
     title: "نجاح",
-    description: `تم تسجيل حضور ${student.name}`,
-    color: "success",
+    description: `تم تسجيل ${status} للطالب ${student.name}`,
+    color: statusColors[status],
   });
-
-  addActivity(
-    `تم تسجيل حضور ${student.name}`,
-    "i-heroicons-check-circle",
-    "text-green-500"
-  );
 };
 
-const markAbsent = async (student) => {
-  await attendanceStore.addAttendance({
-    student_id: student.id,
-    group_id: selectedGroupTab.value,
-    schedule_id: selectedScheduleTab.value,
-    status: "غائب",
-  });
-  student.attendance_status = "غائب";
-  toast.add({
-    title: "نجاح",
-    description: `تم تسجيل غياب ${student.name}`,
-    color: "success",
-  });
-
-  addActivity(
-    `تم تسجيل غياب ${student.name}`,
-    "i-heroicons-x-circle",
-    "text-red-500"
-  );
-};
-
-const markLate = async (student) => {
-  await attendanceStore.addAttendance({
-    student_id: student.id,
-    group_id: selectedGroupTab.value,
-    schedule_id: selectedScheduleTab.value,
-    status: "متأخر",
-  });
-  student.attendance_status = "متأخر";
-  toast.add({
-    title: "نجاح",
-    description: `تم تسجيل تأخر ${student.name}`,
-    color: "success",
-  });
-
-  addActivity(
-    `تم تسجيل تأخر ${student.name}`,
-    "i-heroicons-clock",
-    "text-amber-500"
-  );
-};
-
-const markAllPresent = async () => {
+const markAll = async (status) => {
   await attendanceStore.updateAllAttendance({
     group_id: selectedGroupTab.value,
     schedule_id: selectedScheduleTab.value,
-    status: "حضر",
+    status,
   });
-
-  students.value.forEach((s) => (s.attendance_status = "حضر"));
+  students.value.forEach((s) => (s.attendance_status = status));
   toast.add({
     title: "نجاح",
-    description: "تم تحديد جميع الطلاب كحاضرين",
-    color: "success",
+    description: `تم تحديد جميع الطلاب كـ${status}`,
+    color: statusColors[status],
   });
-
-  addActivity(
-    "تم تحديد جميع الطلاب كحاضرين",
-    "i-heroicons-check-circle",
-    "text-green-500"
-  );
-};
-
-const markAllAbsent = async () => {
-  await attendanceStore.updateAllAttendance({
-    group_id: selectedGroupTab.value,
-    schedule_id: selectedScheduleTab.value,
-    status: "غائب",
-  });
-  students.value.forEach((s) => (s.attendance_status = "غائب"));
-
-  toast.add({
-    title: "نجاح",
-    description: "تم تحديد جميع الطلاب كغائبين",
-    color: "success",
-  });
-
-  addActivity(
-    "تم تحديد جميع الطلاب كغائبين",
-    "i-heroicons-x-circle",
-    "text-red-500"
-  );
-};
-
-const markAllLate = async () => {
-  await attendanceStore.updateAllAttendance({
-    group_id: selectedGroupTab.value,
-    schedule_id: selectedScheduleTab.value,
-    status: "متأخر",
-  });
-  students.value.forEach((s) => (s.attendance_status = "متأخر"));
-
-  toast.add({
-    title: "نجاح",
-    description: "تم تحديد جميع الطلاب متأخرين",
-    color: "success",
-  });
-
-  addActivity(
-    "تم تحديد جميع الطلاب متأخرين",
-    "i-heroicons-x-circle",
-    "text-red-500"
-  );
 };
 
 const exportAttendance = () => {
@@ -611,7 +511,7 @@ const exportAttendance = () => {
                         class="md:col-span-1 text-lg"
                       />
                       <UButton
-                        @click="markAllPresent"
+                        @click="markAll('حضر')"
                         color="success"
                         variant="outline"
                         icon="i-heroicons-check-circle"
@@ -621,7 +521,7 @@ const exportAttendance = () => {
                         class="text-lg"
                       />
                       <UButton
-                        @click="markAllLate"
+                        @click="markAll('متأخر')"
                         color="warning"
                         variant="outline"
                         icon="i-heroicons-x-circle"
@@ -631,7 +531,7 @@ const exportAttendance = () => {
                         class="text-lg"
                       />
                       <UButton
-                        @click="markAllAbsent"
+                        @click="markAll('غائب')"
                         color="error"
                         variant="outline"
                         icon="i-heroicons-x-circle"
