@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AttendanceController;
+use App\Http\Controllers\API\AuditController;
 use App\Http\Controllers\API\CourseController;
 use App\Http\Controllers\API\EnrollmentController;
 use App\Http\Controllers\API\ExamController;
@@ -118,5 +119,8 @@ Route::group([], function () {
         Route::post('', [PaymentController::class, 'store']);
         Route::get('{id}', [PaymentController::class, 'show']);
         Route::put('{id}', [PaymentController::class, 'update']);
+    });
+    Route::group(['prefix' => 'audit'], function () {
+        Route::get('/', [AuditController::class, 'index']);
     });
 });

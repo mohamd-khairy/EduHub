@@ -4,11 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class StudentAttendance extends Model
+
+class StudentAttendance extends Model implements Auditable
 {
     /** @use HasFactory<\Database\Factories\StudentAttendanceFactory> */
-    use HasFactory;
+use HasFactory;
+use \OwenIt\Auditing\Auditable;
+
 
     protected $fillable = ['student_id', 'group_id', 'date', 'status', 'note'];
 

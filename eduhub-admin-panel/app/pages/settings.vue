@@ -16,6 +16,10 @@ const links = [[{
   label: 'Security',
   icon: 'i-lucide-shield',
   to: '/settings/security'
+}, {
+  label: 'سجل الاستخدام',
+  icon: 'i-lucide-shield',
+  to: '/settings/logs'
 }], [{
   label: 'Documentation',
   icon: 'i-lucide-book-open',
@@ -45,7 +49,7 @@ const links = [[{
     </template>
 
     <template #body>
-      <div class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-2xl mx-auto">
+      <div class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-6xl mx-auto">
         <NuxtPage />
       </div>
     </template>

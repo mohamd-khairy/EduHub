@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class ChatMessage extends Model
+
+class ChatMessage extends Model implements Auditable
 {
-    use HasFactory;
+use HasFactory;
+use \OwenIt\Auditing\Auditable;
+
 
     protected $fillable = [
         'sender_id', 'sender_type', 'receiver_id', 'receiver_type', 'message', 'is_read', 'sent_at'

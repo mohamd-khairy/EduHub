@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Notification extends Model
+
+class Notification extends Model implements Auditable
 {
-    use HasFactory;
+use HasFactory;
+use \OwenIt\Auditing\Auditable;
+
 
     protected $fillable = [
         'user_id', 'user_type', 'title', 'message', 'is_read'

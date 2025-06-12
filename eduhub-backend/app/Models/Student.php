@@ -4,11 +4,15 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Student extends Model
+class Student extends Model implements Auditable
 {
-    use HasFactory;
+use HasFactory;
+use \OwenIt\Auditing\Auditable;
+
 
     protected $fillable = [
         'name',
