@@ -9,7 +9,9 @@ use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\GroupController;
 use App\Http\Controllers\API\ParentController;
 use App\Http\Controllers\API\PaymentController;
+use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\ResultController;
+use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StudentController;
 use App\Http\Controllers\API\TeacherController;
 use App\Http\Controllers\API\UserController;
@@ -122,5 +124,13 @@ Route::group([], function () {
     });
     Route::group(['prefix' => 'audit'], function () {
         Route::get('/', [AuditController::class, 'index']);
+    });
+    Route::group(['prefix' => 'role'], function () {
+        Route::get('/', [RoleController::class, 'index']);
+        Route::get('/all', [RoleController::class, 'All']);
+    });
+    Route::group(['prefix' => 'permission'], function () {
+        Route::get('/', [PermissionController::class, 'index']);
+        Route::get('/all', [PermissionController::class, 'All']);
     });
 });

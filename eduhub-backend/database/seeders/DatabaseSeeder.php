@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Services\RoleService;
 use Database\Factories\AttendanceFactory;
 use Database\Factories\CourseFactory;
 use Database\Factories\EnrollmentFactory;
@@ -33,13 +34,13 @@ class DatabaseSeeder extends Seeder
         GroupFactory::new()->count(7)->create();
         // ScheduleFactory::new()->count(10)->create();
         StudentFactory::new()->count(20)->create();
-        TeacherAttendanceFactory::new()->count(10)->create();
         // PaymentFactory::new()->count(10)->create();
         // ExamFactory::new()->count(10)->create();
         // ExamResultFactory::new()->count(10)->create();
         // EnrollmentFactory::new()->count(10)->create();
         // AttendanceFactory::new()->count(10)->create();
-        Role::create(["name" => "admin"]);
+
+        RoleService::create(['admin', 'teacher', 'student', 'parent']);
         User::get()->each(function (User $user) {
             $user->assignRole("admin");
         });

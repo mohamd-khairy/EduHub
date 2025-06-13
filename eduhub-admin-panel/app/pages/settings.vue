@@ -9,9 +9,9 @@ const links = [[{
   icon: 'i-lucide-users',
   to: '/settings/members'
 }, {
-  label: 'Notifications',
+  label: 'الصلاحيات',
   icon: 'i-lucide-bell',
-  to: '/settings/notifications'
+  to: '/settings/roles'
 }, {
   label: 'Security',
   icon: 'i-lucide-shield',

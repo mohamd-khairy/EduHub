@@ -10,7 +10,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 class ParentModel extends Model implements Auditable
 {
 use HasFactory;
-use \OwenIt\Auditing\Auditable;
+ use \OwenIt\Auditing\Auditable;   
+ public static bool $inPermission = true;
 
 
     protected $table = 'parent_models';

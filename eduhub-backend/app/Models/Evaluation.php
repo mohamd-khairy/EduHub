@@ -10,7 +10,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Evaluation extends Model implements Auditable
 {
 use HasFactory;
-use \OwenIt\Auditing\Auditable;
+ use \OwenIt\Auditing\Auditable;   
+ public static bool $inPermission = true;
 
     protected $fillable = ['student_id', 'group_id', 'score', 'comment', 'evaluated_at'];
 

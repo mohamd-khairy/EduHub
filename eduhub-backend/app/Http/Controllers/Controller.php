@@ -52,6 +52,7 @@ abstract class Controller
     public function All(Request $request)
     {
         try {
+            $limit = request('limit', 50);
             $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
 
             if ($request->relations)
@@ -60,7 +61,12 @@ abstract class Controller
             if ($request->search && !empty($request->search))
                 $model = $model->where('name', 'like', '%' . $request->search . '%');
 
-            $data = $model->with($relations ?? [])->take(50)->get();
+            $data = $model->with($relations ?? []);
+
+            if ($limit != 'all') {
+                $data = $data->take(request('limit', 50));
+            }
+            $data = $data->orderBy('id', 'desc')->get();
 
             return  $this->success($data);
         } catch (\Throwable $th) {
@@ -79,7 +85,7 @@ abstract class Controller
 
             $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
 
-             if ($request->image) {
+            if ($request->image) {
                 $image = $request->image->store('images', 'public');
                 $inpput['image'] = url('/storage/' . $image);
             }

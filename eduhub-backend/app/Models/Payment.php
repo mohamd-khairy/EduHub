@@ -10,7 +10,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Payment extends Model implements Auditable
 {
 use HasFactory;
-use \OwenIt\Auditing\Auditable;
+ use \OwenIt\Auditing\Auditable;   
+ public static bool $inPermission = true;
 
 
     protected $fillable = ['student_id', 'amount', 'payment_date', 'method', 'status', 'note'];
