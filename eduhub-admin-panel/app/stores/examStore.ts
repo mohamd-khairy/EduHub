@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useExamStore = defineStore("exam", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const examOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -25,9 +24,7 @@ export const useExamStore = defineStore("exam", () => {
   async function loadAllExams(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/exam?relations=group&page=${page}`
-    );
+    const res = await api(`exam?relations=group&page=${page}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -44,9 +41,7 @@ export const useExamStore = defineStore("exam", () => {
   async function loadExams(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/exam/all?search=${search}`
-    );
+    const res = await api(`exam/all?search=${search}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -56,11 +51,7 @@ export const useExamStore = defineStore("exam", () => {
 
   async function loadExamsForSelect(search = null) {
     try {
-      const response = await fetch(
-        `${BASE_URL}/exam/all?search=${
-          search || ""
-        }`
-      );
+      const response = await api(`exam/all?search=${search || ""}`);
 
       if (!response.ok) {
         console.error("Failed to load courses:", response.statusText);
@@ -89,16 +80,10 @@ export const useExamStore = defineStore("exam", () => {
   }
 
   async function addExam(data) {
-    const res = await fetch(
-      `${BASE_URL}/exam`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const res = await api(`exam`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
 
     if (res.ok) {
       await loadAllExams();
@@ -108,16 +93,11 @@ export const useExamStore = defineStore("exam", () => {
   }
 
   async function editExam(data, id) {
-    const res = await fetch(
-      `${BASE_URL}/exam/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const res = await api(`exam/${id}`, {
+      method: "PUT",
+
+      body: JSON.stringify(data),
+    });
 
     if (res.ok) {
       await loadAllExams();
@@ -131,16 +111,11 @@ export const useExamStore = defineStore("exam", () => {
   async function deleteSelectedExams() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(
-      `${BASE_URL}/exam/delete-all`,
-      {
-        method: "POST", // Adjust method as your API requires
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ids: selectedIds.value }),
-      }
-    );
+    const res = await api(`exam/delete-all`, {
+      method: "POST", // Adjust method as your API requires
+
+      body: JSON.stringify({ ids: selectedIds.value }),
+    });
 
     if (res.ok) {
       // Remove deleted items locally

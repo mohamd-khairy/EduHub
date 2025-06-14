@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useStudentStore = defineStore("student", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const studentOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -27,14 +26,13 @@ export const useStudentStore = defineStore("student", () => {
   async function loadAllStudents(page = 1, params = null, search = null) {
     items.value = []; // clear current items
 
-    const relations =
-      "";
+    const relations = "";
 
     if (params || search) {
       page = 1; // Reset to first page if params or search are provided
     }
 
-    let url = `${BASE_URL}/student?page=${page}`;
+    let url = `student?page=${page}`;
 
     if (relations) {
       url += `&relations=${relations}`;
@@ -56,7 +54,7 @@ export const useStudentStore = defineStore("student", () => {
       url += `&${filterParam}`;
     }
 
-    const res = await fetch(url);
+    const res = await api(url);
     const json = await res.json();
 
     if (json?.data) {
@@ -73,7 +71,7 @@ export const useStudentStore = defineStore("student", () => {
   async function loadStudents(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/student/all?search=${search}`);
+    const res = await api(`student/all?search=${search}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -84,8 +82,8 @@ export const useStudentStore = defineStore("student", () => {
   async function loadOneStudent(id = null) {
     item.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/student/${id}?relations=groups.teacher,groups.course`
+    const res = await api(
+      `student/${id}?relations=groups.teacher,groups.course`
     );
     const json = await res.json();
 
@@ -97,7 +95,7 @@ export const useStudentStore = defineStore("student", () => {
   async function loadInformation(id = null) {
     information.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/student/information/${id}`);
+    const res = await api(`student/information/${id}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -107,9 +105,7 @@ export const useStudentStore = defineStore("student", () => {
 
   async function loadStudentsForSelect(search = null) {
     try {
-      const response = await fetch(
-        `${BASE_URL}/student/all?search=${search || ""}`
-      );
+      const response = await api(`student/all?search=${search || ""}`);
 
       if (!response.ok) {
         console.error("Failed to load courses:", response.statusText);
@@ -138,7 +134,7 @@ export const useStudentStore = defineStore("student", () => {
   }
 
   async function addStudent(data) {
-    const res = await fetch(`${BASE_URL}/student`, {
+    const res = await api(`student`, {
       method: "POST",
       body: data,
     });
@@ -151,37 +147,28 @@ export const useStudentStore = defineStore("student", () => {
   }
 
   async function addEnrollment(data) {
-    const res = await fetch(`${BASE_URL}/enrollment`, {
+    const res = await api(`enrollment`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
   }
 
   async function enrollmentStatusChange(data) {
-    const res = await fetch(`${BASE_URL}/enrollment/change-status`, {
+    const res = await api(`enrollment/change-status`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
   }
 
   async function deleteEnrollment(data) {
-    const res = await fetch(`${BASE_URL}/enrollment/delete`, {
+    const res = await api(`enrollment/delete`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
   }
 
   async function editStudent(data, id) {
-    const res = await fetch(`${BASE_URL}/student/${id}`, {
+    const res = await api(`student/${id}`, {
       method: "POST",
       body: data,
     });
@@ -198,11 +185,8 @@ export const useStudentStore = defineStore("student", () => {
   async function deleteSelectedStudents() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/student/delete-all`, {
+    const res = await api(`student/delete-all`, {
       method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ ids: selectedIds.value }),
     });
 

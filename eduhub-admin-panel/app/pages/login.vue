@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans antialiased">
+  <div class="min-h-screen bg-gray-50 dark:bg-(--chip-dark) font-sans antialiased">
     <div
-      class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4"
+      class="min-h-screen bg-gray-50 dark:bg-(--chip-dark) flex items-center justify-center px-4"
     >
       <div
-        class="lg:w-[50%] grid grid-cols-1 lg:grid-cols-2 gap-0 bg-white dark:bg-gray-900 rounded-2xl shadow-lg overflow-hidden"
+        class="lg:w-[50%] grid grid-cols-1 lg:grid-cols-2 gap-0 bg-white dark:bg-(--chip-dark) rounded-2xl shadow-lg overflow-hidden"
       >
         <!-- Illustration Section -->
         <div
@@ -20,7 +20,7 @@
 
         <!-- Login Form Section -->
         <div
-          class="flex flex-col justify-center px-6 sm:px-10 md:px-14 py-16 bg-gray-50 dark:bg-gray-900 text-right"
+          class="flex flex-col justify-center px-6 sm:px-10 md:px-14 py-16 bg-gray-50 dark:bg-(--ui-bg-elevated) text-right"
         >
           <div class="mb-10">
             <h1
@@ -33,7 +33,7 @@
             </p>
           </div>
 
-          <UForm @submit.prevent class="space-y-6">
+          <UForm :state="form" @submit="onLogin" v-slot="{ submit }" class="space-y-6">
             <div
               class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400"
             >
@@ -81,9 +81,13 @@
               size="lg"
               color="primary"
               class="font-semibold text-lg py-3"
-              @click="onLogin"
+              type="submit"
+              :disabled="loading"
+              @click="submit"
             >
-              تسجيل الدخول
+              <template #default>
+                {{ loading ? "جاري الدخول..." : "تسجيل الدخول" }}
+              </template>
             </UButton>
           </UForm>
 
@@ -107,13 +111,17 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useFetch } from "#app";
+
+definePageMeta({ layout: "auth" });
+
+const authStore = useAuthStore();
+const toast = useToast();
+const router = useRouter();
 
 const form = ref({
   email: "",
   password: "",
 });
-definePageMeta({ layout: "auth" });
 
 const handleImageError = (event) => {
   event.target.onerror = null;
@@ -121,27 +129,31 @@ const handleImageError = (event) => {
     "https://placehold.co/500x500/FFF8E1/E6B34A?text=Illustration";
 };
 
-const router = useRouter();
+const loading = ref(false);
 
 const onLogin = async () => {
+  loading.value = true;
   try {
-    const { data, error } = await useFetch("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify(form.value),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    await authStore.login(form.value);
 
-    if (error.value) {
-      console.error("Login failed:", error.value);
-      return;
+    if (authStore.token && authStore.user) {
+      toast.add({
+        title: "تم الدخول",
+        description: "تم تسجيل الدخول بنجاح",
+        color: "success",
+      });
+      router.push("/");
+    } else {
+      throw new Error("فشل تسجيل الدخول");
     }
-
-    // Success: Redirect to dashboard or home
-    router.push("/");
-  } catch (err) {
-    console.error("Unexpected error:", err);
+  } catch (error) {
+    toast.add({
+      title: "خطأ",
+      description: error?.message || "حدث خطأ غير متوقع",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
   }
 };
 </script>

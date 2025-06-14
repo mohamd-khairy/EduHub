@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useRoleStore = defineStore("role", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const roleOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -25,7 +24,7 @@ export const useRoleStore = defineStore("role", () => {
   async function loadAllRoles(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/role?page=${page}`);
+    const res = await api(`role?page=${page}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -42,21 +41,17 @@ export const useRoleStore = defineStore("role", () => {
   async function loadRoles(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/role/all?limit=all&relations=permissions`
-    );
+    const res = await api(`role/all?limit=all&relations=permissions`);
     const json = await res.json();
 
     if (json?.data) {
-      items.value = json.data;      
+      items.value = json.data;
     }
   }
 
   async function loadRolesForSelect(search = null) {
     try {
-      const response = await fetch(
-        `${BASE_URL}/role/all?search=${search || ""}`
-      );
+      const response = await api(`role/all?search=${search || ""}`);
 
       if (!response.ok) {
         console.error("Failed to load courses:", response.statusText);
@@ -85,11 +80,8 @@ export const useRoleStore = defineStore("role", () => {
   }
 
   async function addRole(data) {
-    const res = await fetch(`${BASE_URL}/role`, {
+    const res = await api(`role`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -101,11 +93,8 @@ export const useRoleStore = defineStore("role", () => {
   }
 
   async function editRole(data, id) {
-    const res = await fetch(`${BASE_URL}/role/${id}`, {
+    const res = await api(`role/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -118,11 +107,8 @@ export const useRoleStore = defineStore("role", () => {
   }
 
   async function editRolePermission(data, id) {
-    const res = await fetch(`${BASE_URL}/role/${id}/permissions`, {
+    const res = await api(`role/${id}/permissions`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -136,11 +122,8 @@ export const useRoleStore = defineStore("role", () => {
   async function deleteSelectedRoles() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/role/delete-all`, {
-      method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const res = await api(`role/delete-all`, {
+      method: "POST",
       body: JSON.stringify({ ids: selectedIds.value }),
     });
 
@@ -158,7 +141,7 @@ export const useRoleStore = defineStore("role", () => {
   }
 
   async function deleteRole(id) {
-    const res = await fetch(`${BASE_URL}/role/${id}`, {
+    const res = await api(`role/${id}`, {
       method: "DELETE",
     });
 

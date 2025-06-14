@@ -5,13 +5,10 @@ const groupStore = useGroupStore();
 const attendanceStore = useAttendanceStore();
 const toast = useToast();
 const now = new Date();
-
 const dashboardTitle = ref("نظام الحضور والغياب");
 const items = ref([]);
-
 const selectedHistoryDate = ref("");
 const currentDate = ref("");
-
 const searchQuery = ref("");
 const classFilter = ref(null);
 const page = ref(1);
@@ -39,8 +36,6 @@ const UDropdownMenu = resolveComponent("UDropdownMenu");
 // Initialize
 onMounted(async () => {
   selectedHistoryDate.value = now.toLocaleDateString("en-CA");
-
-  getAllGroups();
 });
 
 async function getAllGroups() {
@@ -164,7 +159,6 @@ const latePercentage = computed(() => {
   const total = students.value?.length || 0;
   return total ? Math.round((lateCount.value / total) * 100) : 0;
 });
-
 
 const startScanner = () => {
   isScanning.value = true;
@@ -375,7 +369,12 @@ const exportAttendance = () => {
     </template>
 
     <template #body>
-      <UTabs v-model="selectedGroupTab" :items="items" size="xl">
+      <UTabs
+        v-if="items.length > 0"
+        v-model="selectedGroupTab"
+        :items="items"
+        size="xl"
+      >
         <template #content="{ item, index }">
           <UTabs
             v-model="selectedScheduleTab"
@@ -574,7 +573,11 @@ const exportAttendance = () => {
                               name="i-heroicons-qr-code"
                               class="w-20 h-20 text-gray-400 mb-4"
                             />
-                            <p class="text-lg text-gray-500 mb-4" style="cursor: pointer;" @click="startScanner">
+                            <p
+                              class="text-lg text-gray-500 mb-4"
+                              style="cursor: pointer"
+                              @click="startScanner"
+                            >
                               اضغط لبدء المسح الضوئي
                             </p>
                           </div>
@@ -610,6 +613,9 @@ const exportAttendance = () => {
           </UTabs>
         </template>
       </UTabs>
+      <div v-else class="flex items-center justify-center h-64">
+        لا يوجد بيانات في هذا اليوم
+      </div>
     </template>
   </UDashboardPanel>
 </template>

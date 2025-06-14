@@ -1,75 +1,96 @@
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem } from "@nuxt/ui";
+import { useRouter } from "vue-router";
 
 defineProps<{
-  collapsed?: boolean
-}>()
+  collapsed?: boolean;
+}>();
 
-const colorMode = useColorMode()
+const authStore = useAuthStore();
+const colorMode = useColorMode();
+const router = useRouter();
 
 const user = ref({
-  name: 'محمد خيري',
+  name: authStore.user?.name,
   avatar: {
-    src: 'https://github.com/benjamincanac.png',
-    alt: 'محمد خيري'
-  }
-})
+    src: "https://github.com/benjamincanac.png",
+    alt: authStore.user?.name,
+  },
+});
 
-const items = computed<DropdownMenuItem[][]>(() => ([[{
-  type: 'label',
-  label: user.value.name,
-  avatar: user.value.avatar,
-  class: 'text-lg'
-}], [{
-  label: 'الملف الشخصي',
-  icon: 'i-lucide-user',
-  class: 'text-lg'
-},{
-  label: 'المظهر',
-  icon: 'i-lucide-sun-moon',
-  class: 'text-lg',
-  children: [{
-    label: 'Light',
-    icon: 'i-lucide-sun',
-    type: 'checkbox',
-    checked: colorMode.value === 'light',
-    onSelect(e: Event) {
-      e.preventDefault()
-
-      colorMode.preference = 'light'
-    }
-  }, {
-    label: 'Dark',
-    icon: 'i-lucide-moon',
-    type: 'checkbox',
-    checked: colorMode.value === 'dark',
-    onUpdateChecked(checked: boolean) {
-      if (checked) {
-        colorMode.preference = 'dark'
-      }
+const items = computed<DropdownMenuItem[][]>(() => [
+  [
+    {
+      type: "label",
+      label: user.value.name,
+      avatar: user.value.avatar,
+      class: "text-lg",
     },
-    onSelect(e: Event) {
-      e.preventDefault()
-    }
-  }]
-},{
-  label: 'تسجيل الخروج',
-  icon: 'i-lucide-log-out',
-  class: 'text-lg'
-}]]))
+  ],
+  [
+    {
+      label: "الملف الشخصي",
+      icon: "i-lucide-user",
+      class: "text-lg",
+    },
+    {
+      label: "المظهر",
+      icon: "i-lucide-sun-moon",
+      class: "text-lg",
+      children: [
+        {
+          label: "Light",
+          icon: "i-lucide-sun",
+          type: "checkbox",
+          checked: colorMode.value === "light",
+          onSelect(e: Event) {
+            e.preventDefault();
+
+            colorMode.preference = "light";
+          },
+        },
+        {
+          label: "Dark",
+          icon: "i-lucide-moon",
+          type: "checkbox",
+          checked: colorMode.value === "dark",
+          onUpdateChecked(checked: boolean) {
+            if (checked) {
+              colorMode.preference = "dark";
+            }
+          },
+          onSelect(e: Event) {
+            e.preventDefault();
+          },
+        },
+      ],
+    },
+    {
+      label: "تسجيل الخروج",
+      icon: "i-lucide-log-out",
+      class: "text-lg",
+      onSelect: async () => {
+        await authStore.logout();
+        router.push("/login");
+      },
+    },
+  ],
+]);
 </script>
 
 <template>
   <UDropdownMenu
     :items="items"
     :content="{ align: 'center', collisionPadding: 12 }"
-    :ui="{ content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)' }"
+    :ui="{
+      content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)',
+    }"
   >
     <UButton
       v-bind="{
         ...user,
         label: collapsed ? undefined : user?.name,
-        trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
+        trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down',
       }"
       color="neutral"
       variant="ghost"
@@ -77,7 +98,7 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
       :square="collapsed"
       class="data-[state=open]:bg-elevated text-lg"
       :ui="{
-        trailingIcon: 'text-dimmed'
+        trailingIcon: 'text-dimmed',
       }"
     />
 

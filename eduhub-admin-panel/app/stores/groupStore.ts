@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useGroupStore = defineStore("group", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const groupsByTime = ref<object[]>([]);
   const groupOptions = ref<object[]>([]);
@@ -31,8 +30,8 @@ export const useGroupStore = defineStore("group", () => {
   async function loadAllGroups(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/group?relations=teacher,course,schedules,students.parent,exams&page=${page}`
+    const res = await api(
+      `group?relations=teacher,course,schedules,students.parent,exams&page=${page}`
     );
     const json = await res.json();
 
@@ -50,7 +49,7 @@ export const useGroupStore = defineStore("group", () => {
   async function loadAllGroupsByTime(date = null) {
     groupsByTime.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/group/groups-by-time?date=${date}`);
+    const res = await api(`group/groups-by-time?date=${date}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -61,11 +60,8 @@ export const useGroupStore = defineStore("group", () => {
   async function loadGroupTodayAttendance(data, date = null) {
     todayGroupAttendance.value = []; // Clear current items
 
-    const res = await fetch(`${BASE_URL}/group/group-attendance?date=${date}`, {
+    const res = await api(`group/group-attendance?date=${date}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -80,13 +76,13 @@ export const useGroupStore = defineStore("group", () => {
 
   async function loadGroupsForSelect(search = null) {
     try {
-      let url = `${BASE_URL}/group/all`;
+      let url = `group/all`;
 
       if (search) {
         url += `?search=${search || ""}`;
       }
 
-      const response = await fetch(url);
+      const response = await api(url);
 
       if (!response.ok) {
         console.error("Failed to load courses:", response.statusText);
@@ -115,11 +111,8 @@ export const useGroupStore = defineStore("group", () => {
   }
 
   async function addGroup(data) {
-    const res = await fetch(`${BASE_URL}/group`, {
+    const res = await api(`group`, {
       method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -131,11 +124,8 @@ export const useGroupStore = defineStore("group", () => {
   }
 
   async function editGroup(data, id) {
-    const res = await fetch(`${BASE_URL}/group/${id}`, {
+    const res = await api(`group/${id}`, {
       method: "PUT", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -151,11 +141,8 @@ export const useGroupStore = defineStore("group", () => {
   async function deleteSelectedGroups() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/group/delete-all`, {
+    const res = await api(`group/delete-all`, {
       method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ ids: selectedIds.value }),
     });
 

@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const usePermissionStore = defineStore("permission", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const permissionOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -25,9 +24,7 @@ export const usePermissionStore = defineStore("permission", () => {
   async function loadAllPermissions(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/permission?page=${page}`
-    );
+    const res = await api(`permission?page=${page}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -44,7 +41,7 @@ export const usePermissionStore = defineStore("permission", () => {
   async function loadPermissions(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/permission/all?limit=all`);
+    const res = await api(`permission/all?limit=all`);
     const json = await res.json();
 
     if (json?.data) {
@@ -54,9 +51,7 @@ export const usePermissionStore = defineStore("permission", () => {
 
   async function loadPermissionsForSelect(search = null) {
     try {
-      const response = await fetch(
-        `${BASE_URL}/permission/all?search=${search || ""}`
-      );
+      const response = await api(`permission/all?search=${search || ""}`);
 
       if (!response.ok) {
         console.error("Failed to load courses:", response.statusText);
@@ -85,11 +80,8 @@ export const usePermissionStore = defineStore("permission", () => {
   }
 
   async function addPermission(data) {
-    const res = await fetch(`${BASE_URL}/permission`, {
+    const res = await api(`permission`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -101,11 +93,8 @@ export const usePermissionStore = defineStore("permission", () => {
   }
 
   async function editPermission(data, id) {
-    const res = await fetch(`${BASE_URL}/permission/${id}`, {
+    const res = await api(`permission/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -121,11 +110,8 @@ export const usePermissionStore = defineStore("permission", () => {
   async function deleteSelectedPermissions() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/permission/delete-all`, {
+    const res = await api(`permission/delete-all`, {
       method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ ids: selectedIds.value }),
     });
 

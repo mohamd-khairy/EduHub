@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useParentStore = defineStore("parent", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const parentOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -25,9 +24,7 @@ export const useParentStore = defineStore("parent", () => {
   async function loadAllParents(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/parentModel?relations=students&page=${page}`
-    );
+    const res = await api(`parentModel?relations=students&page=${page}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -44,7 +41,7 @@ export const useParentStore = defineStore("parent", () => {
   async function loadParents(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/parentModel/all?search=${search}`);
+    const res = await api(`parentModel/all?search=${search}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -54,9 +51,7 @@ export const useParentStore = defineStore("parent", () => {
 
   async function loadParentsForSelect(search = null) {
     try {
-      const response = await fetch(
-        `${BASE_URL}/parentModel/all?search=${search || ""}`
-      );
+      const response = await api(`parentModel/all?search=${search || ""}`);
 
       if (!response.ok) {
         console.error("Failed to load courses:", response.statusText);
@@ -85,11 +80,8 @@ export const useParentStore = defineStore("parent", () => {
   }
 
   async function addParent(data) {
-    const res = await fetch(`${BASE_URL}/parentModel`, {
+    const res = await api(`parentModel`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -101,11 +93,8 @@ export const useParentStore = defineStore("parent", () => {
   }
 
   async function editParent(data, id) {
-    const res = await fetch(`${BASE_URL}/parentModel/${id}`, {
+    const res = await api(`parentModel/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -121,11 +110,8 @@ export const useParentStore = defineStore("parent", () => {
   async function deleteSelectedParents() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/parentModel/delete-all`, {
+    const res = await api(`parentModel/delete-all`, {
       method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ ids: selectedIds.value }),
     });
 

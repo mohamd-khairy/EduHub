@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const usePaymentStore = defineStore("payment", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const paymentOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -25,9 +24,7 @@ export const usePaymentStore = defineStore("payment", () => {
   async function loadAllPayments(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/payment?relations=student&page=${page}`
-    );
+    const res = await api(`payment?relations=student&page=${page}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -44,7 +41,7 @@ export const usePaymentStore = defineStore("payment", () => {
   async function loadPayments(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/payment/all?search=${search}`);
+    const res = await api(`payment/all?search=${search}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -54,9 +51,7 @@ export const usePaymentStore = defineStore("payment", () => {
 
   async function loadPaymentsForSelect(search = null) {
     try {
-      const response = await fetch(
-        `${BASE_URL}/payment/all?search=${search || ""}`
-      );
+      const response = await api(`payment/all?search=${search || ""}`);
 
       if (!response.ok) {
         console.error("Failed to load payments:", response.statusText);
@@ -85,11 +80,8 @@ export const usePaymentStore = defineStore("payment", () => {
   }
 
   async function addPayment(data) {
-    const res = await fetch(`${BASE_URL}/payment`, {
+    const res = await api(`payment`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -101,11 +93,8 @@ export const usePaymentStore = defineStore("payment", () => {
   }
 
   async function editPayment(data, id) {
-    const res = await fetch(`${BASE_URL}/payment/${id}`, {
+    const res = await api(`payment/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -121,11 +110,8 @@ export const usePaymentStore = defineStore("payment", () => {
   async function deleteSelectedpayments() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/payment/delete-all`, {
+    const res = await api(`payment/delete-all`, {
       method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ ids: selectedIds.value }),
     });
 

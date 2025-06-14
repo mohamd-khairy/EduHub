@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useAuditStore = defineStore("audit", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const paymentOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -25,9 +24,7 @@ export const useAuditStore = defineStore("audit", () => {
   async function loadAllAudits(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/audit?&page=${page}`
-    );
+    const res = await api(`audit?&page=${page}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -45,11 +42,8 @@ export const useAuditStore = defineStore("audit", () => {
   async function deleteSelectedpayments() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/audit/delete-all`, {
-      method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const res = await api(`audit/delete-all`, {
+      method: "POST",
       body: JSON.stringify({ ids: selectedIds.value }),
     });
 

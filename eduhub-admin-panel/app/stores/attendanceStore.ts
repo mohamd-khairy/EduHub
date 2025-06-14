@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useAttendanceStore = defineStore("attendance", () => {
-  const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
+  const api = useApi();
+
   const items = ref<object[]>([]);
   const attendanceOptions = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
@@ -25,9 +24,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
   async function loadAllAttendances(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/attendance?relations=student&page=${page}`
-    );
+    const res = await api(`attendance?relations=student&page=${page}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -44,7 +41,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
   async function loadAttendances(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/attendance/all?search=${search}`);
+    const res = await api(`attendance/all?search=${search}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -54,9 +51,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
 
   async function loadAttendancesForSelect(search = null) {
     try {
-      const response = await fetch(
-        `${BASE_URL}/attendance/all?search=${search || ""}`
-      );
+      const response = await api(`attendance/all?search=${search || ""}`);
 
       if (!response.ok) {
         console.error("Failed to load attendances:", response.statusText);
@@ -85,11 +80,8 @@ export const useAttendanceStore = defineStore("attendance", () => {
   }
 
   async function updateAllAttendance(data) {
-    const res = await fetch(`${BASE_URL}/attendance/update-all-attendance`, {
+    const res = await api(`attendance/update-all-attendance`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -101,11 +93,8 @@ export const useAttendanceStore = defineStore("attendance", () => {
   }
 
   async function addAttendance(data) {
-    const res = await fetch(`${BASE_URL}/attendance`, {
+    const res = await api(`attendance`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -117,11 +106,8 @@ export const useAttendanceStore = defineStore("attendance", () => {
   }
 
   async function editAttendance(data, id) {
-    const res = await fetch(`${BASE_URL}/attendance/${id}`, {
+    const res = await api(`attendance/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
 
@@ -137,11 +123,8 @@ export const useAttendanceStore = defineStore("attendance", () => {
   async function deleteSelectedattendances() {
     if (selectedIds.value.length === 0) return;
 
-    const res = await fetch(`${BASE_URL}/attendance/delete-all`, {
+    const res = await api(`attendance/delete-all`, {
       method: "POST", // Adjust method as your API requires
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ ids: selectedIds.value }),
     });
 
