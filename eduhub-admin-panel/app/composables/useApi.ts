@@ -1,9 +1,10 @@
 // composables/useApi.ts
 export function useApi() {
-  // Prefer env from runtimeConfig if Nuxt 3, or fallback
   const BASE_URL =
     import.meta.env.NUXT_API_BASE_URL ||
     "http://localhost/EduHub/eduhub-backend/public/api";
+
+  const router = useRouter(); // Nuxt 3 composable to programmatically navigate
 
   return async (endpoint: string, options: RequestInit = {}) => {
     const token = process.client ? localStorage.getItem("auth_token") : null;
@@ -12,14 +13,25 @@ export function useApi() {
       endpoint.startsWith("/") ? endpoint : "/" + endpoint
     }`;
 
-    return await fetch(url, {
+    const response = await fetch(url, {
       ...options,
       headers: {
         ...(options.headers || {}),
-        "Accept": "application/json",
+        Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
+
+    if (response.status === 401 && process.client) {
+      // Optional: clear token and redirect
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
+
+      router.push("/login");
+      return;
+    }
+
+    return response;
   };
 }
