@@ -152,7 +152,16 @@ abstract class Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
+
+            $data = $model->where('id', $id)->delete();
+
+            return  $this->success($data);
+        } catch (\Throwable $th) {
+            // throw $th;
+            return  $this->fail([]);
+        }
     }
 
     public function deleteAll(Request $request)

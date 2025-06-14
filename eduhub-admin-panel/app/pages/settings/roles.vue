@@ -2,6 +2,7 @@
 import { ref, reactive, watch, onMounted, computed } from "vue";
 import { useRoleStore } from "~/stores/roleStore";
 import groupBy from "lodash/groupBy";
+import AddRoleModal from "~/components/settings/AddRoleModal.vue";
 
 const roleStore = useRoleStore();
 const permissionStore = usePermissionStore();
@@ -27,14 +28,13 @@ function onChangePermission(permission: any) {
   );
 }
 
-
 function toggleGroup(group: string, value: boolean) {
   if (!groupedPermissions.value[group]) return;
   groupedPermissions.value[group].forEach((permission) => {
     state[permission.name] = value;
   });
 
-   state[selectedRole.value.name] = permissions.value.every(
+  state[selectedRole.value.name] = permissions.value.every(
     (perm: any) => state[perm.name]
   );
 }
@@ -56,17 +56,19 @@ const groupedPermissions = computed(() => {
   return groupBy(permissions.value, "group");
 });
 
-
-onMounted(async () => {
+async function getRoles() {
   isLoading.value = true;
   await roleStore.loadRoles();
   roles.value = roleStore.items;
+  isLoading.value = false;
+}
+
+onMounted(async () => {
+  isLoading.value = true;
+  getRoles();
   await permissionStore.loadPermissions();
   permissions.value = permissionStore.items;
 
-  if (roles.value.length > 0) {
-    selectedRole.value = roles.value[0];
-  }
   isLoading.value = false;
 });
 
@@ -78,11 +80,54 @@ watch(selectedRole, (newVal) => {
       (perm: any) => perm.name === p.name
     );
   });
+
+  state[selectedRole.value.name] = permissions.value.every(
+    (perm: any) => state[perm.name]
+  );
 });
 
 function formatPermissionName(name: string): string {
   return name.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+watch(state, async () => {
+  const permission_ids = [];
+
+  Object.keys(state)
+    .filter((key) => state[key])
+    .forEach((key) => {
+      const exists = permissions.value.find((perm: any) => perm.name === key);
+
+      if (exists) {
+        permission_ids.push(exists.id);
+      }
+    });
+
+  const payload = {
+    permissions: permission_ids,
+  };
+  await roleStore.editRolePermission(payload, selectedRole.value.id);
+});
+
+async function onRoleDelete(role: any) {
+  await roleStore.deleteRole(role.id);
+}
+
+watch(
+  () => roleStore.items,
+  () => {
+    roles.value = roleStore.items;
+  }
+);
+
+watch(
+  () => roles.value,
+  () => {
+    if (roles.value.length > 0) {
+      selectedRole.value = roles.value[0];
+    }
+  }
+);
 </script>
 
 <template>
@@ -97,39 +142,51 @@ function formatPermissionName(name: string): string {
     </div>
 
     <template v-else>
+
       <!-- Right Sidebar: Role List -->
       <UCard class="w-1/4 p-0 overflow-y-auto">
+
         <template #header>
           <UInput
             icon="i-lucide-search"
             placeholder="ابحث ..."
             variant="outline"
-            size="sm"
-            class="w-full"
             @input="(e) => setFilterValue(e.target.value)"
           />
         </template>
 
         <div class="divide-y divide-gray-200">
+        <AddRoleModal v-if="selectedRole && roles.length > 0" class="mb-6"/>
+
           <UButton
             v-for="role in roles"
             :key="role.id"
             variant="ghost"
             color="gray"
-            class="justify-start w-full text-left rounded-t-lg px-4 py-3"
+            class="justify-between w-full text-left rounded-t-lg px-4 py-3"
             :class="
               selectedRole?.id === role.id ? 'bg-primary/10 text-primary' : ''
             "
             @click="selectedRole = role"
           >
             {{ role.name }}
+
+            <UButton
+              icon="i-lucide-trash"
+              color="red"
+              variant="soft"
+              size="lg"
+              class="hover:bg-red-100 hover:text-red-700 transition-colors duration-200"
+              @click="onRoleDelete(role)"
+            />
           </UButton>
         </div>
       </UCard>
 
       <!-- Left Side: Role Details -->
-      <div class="flex-1 overflow-y-auto">
-        <UCard v-if="selectedRole" class="space-y-6">
+      <div class="flex-1 overflow-y-auto ">
+        <UCard v-if="selectedRole && roles.length > 0" class="space-y-6">
+
           <template #header>
             <div class="flex items-center justify-between">
               <div>
@@ -186,8 +243,12 @@ function formatPermissionName(name: string): string {
           </div>
         </UCard>
 
-        <UCard v-else class="text-center text-gray-500 py-12">
+        <UCard
+          v-else
+          class="lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+        >
           <p>الرجاء اختيار دور من القائمة لعرض التفاصيل</p>
+          <AddRoleModal />
         </UCard>
       </div>
     </template>

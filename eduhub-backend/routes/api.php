@@ -127,7 +127,10 @@ Route::group([], function () {
     });
     Route::group(['prefix' => 'role'], function () {
         Route::get('/', [RoleController::class, 'index']);
+        Route::post('/', [RoleController::class, 'store']);
+        Route::delete('/{id}', [RoleController::class, 'destroy']);
         Route::get('/all', [RoleController::class, 'All']);
+        Route::put('/{id}/permissions', [RoleController::class, 'updatePermission']);
     });
     Route::group(['prefix' => 'permission'], function () {
         Route::get('/', [PermissionController::class, 'index']);

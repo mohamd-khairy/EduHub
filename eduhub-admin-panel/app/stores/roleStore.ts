@@ -25,9 +25,7 @@ export const useRoleStore = defineStore("role", () => {
   async function loadAllRoles(page = 1) {
     items.value = []; // clear current items
 
-    const res = await fetch(
-      `${BASE_URL}/role?page=${page}`
-    );
+    const res = await fetch(`${BASE_URL}/role?page=${page}`);
     const json = await res.json();
 
     if (json?.data) {
@@ -44,11 +42,13 @@ export const useRoleStore = defineStore("role", () => {
   async function loadRoles(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/role/all?limit=all&relations=permissions`);
+    const res = await fetch(
+      `${BASE_URL}/role/all?limit=all&relations=permissions`
+    );
     const json = await res.json();
 
     if (json?.data) {
-      items.value = json.data;
+      items.value = json.data;      
     }
   }
 
@@ -94,7 +94,7 @@ export const useRoleStore = defineStore("role", () => {
     });
 
     if (res.ok) {
-      await loadAllRoles();
+      await loadRoles();
     } else {
       throw new Error("Failed to delete groups");
     }
@@ -112,6 +112,21 @@ export const useRoleStore = defineStore("role", () => {
     if (res.ok) {
       await loadAllRoles();
       editModalOpen.value = false;
+    } else {
+      throw new Error("Failed to delete groups");
+    }
+  }
+
+  async function editRolePermission(data, id) {
+    const res = await fetch(`${BASE_URL}/role/${id}/permissions`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (res.ok) {
     } else {
       throw new Error("Failed to delete groups");
     }
@@ -137,6 +152,18 @@ export const useRoleStore = defineStore("role", () => {
       await loadAllRoles();
       deleteModalOpen.value = false;
       clearSelection();
+    } else {
+      throw new Error("Failed to delete Roles");
+    }
+  }
+
+  async function deleteRole(id) {
+    const res = await fetch(`${BASE_URL}/role/${id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      await loadRoles();
     } else {
       throw new Error("Failed to delete Roles");
     }
@@ -177,6 +204,8 @@ export const useRoleStore = defineStore("role", () => {
     pagination,
     editModalOpen,
     editItem,
+    deleteRole,
+    editRolePermission,
     addRole,
     editRole,
     loadAllRoles,

@@ -44,7 +44,7 @@ export const usePermissionStore = defineStore("permission", () => {
   async function loadPermissions(search = null) {
     items.value = []; // clear current items
 
-    const res = await fetch(`${BASE_URL}/permission/all?limit=all&relations=permissions`);
+    const res = await fetch(`${BASE_URL}/permission/all?limit=all`);
     const json = await res.json();
 
     if (json?.data) {
