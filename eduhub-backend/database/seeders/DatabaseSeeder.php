@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        RoleService::create(['admin', 'teacher', 'student', 'parent']);
+
         UserFactory::new()->count(10)->create();
         CourseFactory::new()->count(10)->create();
         TeacherFactory::new()->count(10)->create();
@@ -40,7 +42,6 @@ class DatabaseSeeder extends Seeder
         // EnrollmentFactory::new()->count(10)->create();
         // AttendanceFactory::new()->count(10)->create();
 
-        RoleService::create(['admin', 'teacher', 'student', 'parent']);
         User::get()->each(function (User $user) {
             $user->assignRole("admin");
         });

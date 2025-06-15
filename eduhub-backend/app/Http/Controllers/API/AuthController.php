@@ -24,11 +24,18 @@ class AuthController extends Controller
         // Create token
         $user = Auth::user();
         $token = $user->createToken('login-token')->plainTextToken;
+        $roles = $user->roles()->pluck('name');
+        $permissions = $user->getAllPermissions()->pluck('name');
+
+        unset($user->roles); // remove if loaded
+        unset($user->permissions); // remove if loaded
 
         return $this->success([
             'message' => 'Login successful.',
             'token' => $token,
-            'user' => $user
+            'user' => $user,
+            'roles' =>   $roles,
+            'permissions' => $permissions,
         ]);
     }
 }
