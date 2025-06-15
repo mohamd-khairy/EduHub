@@ -10,9 +10,8 @@ use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable  implements Auditable
+class User extends Authenticatable implements Auditable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
     use HasApiTokens;
     use \OwenIt\Auditing\Auditable;
@@ -28,7 +27,8 @@ class User extends Authenticatable  implements Auditable
         'name',
         'email',
         'password',
-        'role'
+        'phone',
+        'image'
     ];
 
     /**
@@ -41,6 +41,7 @@ class User extends Authenticatable  implements Auditable
         'remember_token',
     ];
 
+    protected $appends = ['display_roles', 'role'];
 
     /**
      * Get the attributes that should be cast.
@@ -55,13 +56,24 @@ class User extends Authenticatable  implements Auditable
         ];
     }
 
-    public function isAdmin()
+    public function setImageAttribute($value)
     {
-        return $this->role === 'admin';
+        $image = $value->store('images', 'public');
+        $this->attributes['image'] = url('/storage/' . $image);
     }
 
-    public function isStaff()
+    public function getRoleAttribute()
     {
-        return $this->role === 'staff';
+        return $this->roles->first();
+    }
+
+    public function getDisplayRolesAttribute()
+    {
+        return $this->roles->pluck('name')->implode(', ');
+    }
+
+    public function isAdmin()
+    {
+        return in_array('admin', $this->roles->pluck('name')->toArray());
     }
 }

@@ -3,7 +3,9 @@ import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import AddModal from '~/components/users/AddModal.vue'
 import DeleteModal from '~/components/users/DeleteModal.vue'
-import type { User } from '~/types'
+import EditModal from '~/components/users/EditModal.vue'
+
+const userStore = useUserStore();
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -14,106 +16,85 @@ const toast = useToast()
 const table = useTemplateRef('table')
 
 const columnFilters = ref([{
-  id: 'name',
+  id: 'الاسم',
   value: ''
 }])
 
 const columnVisibility = ref()
 
 const items = ref([])
-const pagination = ref({
-  page: 1,
-  pageCount: 1,
-  pageSize: 10,
-  total: 0
+
+onMounted(async () => {
+  await userStore.loadAllUsers()
+  items.value = userStore.items;
 })
 
-// Initial load
-await loadData()
-
-async function loadData(page = 1) {
-  const { data } = await useFetch(`http://localhost/EduHub/eduhub-backend/public/api/user?page=${page}`, {
-    transform: (res) => res.data
-  })
-
-  if (data.value) {
-    items.value = data.value.data
-
-    pagination.value = {
-      page: data.value.current_page,
-      pageCount: data.value.last_page,
-      pageSize: data.value.per_page,
-      total: data.value.total
-    }
-  }
-}
-
-function getRowItems(row: Row<ob>) {
+function getRowItems(row: any) {
   return [
+    { type: 'label', label: 'الاجراءات' },
+    { type: 'separator' },
     {
-      type: 'label',
-      label: 'Actions'
-    },
-    {
-      label: 'Copy customer ID',
-      icon: 'i-lucide-copy',
+      label: 'تعديل الموظف',
+      icon: 'i-lucide-edit',
+      color: 'primary',
       onSelect() {
-        navigator.clipboard.writeText(row.original.id.toString())
-        toast.add({
-          title: 'Copied to clipboard',
-          description: 'Customer ID copied to clipboard'
-        })
+        userStore.editItem = row.original
+        userStore.editModalOpen = true
       }
     },
     {
-      type: 'separator'
-    },
-    {
-      label: 'View customer details',
-      icon: 'i-lucide-list'
-    },
-    {
-      label: 'View customer payments',
-      icon: 'i-lucide-wallet'
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: 'Delete customer',
+      label: 'حذف الموظف',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
-        toast.add({
-          title: 'Customer deleted',
-          description: 'The customer has been deleted.'
-        })
+        userStore.addId(row.original.id)
+        userStore.deleteModalOpen = true
       }
     }
   ]
 }
 
-const columns: TableColumn<User>[] = [
+const columns: TableColumn<object>[] = [
   {
-    id: 'select',
+    id: 'اختار',
     header: ({ table }) =>
       h(UCheckbox, {
-        'modelValue': table.getIsSomePageRowsSelected()
-          ? 'indeterminate'
-          : table.getIsAllPageRowsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-          table.toggleAllPageRowsSelected(!!value),
-        'ariaLabel': 'Select all'
+        modelValue: userStore.selectedIds.length > 0 && userStore.selectedIds.length === table.getFilteredRowModel().rows.length
+          ? true
+          : userStore.selectedIds?.length > 0
+            ? 'indeterminate'
+            : false,
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            // Select all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              userStore.toggleId(r.original.id)
+            })
+          } else {
+            // Deselect all visible rows
+            table.getFilteredRowModel().rows.forEach(r => {
+              userStore.removeId(r.original.id)
+            })
+          }
+        },
+        ariaLabel: 'Select all'
       }),
     cell: ({ row }) =>
       h(UCheckbox, {
-        'modelValue': row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
-        'ariaLabel': 'Select row'
+        modelValue: userStore.selectedIds.includes(row.original.id),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            userStore.addId(row.original.id)
+          } else {
+            userStore.removeId(row.original.id)
+          }
+        },
+        ariaLabel: 'Select row'
       })
   },
   {
     accessorKey: 'id',
+    id: 'الرقم',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -132,7 +113,21 @@ const columns: TableColumn<User>[] = [
     }
   },
   {
+    accessorKey: 'image',
+    id: 'الصورة',
+    header: 'الصورة',
+    cell: ({ row }) => {
+      const imageUrl = row.original.image; // fallback image
+      return h('img', {
+        src: imageUrl,
+        alt: row.original.name || 'User Image',
+        class: 'w-10 h-10 rounded-full object-cover'
+      });
+    }
+  },
+  {
     accessorKey: 'name',
+    id: 'الاسم',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -152,25 +147,30 @@ const columns: TableColumn<User>[] = [
   },
   {
     accessorKey: 'email',
+    id: 'البريد الالكتروني',
     header: 'البريد الالكتروني',
   },
   {
-    accessorKey: 'email_verified_at',
-    header: ' تاكيد البريد الالكتروني'
+    accessorKey: 'phone',
+    id: ' رقم الهاتف ',
+    header: ' رقم الهاتف '
   },
   {
-    accessorKey: 'role',
+    accessorKey: 'display_roles',
+    id: 'الدور',
     header: 'الدور',
     cell: ({ row }) => {
       const color = 'success'
 
       return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.original.role
+        row.original.display_roles
       )
     }
   },
   {
-    id: 'actions',
+    accessorKey: 'actions',
+    id: 'الاجراءات',
+    header: 'الاجراءات',
     cell: ({ row }) => {
       return h(
         'div',
@@ -196,35 +196,43 @@ const columns: TableColumn<User>[] = [
   }
 ]
 
+watch(() => userStore.items, () => {
+  items.value = userStore.items;
+})
 </script>
 
 <template>
   <UDashboardPanel id="customers">
     <template #header>
-      <UDashboardNavbar title="اولياء الامور">
+      <UDashboardNavbar title="الموظفيين">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
 
         <template #right>
           <AddModal />
+
+          <DeleteModal :count="userStore.selectedIds.length" v-model:open="userStore.deleteModalOpen" />
+
+          <EditModal :item="userStore.editItem" v-model:open="userStore.editModalOpen" />
+
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)" class="max-w-sm"
+        <UInput :model-value="(table?.tableApi?.getColumn('الاسم')?.getFilterValue() as string)" class="max-w-sm"
           icon="i-lucide-search" placeholder="ابحث ..."
-          @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
+          @update:model-value="table?.tableApi?.getColumn('الاسم')?.setFilterValue($event)" />
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <DeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
-            <UButton v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length" label="حذف" color="error"
-              variant="subtle" icon="i-lucide-trash">
+          <DeleteModal :count="userStore.selectedIds.length">
+            <UButton v-if="userStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
-                  {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
+                  {{ userStore.selectedIds.length }}
                 </UKbd>
               </template>
             </UButton>
@@ -251,7 +259,7 @@ const columns: TableColumn<User>[] = [
       </div>
 
       <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-        v-model:pagination="pagination" class="shrink-0" :data="items" :columns="columns" :ui="{
+        v-model:pagination="userStore.pagination" class="shrink-0" :data="items" :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -262,8 +270,8 @@ const columns: TableColumn<User>[] = [
 
       <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
         <div class="flex items-center gap-1.5" dir="rtl">
-          <UPagination dir="rtl" :total="pagination.total" :items-per-page="pagination.pageSize"
-            :default-page="pagination.page" @update:page="(p) => loadData(p)" />
+          <UPagination dir="rtl" :total="userStore?.pagination?.total" :items-per-page="userStore?.pagination?.pageSize"
+            :default-page="userStore?.pagination?.page" @update:page="(p) => userStore.loadAllUsers(p)" />
         </div>
       </div>
     </template>

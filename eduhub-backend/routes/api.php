@@ -60,7 +60,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('', [UserController::class, 'store']);
         Route::get('{id}', [UserController::class, 'show']);
-        Route::put('{id}', [UserController::class, 'update']);
+        Route::post('{id}', [UserController::class, 'update']);
     });
     Route::group(['prefix' => 'student'], function () {
         Route::get('/all', [StudentController::class, 'All']);

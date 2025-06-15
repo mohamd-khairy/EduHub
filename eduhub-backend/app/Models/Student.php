@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Student extends Model implements Auditable
 {
-use HasFactory;
- use \OwenIt\Auditing\Auditable;   
- public static bool $inPermission = true;
+    use HasFactory;
+    use \OwenIt\Auditing\Auditable;
+    public static bool $inPermission = true;
 
 
     protected $fillable = [

@@ -4,7 +4,6 @@ import { upperFirst } from 'scule'
 import AddModal from '~/components/teachers/AddModal.vue'
 import DeleteModal from '~/components/teachers/DeleteModal.vue'
 import EditModal from '~/components/teachers/EditModal.vue'
-import type { User } from '~/types'
 
 const teacherStore = useTeacherStore()
 
@@ -52,7 +51,7 @@ function getRowItems(row: any) {
   ]
 }
 
-const columns: TableColumn<User>[] = [
+const columns: TableColumn<object>[] = [
    {
     id: 'اختار',
     header: ({ table }) =>

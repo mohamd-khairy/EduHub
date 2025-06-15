@@ -12,8 +12,7 @@ class Audit extends Model implements \OwenIt\Auditing\Contracts\Audit
     /**
      * @var string[]
      */
-
-    protected $guarded = ['*'];
+    protected $guarded = [];
     /**
      * Is globally auditing disabled?
      *

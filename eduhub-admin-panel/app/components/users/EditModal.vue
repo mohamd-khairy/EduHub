@@ -3,24 +3,28 @@ import * as z from "zod";
 import { defineEmits } from "vue";
 import type { FormSubmitEvent } from "@nuxt/ui";
 
-const emit = defineEmits(["addUser"]);
-
-const open = ref(false);
-
 const userStore = useUserStore();
 const roleStore = useRoleStore();
 
-onMounted(async () => {
-  roleStore.loadRolesForSelect();
-});
+const props = defineProps({
+  open: Boolean,
+  item: Object
+})
 
-const schema = z.object({
-  name: z.string().min(2, "Too short"),
-  email: z.string().email("Invalid email"),
-  password: z.string().min(2, "Too short"),
-  phone: z.string(),
-});
+const emit = defineEmits(['update:open'])
 
+watch(() => props.open, (val) => {
+  open.value = val
+})
+
+const open = ref(false)
+
+watch(open, (val) => {
+  emit('update:open', val)
+})
+
+
+const toast = useToast();
 type Schema = z.output<typeof schema>;
 
 const state = reactive<Partial<Schema>>({
@@ -32,7 +36,16 @@ const state = reactive<Partial<Schema>>({
   image: "",
 });
 
-const toast = useToast();
+const schema = z.object({
+  name: z.string().min(2, "Too short"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(2, "Too short"),
+  phone: z.string(),
+});
+
+onMounted(async () => {
+  roleStore.loadRolesForSelect();
+});
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
 
@@ -52,14 +65,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   }
 
   try {
-    // Submit user
-    await userStore.addUser(formData);
-    emit("addUser", formData);
+    await userStore.editUser(formData, props.item?.id);
+
+    emit("update:open", false);
 
     // Success feedback
     toast.add({
-      title: "موظف جديد",
-      description: `تمت إضافة ${state.name} بنجاح.`,
+      title: "تعديل الموظف بنجاح.",
+      description: `تمت تعديل ${state.name} بنجاح.`,
       color: "success",
     });
 
@@ -74,7 +87,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     });
   }
 }
-
 
 function resetState() {
   Object.assign(state, {
@@ -102,11 +114,25 @@ function onFileChange(e: Event) {
 function onFileClick() {
   fileRef.value?.click();
 }
+
+watch(() => props.item, (val) => {
+  if (!val) return;
+
+  if (val) {
+    state.name = val.name;
+    state.email = val.email;
+    state.password = val.password;
+    state.phone = val.phone;
+    state.image = val.image;
+    state.roles = val.roles.map((role) => {
+      return { value: role.id, label: role.name }
+    })[0]
+  }
+});
 </script>
 
 <template>
-  <UModal v-model:open="open" title="اضافة موظف" description="إضافة موظف جديد" dir="rtl">
-    <UButton label="إضافة موظف جديد" color="neutral" icon="i-lucide-plus" dir="rtl" />
+  <UModal v-model:open="open" title="تعديل موظف" description="تعديل موظف جديد" dir="rtl">
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl" @submit="onSubmit">
