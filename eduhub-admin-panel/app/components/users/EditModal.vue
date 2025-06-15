@@ -23,7 +23,6 @@ watch(open, (val) => {
   emit('update:open', val)
 })
 
-
 const toast = useToast();
 type Schema = z.output<typeof schema>;
 
@@ -43,9 +42,6 @@ const schema = z.object({
   phone: z.string(),
 });
 
-onMounted(async () => {
-  roleStore.loadRolesForSelect();
-});
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
 

@@ -6,6 +6,7 @@ import DeleteModal from '~/components/users/DeleteModal.vue'
 import EditModal from '~/components/users/EditModal.vue'
 
 const userStore = useUserStore();
+const roleStore = useRoleStore();
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -25,8 +26,8 @@ const columnVisibility = ref()
 const items = ref([])
 
 onMounted(async () => {
+  await roleStore.loadRolesForSelect();
   await userStore.loadAllUsers()
-  items.value = userStore.items;
 })
 
 function getRowItems(row: any) {

@@ -10,10 +10,6 @@ const open = ref(false);
 const userStore = useUserStore();
 const roleStore = useRoleStore();
 
-onMounted(async () => {
-  roleStore.loadRolesForSelect();
-});
-
 const schema = z.object({
   name: z.string().min(2, "Too short"),
   email: z.string().email("Invalid email"),
@@ -54,7 +50,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
     // Submit user
     await userStore.addUser(formData);
-    emit("addUser", formData);
+
+    open.value = false;
 
     // Success feedback
     toast.add({
@@ -64,7 +61,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     });
 
     resetState();
-    open.value = false;
   } catch (error) {
     console.error("Submission failed:", error);
     toast.add({
