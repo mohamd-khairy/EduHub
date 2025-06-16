@@ -8,20 +8,23 @@ const roleStore = useRoleStore();
 
 const props = defineProps({
   open: Boolean,
-  item: Object
-})
+  item: Object,
+});
 
-const emit = defineEmits(['update:open'])
+const emit = defineEmits(["update:open"]);
 
-watch(() => props.open, (val) => {
-  open.value = val
-})
+watch(
+  () => props.open,
+  (val) => {
+    open.value = val;
+  }
+);
 
-const open = ref(false)
+const open = ref(false);
 
 watch(open, (val) => {
-  emit('update:open', val)
-})
+  emit("update:open", val);
+});
 
 const toast = useToast();
 type Schema = z.output<typeof schema>;
@@ -38,13 +41,10 @@ const state = reactive<Partial<Schema>>({
 const schema = z.object({
   name: z.string().min(2, "Too short"),
   email: z.string().email("Invalid email"),
-  password: z.string().min(2, "Too short"),
   phone: z.string(),
 });
 
-
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-
   const formData = new FormData();
 
   // Append text fields with fallback values
@@ -111,58 +111,123 @@ function onFileClick() {
   fileRef.value?.click();
 }
 
-watch(() => props.item, (val) => {
-  if (!val) return;
+watch(
+  () => props.item,
+  (val) => {
+    if (!val) return;
 
-  if (val) {
-    state.name = val.name;
-    state.email = val.email;
-    state.password = val.password;
-    state.phone = val.phone;
-    state.image = val.image;
-    state.roles = val.roles.map((role) => {
-      return { value: role.id, label: role.name }
-    })[0]
+    if (val) {
+      state.name = val.name;
+      state.email = val.email;
+      state.password = val.password;
+      state.phone = val.phone;
+      state.image = val.image;
+      state.roles = val.roles.map((role) => {
+        return { value: role.id, label: role.name };
+      })[0];
+    }
   }
-});
+);
 </script>
 
 <template>
-  <UModal v-model:open="open" title="تعديل موظف" description="تعديل موظف جديد" dir="rtl">
-
+  <UModal
+    v-model:open="open"
+    title="تعديل موظف"
+    description="تعديل موظف جديد"
+    dir="rtl"
+  >
     <template #body dir="rtl">
-      <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl" @submit="onSubmit">
-        <UFormField label="اسم الموظف" placeholder="اسم الموظف" name="name" style="font-size: 18px">
+      <UForm
+        :schema="schema"
+        :state="state"
+        class="space-y-4"
+        dir="rtl"
+        @submit="onSubmit"
+      >
+        <UFormField
+          label="اسم الموظف"
+          placeholder="اسم الموظف"
+          name="name"
+          style="font-size: 18px"
+        >
           <UInput required v-model="state.name" class="w-full" />
         </UFormField>
 
-        <UFormField label="البريد الالكتروني" placeholder="البريد الالكتروني" name="email" style="font-size: 18px">
+        <UFormField
+          label="البريد الالكتروني"
+          placeholder="البريد الالكتروني"
+          name="email"
+          style="font-size: 18px"
+        >
           <UInput required v-model="state.email" class="w-full" type="email" />
         </UFormField>
 
-        <UFormField label="كلمة المرور" placeholder="كلمة المرور" name="password" style="font-size: 18px">
-          <UInput required v-model="state.password" class="w-full" type="password" />
+        <UFormField
+          label="كلمة المرور"
+          placeholder="كلمة المرور"
+          name="password"
+          style="font-size: 18px"
+        >
+          <UInput v-model="state.password" class="w-full" type="password" />
         </UFormField>
 
-        <UFormField label="رقم تليفون الموظف" placeholder="رقم تليفون الموظف" name="phone" style="font-size: 18px">
+        <UFormField
+          label="رقم تليفون الموظف"
+          placeholder="رقم تليفون الموظف"
+          name="phone"
+          style="font-size: 18px"
+        >
           <UInput type="tel" required v-model="state.phone" class="w-full" />
         </UFormField>
 
-        <UFormField label="الصلاحيات" placeholder="الصلاحيات" name="roles" style="font-size: 18px">
-          <USelectMenu :items="roleStore.roleOptions" v-model="state.roles" autocomplete="off" class="w-full" />
+        <UFormField
+          label="الصلاحيات"
+          placeholder="الصلاحيات"
+          name="roles"
+          style="font-size: 18px"
+        >
+          <USelectMenu
+            :items="roleStore.roleOptions"
+            v-model="state.roles"
+            autocomplete="off"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField name="image" label="صورة الملف الشخصي" description="JPG, GIF or PNG. 1MB Max."
-          class="flex max-sm:flex-col justify-between sm:items-center gap-4" style="font-size: 18px">
+        <UFormField
+          name="image"
+          label="صورة الملف الشخصي"
+          description="JPG, GIF or PNG. 1MB Max."
+          class="flex max-sm:flex-col justify-between sm:items-center gap-4"
+          style="font-size: 18px"
+        >
           <div class="flex flex-wrap items-center gap-3">
             <UAvatar :src="state.image" :alt="state.name" size="lg" />
             <UButton label="اختر صورة" color="neutral" @click="onFileClick" />
-            <input ref="fileRef" type="file" class="hidden" accept=".jpg, .jpeg, .png, .gif" @change="onFileChange" />
+            <input
+              ref="fileRef"
+              type="file"
+              class="hidden"
+              accept=".jpg, .jpeg, .png, .gif"
+              @change="onFileChange"
+            />
           </div>
         </UFormField>
         <div class="flex justify-end gap-2">
-          <UButton label="الغاء" color="neutral" variant="subtle" @click="open = false" />
-          <UButton label="حفظ" color="primary" variant="solid" type="submit" loading-auto />
+          <UButton
+            label="الغاء"
+            color="neutral"
+            variant="subtle"
+            @click="open = false"
+          />
+          <UButton
+            label="حفظ"
+            color="primary"
+            variant="solid"
+            type="submit"
+            loading-auto
+          />
         </div>
       </UForm>
     </template>

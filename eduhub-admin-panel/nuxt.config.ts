@@ -1,6 +1,9 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+// nuxt.config.ts
 export default defineNuxtConfig({
   modules: ["@nuxt/eslint", "@nuxt/ui-pro", "@vueuse/nuxt", "@pinia/nuxt"],
+  router: {
+    middleware: ['auth', 'permission'], // Ensure auth middleware runs first, then permission
+  },
   ui: {
     global: true,
   },

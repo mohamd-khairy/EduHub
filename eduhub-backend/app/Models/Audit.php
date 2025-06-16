@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Audit extends Model implements \OwenIt\Auditing\Contracts\Audit
 {
     use \OwenIt\Auditing\Audit;
+
     public static bool $inPermission = true;
 
     /**

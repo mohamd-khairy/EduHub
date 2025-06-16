@@ -9,12 +9,14 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class Setting extends Model implements Auditable
 {
-use HasFactory;
- use \OwenIt\Auditing\Auditable;   
- public static bool $inPermission = true;
+    use HasFactory;
+    use \OwenIt\Auditing\Auditable;
 
+    public static bool $inPermission = true;
 
     protected $fillable = [
-        'key', 'value', 'description'
+        'key',
+        'value',
+        'description'
     ];
 }

@@ -37,5 +37,18 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.removeItem("auth_user");
   }
 
-  return { user, token, roles, permissions, login, logout };
+  // Lazy load the permissions only when needed
+  const loadPermissions = () => {
+    if (process.client) {
+      // Check if permissions are already loaded
+      const storedPermissions = localStorage.getItem("auth_permissions");
+      permissions.value = storedPermissions
+        ? JSON.parse(storedPermissions)
+        : [];
+    }
+  };
+
+  if(process.client) loadPermissions();
+
+  return { user, token, roles, permissions, loadPermissions, login, logout };
 });
