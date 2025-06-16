@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({
+  permission: "read-result",
+});
 import type { TableColumn } from "@nuxt/ui";
 import { upperFirst } from "scule";
 import AddModal from "~/components/results/AddModal.vue";

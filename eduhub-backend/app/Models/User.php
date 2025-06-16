@@ -58,13 +58,15 @@ class User extends Authenticatable implements Auditable
 
     public function setImageAttribute($value)
     {
-        $image = $value->store('images', 'public');
-        $this->attributes['image'] = url('/storage/' . $image);
+        if ($value) {
+            $image = $value->store('images', 'public');
+            $this->attributes['image'] = url('/storage/' . $image);
+        }
     }
 
     public function getRoleAttribute()
     {
-        return $this->roles->first();
+        return $this->roles()->first();
     }
 
     public function getDisplayRolesAttribute()

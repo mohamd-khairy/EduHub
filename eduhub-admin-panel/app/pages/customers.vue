@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({
+  permission: "read-customer",
+});
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'

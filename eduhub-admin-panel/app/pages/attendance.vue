@@ -1,4 +1,7 @@
 <script setup>
+definePageMeta({
+  permission: "read-attendance",
+});
 import { ref, computed, onMounted } from "vue";
 
 const groupStore = useGroupStore();

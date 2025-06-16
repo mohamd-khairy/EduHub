@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({
+  permission: "read-group",
+});
 import type { TableColumn } from "@nuxt/ui";
 import { upperFirst } from "scule";
 import { ref, computed, onMounted } from "vue";

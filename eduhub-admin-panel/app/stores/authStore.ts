@@ -6,7 +6,8 @@ export const useAuthStore = defineStore("auth", () => {
 
   const user = ref(null);
   const token = ref("");
-  const loaded = ref(false);
+  const roles = ref(null);
+  const permissions = ref(null);
 
   async function login(par) {
     const res = await api(`auth/login`, {
@@ -18,11 +19,15 @@ export const useAuthStore = defineStore("auth", () => {
 
     if (!res.ok) throw new Error(data.message || "Login failed");
 
-    user.value = data.data.user;
-    token.value = data.data.token;
+    user.value = data?.data?.user;
+    token.value = data?.data?.token;
+    roles.value = data?.data?.roles;
+    permissions.value = data?.data?.permissions;
 
     localStorage.setItem("auth_token", token.value);
     localStorage.setItem("auth_user", JSON.stringify(user.value));
+    localStorage.setItem("auth_roles", JSON.stringify(roles.value));
+    localStorage.setItem("auth_permissions", JSON.stringify(permissions.value));
   }
 
   async function logout() {
@@ -32,5 +37,5 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.removeItem("auth_user");
   }
 
-  return { user, token, loaded, login, logout };
+  return { user, token, roles, permissions, login, logout };
 });

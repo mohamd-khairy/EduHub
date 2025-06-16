@@ -9,6 +9,7 @@ const links = [
       label: "الصفحة الرئيسية",
       icon: "i-lucide-house",
       to: "/",
+      permission: "read-dashboard",
       onSelect: () => {
         open.value = false;
       },
@@ -18,6 +19,7 @@ const links = [
       label: "المواد الدراسية",
       icon: "i-lucide-book-open",
       to: "/courses",
+      permission: "read-course",
       onSelect: () => {
         open.value = false;
       },
@@ -27,6 +29,7 @@ const links = [
       label: "المدرسيين",
       icon: "i-lucide-users",
       to: "/teachers",
+      permission: "read-teacher",
       onSelect: () => {
         open.value = false;
       },
@@ -36,6 +39,7 @@ const links = [
       label: "أولياء الامور",
       icon: "i-lucide-users",
       to: "/parents",
+      permission: "read-parent",
       onSelect: () => {
         open.value = false;
       },
@@ -45,6 +49,7 @@ const links = [
       label: "الطلاب",
       icon: "i-heroicons-user-group",
       to: "/students",
+      permission: "read-student",
       // badge: '4',
       onSelect: () => {
         open.value = false;
@@ -55,6 +60,7 @@ const links = [
       label: "المجموعات",
       icon: "i-lucide-group",
       to: "/groups",
+      permission: "read-group",
       // badge: '4',
       onSelect: () => {
         open.value = false;
@@ -65,6 +71,7 @@ const links = [
       label: "الاختبارات",
       icon: "i-lucide-book-open",
       to: "/exams",
+      permission: "read-exam",
       onSelect: () => {
         open.value = false;
       },
@@ -74,6 +81,7 @@ const links = [
       label: "الدرجات",
       icon: "i-lucide-pencil",
       to: "/results",
+      permission: "read-result",
       onSelect: () => {
         open.value = false;
       },
@@ -83,6 +91,7 @@ const links = [
       label: "المدفوعات",
       icon: "i-lucide-dollar-sign",
       to: "/payments",
+      permission: "read-payment",
       onSelect: () => {
         open.value = false;
       },
@@ -92,6 +101,7 @@ const links = [
       label: "الموظفين",
       icon: "i-lucide-users",
       to: "/users",
+      permission: "read-user",
       onSelect: () => {
         open.value = false;
       },
@@ -101,6 +111,7 @@ const links = [
       label: "الحضور والغياب",
       icon: "i-lucide-check-check",
       to: "/attendance",
+      permission: "read-attendance",
       onSelect: () => {
         open.value = false;
       },
@@ -112,6 +123,10 @@ const links = [
       label: "الاعدادات",
       icon: "i-lucide-settings",
       to: "/settings",
+      permission: "read-setting",
+      onSelect: () => {
+        open.value = false;
+      },
     },
   ],
 ];
@@ -138,6 +153,28 @@ const groups = computed(() => [
     ],
   },
 ]);
+
+const authStore = useAuthStore();
+const items = ref([[], []]); // Two groups like links[0], links[1]
+
+onMounted(() => {
+  const permissions = authStore.permissions;
+
+  // Reset both groups
+  items.value = [[], []];
+
+  links[0]?.forEach((item) => {
+    if (permissions.includes(item.permission)) {
+      items.value[0].push(item);
+    }
+  });
+
+  links[1]?.forEach((item) => {
+    if (permissions.includes(item.permission)) {
+      items.value[1].push(item);
+    }
+  });
+});
 </script>
 
 <template>
@@ -159,13 +196,13 @@ const groups = computed(() => [
 
         <UNavigationMenu
           :collapsed="collapsed"
-          :items="links[0]"
+          :items="items[0]"
           orientation="vertical"
         />
 
         <UNavigationMenu
           :collapsed="collapsed"
-          :items="links[1]"
+          :items="items[1]"
           orientation="vertical"
           class="mt-auto"
         />

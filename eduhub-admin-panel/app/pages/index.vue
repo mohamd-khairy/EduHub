@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({
+  permission: "read-dashboard",
+});
 import { sub } from 'date-fns'
 import type { Period, Range } from '~/types'
 
