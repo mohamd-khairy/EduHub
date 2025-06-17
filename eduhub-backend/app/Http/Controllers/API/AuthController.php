@@ -38,4 +38,31 @@ class AuthController extends Controller
             'permissions' => $permissions,
         ]);
     }
+
+    public function Me(Request $request)
+    {
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // If no user is authenticated, return 401 Unauthorized
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+
+        $user = Auth::user();
+        $roles = $user->roles()->pluck('name');
+        $permissions = $user->getAllPermissions()->pluck('name');
+
+        unset($user->roles); // remove if loaded
+        unset($user->permissions); // remove if loaded
+
+        return $this->success([
+            'message' => 'Login successful.',
+            'user' => $user,
+            'roles' =>   $roles,
+            'permissions' => $permissions,
+        ]);
+    }
 }

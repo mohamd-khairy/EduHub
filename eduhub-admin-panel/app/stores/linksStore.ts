@@ -1,13 +1,14 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { useAuthStore } from "@/stores/authStore"; // Assuming you have authStore to manage user permissions
+import { useAuthStore } from "@/stores/authStore"; // Assuming authStore manages user data and permissions
+import { useRoute } from "vue-router"; // Import useRoute for route handling
 
 export const useLinksStore = defineStore("links", () => {
-  const authStore = useAuthStore(); // Accessing the auth store to get user permissions
+  const authStore = useAuthStore(); // Accessing the auth store for user permissions and data
   const open = ref(false);
   const route = useRoute();
 
-  // Initial links data
+  // Initial links data (with permissions)
   const links = [
     [
       {
@@ -16,9 +17,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-house",
         to: "/",
         permission: "read-dashboard",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -26,9 +25,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-book-open",
         to: "/courses",
         permission: "read-course",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -36,9 +33,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-users",
         to: "/teachers",
         permission: "read-teacher",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -46,9 +41,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-users",
         to: "/parents",
         permission: "read-parent",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -56,9 +49,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-heroicons-user-group",
         to: "/students",
         permission: "read-student",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -66,9 +57,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-group",
         to: "/groups",
         permission: "read-group",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -76,9 +65,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-book-open",
         to: "/exams",
         permission: "read-exam",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -86,9 +73,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-pencil",
         to: "/results",
         permission: "read-result",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -96,9 +81,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-dollar-sign",
         to: "/payments",
         permission: "read-payment",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -106,9 +89,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-users",
         to: "/users",
         permission: "read-user",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
       {
         class: "text-lg",
@@ -116,9 +97,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-check-check",
         to: "/attendance",
         permission: "read-attendance",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
     ],
     [
@@ -128,9 +107,7 @@ export const useLinksStore = defineStore("links", () => {
         icon: "i-lucide-settings",
         to: "/settings/roles",
         permission: "read-setting",
-        onSelect: () => {
-          open.value = false;
-        },
+        onSelect: () => (open.value = false),
       },
     ],
   ];
@@ -140,20 +117,20 @@ export const useLinksStore = defineStore("links", () => {
 
   // Action to filter links based on user permissions
   const filterLinks = () => {
-    if (!process.client) return;
-    
-    const stored = process.client
-      ? localStorage.getItem("auth_permissions")
-      : null;
+    if (!process.client) return; // Ensure we're running on the client
 
-    const userPermissions = stored ? JSON.parse(stored) : [];
+    // Wait for authStore to load user permissions if it's not available
+    if (!authStore.permissions.length) {
+      authStore.loadUserData(); // Load the user data and permissions if not already loaded
+    }
 
-    const permissions = authStore.permissions || userPermissions; // Get permissions from authStore
+    // Get permissions from authStore
+    const permissions = authStore.permissions;
 
-    // Reset items
+    // Reset items (clear any previously filtered items)
     items.value = [[], []];
 
-    // Filter links based on permissions
+    // Filter links based on the permissions
     links[0]?.forEach((item) => {
       if (permissions.includes(item.permission)) {
         items.value[0].push(item);
@@ -187,5 +164,9 @@ export const useLinksStore = defineStore("links", () => {
     },
   ]);
 
+  // Call filterLinks when the component is mounted (or whenever permissions change)
+  filterLinks();
+
+  // Return all the necessary states and actions
   return { links, items, groups, filterLinks, open };
 });

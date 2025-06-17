@@ -1,30 +1,25 @@
 // middleware/auth.global.ts
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const publicRoutes = ["/login", "/register", "/forgot-password"];
+  const authStore = useAuthStore();
 
+  // If it's client-side, wait for user data to be loaded from cookies
   if (process.client) {
-    const authStore = useAuthStore();
+    // Wait for user data to be loaded
+    await authStore.loadUserData();
 
-    // Sync token and user from localStorage
-    authStore.token = localStorage.getItem("auth_token");
-
-    const userStr = localStorage.getItem("auth_user");
-    authStore.user = userStr ? JSON.parse(userStr) : null;
-
-    const rolesStr = localStorage.getItem("auth_roles");
-    authStore.roles = rolesStr ? JSON.parse(rolesStr) : null;
-
-    const permissionsStr = localStorage.getItem("auth_permissions");
-    authStore.permissions = permissionsStr ? JSON.parse(permissionsStr) : null;
-
-    // If not authenticated and trying to access a protected route
-    if (!authStore.token && !publicRoutes.includes(to.path)) {
-      return navigateTo("/login");
+    // Check if user is authenticated
+    if (!authStore.isAuthenticated) {
+      // If user is not authenticated and trying to access a protected route
+      if (!publicRoutes.includes(to.path)) {
+        return navigateTo("/login");
+      }
     }
+  }
 
-    // If authenticated and trying to access a public route (optional)
-    if (authStore.token && publicRoutes.includes(to.path)) {
-      return navigateTo("/");
-    }
+  // Server-side logic (SSR) to check if user is authenticated
+  // If the authStore is not initialized yet and we are on SSR, check cookies directly
+  if (!authStore.isAuthenticated && !publicRoutes.includes(to.path)) {
+    return navigateTo("/login");  // Redirect to login page if not authenticated
   }
 });

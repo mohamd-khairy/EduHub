@@ -137,6 +137,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [PermissionController::class, 'index']);
         Route::get('/all', [PermissionController::class, 'All']);
     });
+
+    Route::group(['prefix' => 'auth'], function () {
+        Route::get('/me', [AuthController::class, 'Me']);
+    });
 });
 
 Route::group(['prefix' => 'auth'], function () {
