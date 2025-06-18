@@ -1,17 +1,21 @@
-// composables/useApi.ts
+import { useRouter } from '#app';
+
 export function useApi() {
   const BASE_URL =
-    import.meta.env.NUXT_API_BASE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public/api";
-
+    import.meta.env.NUXT_API_BASE_URL || "http://localhost/EduHub/eduhub-backend/public/api";
+  
   const router = useRouter();
+  const authStore = useAuthStore(); // Access the authStore to get the token
 
-  return async (endpoint: string, options: RequestInit = {}) => {
-    const token = process.client ? localStorage.getItem("auth_token") : null;
+  // Helper function to get the token from Pinia store
+  const getToken = () => {
+    return authStore.token; // Get the token from the Pinia store
+  };
 
-    const url = `${BASE_URL}${
-      endpoint.startsWith("/") ? endpoint : "/" + endpoint
-    }`;
+  return async (endpoint: string, options: RequestInit = {}): Promise<Response | void> => {
+    const token = getToken();
+
+    const url = `${BASE_URL}${endpoint.startsWith("/") ? endpoint : "/" + endpoint}`;
 
     // Check if body is FormData
     const isFormData = options.body instanceof FormData;
@@ -27,18 +31,30 @@ export function useApi() {
       headers["Content-Type"] = "application/json";
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      });
 
-    if (response.status === 401 && process.client) {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("auth_user");
-      router.push("/login");
-      return;
+      // Handle 401 Unauthorized responses
+      if (response.status === 401 && process.client) {
+        // Clear the token and user data from Pinia store
+        authStore.resetAuthState();  // Assuming `resetAuthState` is a function in your authStore that resets the user, token, etc.
+        router.push("/login");
+        return;
+      }
+
+      // If the response is an error, throw to handle it in the calling code
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "An error occurred during the request");
+      }
+
+      return response;
+    } catch (error) {
+      console.error("API request failed:", error);
+      throw error; // Propagate error for higher-level handling
     }
-
-    return response;
   };
 }

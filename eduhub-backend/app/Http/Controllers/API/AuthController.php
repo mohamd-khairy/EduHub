@@ -65,4 +65,19 @@ class AuthController extends Controller
             'permissions' => $permissions,
         ]);
     }
+
+    public function logout(Request $request)
+    {
+        // Logout the user
+        Auth::logout();
+
+        // Invalidate the session to ensure no session fixation attacks
+        $request->session()->invalidate();
+
+        // Regenerate the session token to avoid session fixation
+        $request->session()->regenerateToken();
+
+        // Return a response indicating successful logout
+        return $this->success(true);
+    }
 }

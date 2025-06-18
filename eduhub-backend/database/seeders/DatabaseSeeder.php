@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
 use App\Models\User;
 use App\Services\RoleService;
 use Database\Factories\AttendanceFactory;
@@ -42,8 +43,10 @@ class DatabaseSeeder extends Seeder
         // EnrollmentFactory::new()->count(10)->create();
         // AttendanceFactory::new()->count(10)->create();
 
-        User::get()->each(function (User $user) {
-            $user->assignRole("admin");
-        });
+        Role::findByName('parent')->givePermissionTo(Permission::where('group', 'parentmodel')->pluck('id'));
+
+        Role::findByName('teacher')->givePermissionTo(Permission::where('group', 'teacher')->pluck('id'));
+
+        Role::findByName('student')->givePermissionTo(Permission::where('group', 'student')->pluck('id'));
     }
 }

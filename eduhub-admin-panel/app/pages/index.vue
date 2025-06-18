@@ -1,9 +1,15 @@
 <script setup lang="ts">
-definePageMeta({
-  permission: "read-dashboard",
-});
+
 import { sub } from 'date-fns'
 import type { Period, Range } from '~/types'
+const authStore = useAuthStore()
+const hasPermission = ref(false)
+onMounted(() => {
+  console.log(authStore.permissions);
+  if (authStore.permissions.includes('read-dashboard')) {
+    hasPermission.value = true;
+  }
+});
 
 const { isNotificationsSlideoverOpen } = useDashboard()
 
@@ -34,21 +40,12 @@ const period = ref<Period>('daily')
 
         <template #right>
           <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              @click="isNotificationsSlideoverOpen = true"
-            >
+            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
               <UChip color="error" inset>
                 <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
               </UChip>
             </UButton>
           </UTooltip>
-
-          <UDropdownMenu :items="items">
-            <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
-          </UDropdownMenu>
         </template>
       </UDashboardNavbar>
 
@@ -64,8 +61,8 @@ const period = ref<Period>('daily')
 
     <template #body>
       <HomeStats :period="period" :range="range" />
-      <HomeChart :period="period" :range="range" />
-      <HomeSales :period="period" :range="range" />
+      <HomeChart :period="period" :range="range" v-if="hasPermission" />
+      <HomeSales :period="period" :range="range" v-if="hasPermission" />
     </template>
   </UDashboardPanel>
 </template>

@@ -21,6 +21,7 @@
     "@vueuse/nuxt": "^13.3.0",
     "date-fns": "^4.1.0",
     "nuxt": "^3.17.5",
+    "pinia-plugin-persistedstate": "^4.3.0",
     "zod": "^3.25.64"
   },
   "devDependencies": {

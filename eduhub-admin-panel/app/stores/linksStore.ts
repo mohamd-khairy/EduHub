@@ -16,7 +16,6 @@ export const useLinksStore = defineStore("links", () => {
         label: "الصفحة الرئيسية",
         icon: "i-lucide-house",
         to: "/",
-        permission: "read-dashboard",
         onSelect: () => (open.value = false),
       },
       {
@@ -132,13 +131,19 @@ export const useLinksStore = defineStore("links", () => {
 
     // Filter links based on the permissions
     links[0]?.forEach((item) => {
-      if (permissions.includes(item.permission)) {
+      if (
+        permissions.includes(item.permission) ||
+        item.permission == undefined
+      ) {
         items.value[0].push(item);
       }
     });
 
     links[1]?.forEach((item) => {
-      if (permissions.includes(item.permission)) {
+      if (
+        permissions.includes(item.permission) ||
+        item.permission == undefined
+      ) {
         items.value[1].push(item);
       }
     });

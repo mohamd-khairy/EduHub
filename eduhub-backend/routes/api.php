@@ -140,6 +140,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'auth'], function () {
         Route::get('/me', [AuthController::class, 'Me']);
+        Route::get('/logout', [AuthController::class, 'logout']);
     });
 });
 
