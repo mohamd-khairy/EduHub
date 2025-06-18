@@ -4,6 +4,7 @@ import * as z from 'zod'
 const open = ref(false)
 
 const parentStore = useParentStore()
+const authStore = useAuthStore();
 
 const schema = z.object({
   name: z.string().min(2, 'Too short'),
@@ -48,7 +49,7 @@ function resetState() {
 
 <template>
   <UModal v-model:open="open" title="اضافة ولي امر" description="إضافة ولي امر جديد" dir="rtl">
-    <UButton label="إضافة ولي امر جديد" icon="i-lucide-plus" dir="rtl" />
+    <UButton label="إضافة ولي امر جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-parentmodel')" />
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">

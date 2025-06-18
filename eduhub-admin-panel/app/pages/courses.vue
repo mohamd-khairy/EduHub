@@ -202,9 +202,9 @@ const columns: TableColumn<User>[] = [
         </template>
 
 
-        <DeleteModal :count="courseStore.selectedIds.length" v-model:open="courseStore.deleteModalOpen" />
+        <DeleteModal :count="courseStore.selectedIds.length" v-model:open="courseStore.deleteModalOpen" v-can="'delete-course'" />
 
-        <EditModal :item="courseStore.editItem" v-model:open="courseStore.editModalOpen" />
+        <EditModal :item="courseStore.editItem" v-model:open="courseStore.editModalOpen" v-can="'update-course'" />
 
       </UDashboardNavbar>
     </template>

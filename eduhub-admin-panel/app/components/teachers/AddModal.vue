@@ -4,6 +4,7 @@ import * as z from 'zod'
 const open = ref(false)
 
 const teacherStore = useTeacherStore()
+const authStore = useAuthStore();
 
 const schema = z.object({
   name: z.string().min(2, 'Too short'),
@@ -50,7 +51,7 @@ function resetState() {
 
 <template>
   <UModal v-model:open="open" title="اضافة مدرس" description="إضافة مدرس جديد" dir="rtl">
-    <UButton label="إضافة مدرس جديد" icon="i-lucide-plus" dir="rtl" />
+    <UButton label="إضافة مدرس جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-teacher')" />
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">

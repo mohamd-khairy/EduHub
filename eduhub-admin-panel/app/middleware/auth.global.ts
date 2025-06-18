@@ -8,8 +8,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (process.client) {
     // Wait for user data to be loaded (from Pinia store with persisted state)
     await authStore.loadUserData();
-
-    console.log(!authStore.isAuthenticated && !publicRoutes.includes(to.path));
     
     // Check if the user is authenticated
     if (!authStore.isAuthenticated) {

@@ -8,6 +8,7 @@ const open = ref(false);
 
 const studentStore = useStudentStore();
 const parentStore = useParentStore();
+const authStore = useAuthStore();
 
 onMounted(async () => {
   parentStore.loadParentsForSelect();
@@ -113,6 +114,7 @@ function onFileClick() {
       color="neutral"
       icon="i-lucide-plus"
       dir="rtl"
+      v-if="authStore.hasPermission('create-student')" 
     />
 
     <template #body dir="rtl">

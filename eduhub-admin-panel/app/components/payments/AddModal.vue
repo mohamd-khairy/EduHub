@@ -4,6 +4,7 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 
 const paymentStore = usePaymentStore();
 const studentStore = useStudentStore();
+const authStore = useAuthStore();
 
 const toast = useToast();
 const schema = z.object({});
@@ -73,7 +74,7 @@ watch(searchStudentTerm, (newVal) => {
 
 <template>
   <UModal v-model:open="open" title="اضافة دفع" description="إضافة دفع جديد">
-    <UButton label="إضافة دفع جديد" icon="i-lucide-plus" />
+    <UButton label="إضافة دفع جديد" icon="i-lucide-plus" v-if="authStore.hasPermission('create-parentmodel')" />
 
     <template #body>
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">

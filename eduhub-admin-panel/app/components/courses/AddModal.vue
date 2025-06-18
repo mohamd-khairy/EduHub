@@ -3,6 +3,7 @@ import * as z from 'zod'
 
 const open = ref(false)
 const courseStore = useCourseStore()
+const authStore = useAuthStore();
 
 const schema = z.object({
   name: z.string().min(2, 'Too short'),
@@ -33,7 +34,7 @@ function resetState() {
 
 <template>
   <UModal v-model:open="open" title="اضافة كورس" description="إضافة كورس جديد" dir="rtl">
-    <UButton label="إضافة كورس جديد" icon="i-lucide-plus" dir="rtl" />
+    <UButton label="إضافة كورس جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-course')" />
 
     <template #body dir="rtl" >
       <UForm

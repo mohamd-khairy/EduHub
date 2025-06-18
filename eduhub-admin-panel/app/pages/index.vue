@@ -5,23 +5,12 @@ import type { Period, Range } from '~/types'
 const authStore = useAuthStore()
 const hasPermission = ref(false)
 onMounted(() => {
-  console.log(authStore.permissions);
   if (authStore.permissions.includes('read-dashboard')) {
     hasPermission.value = true;
   }
 });
 
 const { isNotificationsSlideoverOpen } = useDashboard()
-
-const items = [[{
-  label: 'طالب جديد',
-  icon: 'i-lucide-send',
-  to: '/inbox'
-}, {
-  label: 'مادة جديدة',
-  icon: 'i-lucide-user-plus',
-  to: '/customers'
-}]]
 
 const range = shallowRef<Range>({
   start: sub(new Date(), { days: 14 }),

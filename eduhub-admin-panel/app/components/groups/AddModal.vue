@@ -4,6 +4,7 @@ import * as z from "zod";
 const groupStore = useGroupStore();
 const courseStore = useCourseStore();
 const teacherStore = useTeacherStore();
+const authStore = useAuthStore();
 
 const schema = z.object({
   name: z.string().min(2, "Too short"),
@@ -92,7 +93,7 @@ function removeScheduleItem(index: number) {
     description="إضافة مجموعة جديد"
     dir="rtl"
   >
-    <UButton label="إضافة مجموعة جديد" icon="i-lucide-plus" dir="rtl" />
+    <UButton label="إضافة مجموعة جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-group')"/>
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">

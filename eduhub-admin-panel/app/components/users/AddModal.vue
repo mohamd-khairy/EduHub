@@ -9,6 +9,7 @@ const open = ref(false);
 
 const userStore = useUserStore();
 const roleStore = useRoleStore();
+const authStore = useAuthStore();
 
 const schema = z.object({
   name: z.string().min(2, "Too short"),
@@ -109,6 +110,7 @@ function onFileClick() {
       color="neutral"
       icon="i-lucide-plus"
       dir="rtl"
+        v-if="authStore.hasPermission('create-user')" 
     />
 
     <template #body dir="rtl">

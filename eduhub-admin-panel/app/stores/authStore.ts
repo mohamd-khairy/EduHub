@@ -22,12 +22,14 @@ export const useAuthStore = defineStore(
       if (process.client) {
         const userCookie = useCookie("auth_user").value;
         const rolesCookie = useCookie("auth_roles").value;
-        const permissionsCookie =
-          useCookie("auth_permissions").value;
+        const permissionsCookie = useCookie("auth_permissions").value;
 
         user.value = userCookie || null;
         roles.value = rolesCookie || [];
         permissions.value = permissionsCookie || [];
+
+        // console.log(permissions.value);
+        
       }
     };
 

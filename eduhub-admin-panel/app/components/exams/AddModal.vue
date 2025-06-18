@@ -3,6 +3,7 @@ import * as z from 'zod'
 
 const groupStore = useGroupStore()
 const examStore = useExamStore()
+const authStore = useAuthStore();
 
 const open = ref(false)
 const toast = useToast()
@@ -57,7 +58,7 @@ async function onSubmit() {
 
 <template>
   <UModal v-model:open="open" title="اضافة اختبار" description="إضافة اختبار جديد" dir="rtl">
-      <UButton label="إضافة اختبار جديد" icon="i-lucide-plus" dir="rtl" />
+      <UButton label="إضافة اختبار جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-exam')" />
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">
