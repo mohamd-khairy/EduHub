@@ -13,7 +13,8 @@ class Student extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
     public static bool $inPermission = true;
-    public static array $customPermission = [
+
+    public static array $customPermissions = [
         'read-student-parent',
         'read-student-group',
         'create-student-group',

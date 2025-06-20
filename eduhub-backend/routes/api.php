@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\AuditController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CourseController;
+use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\EnrollmentController;
 use App\Http\Controllers\API\ExamController;
 use App\Http\Controllers\API\GeneralController;
@@ -136,6 +137,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'permission'], function () {
         Route::get('/', [PermissionController::class, 'index']);
         Route::get('/all', [PermissionController::class, 'All']);
+    });
+
+    Route::group(['prefix' => 'dashboard'], function () {
+        Route::get('/', [DashboardController::class, 'index']);
     });
 
     Route::group(['prefix' => 'auth'], function () {

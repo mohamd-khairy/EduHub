@@ -10,8 +10,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Attendance extends Model implements Auditable
 {
     use HasFactory;
-     use \OwenIt\Auditing\Auditable;   
- public static bool $inPermission = true;
+    use \OwenIt\Auditing\Auditable;
+    public static bool $inPermission = true;
 
     protected $fillable = ['student_id', 'group_id',  'schedule_id', 'date', 'status', 'note'];
 

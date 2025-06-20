@@ -98,12 +98,7 @@ export const useGroupStore = defineStore("group", () => {
       }
 
       // Map data to the format expected by your select
-      groupOptions.value = json.data.map(
-        (item: { id: number; name: string }) => ({
-          label: item.name,
-          value: String(item.id),
-        })
-      );
+      groupOptions.value = json.data;
     } catch (error) {
       console.error("Error loading courses:", error);
       return [];

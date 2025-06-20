@@ -9,10 +9,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class Exam extends Model implements Auditable
 {
-use HasFactory;
- use \OwenIt\Auditing\Auditable;   
- public static bool $inPermission = true;
-
+    use HasFactory;
+    use \OwenIt\Auditing\Auditable;
+    public static bool $inPermission = true;
 
     protected $fillable = [
         'group_id',

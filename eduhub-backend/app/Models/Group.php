@@ -10,10 +10,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class Group extends Model implements Auditable
 {
-use HasFactory;
- use \OwenIt\Auditing\Auditable;   
- public static bool $inPermission = true;
-
+    use HasFactory;
+    use \OwenIt\Auditing\Auditable;
+    public static bool $inPermission = true;
 
     protected $fillable = ['name', 'teacher_id', 'course_id', 'max_students'];
 

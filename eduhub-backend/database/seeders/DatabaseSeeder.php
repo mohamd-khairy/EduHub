@@ -43,6 +43,14 @@ class DatabaseSeeder extends Seeder
         // EnrollmentFactory::new()->count(10)->create();
         // AttendanceFactory::new()->count(10)->create();
 
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@admin.com',
+            'password' => 'password',
+            'email_verified_at' => now(),
+            'phone' => '1234567890',
+        ])->assignRole('admin');
+
         Role::findByName('parent')->givePermissionTo(Permission::where('group', 'parentmodel')->pluck('id'));
 
         Role::findByName('teacher')->givePermissionTo(Permission::where('group', 'teacher')->pluck('id'));

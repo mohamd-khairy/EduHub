@@ -1,22 +1,47 @@
 <script setup lang="ts">
+import { sub } from "date-fns";
+import type { Period, Range } from "~/types";
+const { isNotificationsSlideoverOpen } = useDashboard();
+const resetSignal = ref(false);
+const authStore = useAuthStore();
+const dashboardStore = useDashboardStore();
 
-import { sub } from 'date-fns'
-import type { Period, Range } from '~/types'
-const authStore = useAuthStore()
-const hasPermission = ref(false)
-onMounted(() => {
-  if (authStore.permissions.includes('read-dashboard')) {
+const range = shallowRef<Range>({
+  start: null,
+  end: null,
+});
+
+const group_id = ref(null);
+const stats = ref([]);
+
+const hasPermission = ref(false);
+onMounted(async () => {
+  await dashboardStore.fetchDashboardData();
+  stats.value = dashboardStore.items;
+
+  if (authStore.hasPermission("read-dashboard")) {
     hasPermission.value = true;
   }
 });
 
-const { isNotificationsSlideoverOpen } = useDashboard()
+watch([range, group_id], async ([newRange, newGroupId]) => {
+  await dashboardStore.fetchDashboardData({
+    start: newRange.start?.toISOString() || "",
+    end: newRange.end?.toISOString() || "",
+    group_id: newGroupId || "",
+  });
+  stats.value = dashboardStore.items;
+});
 
-const range = shallowRef<Range>({
-  start: sub(new Date(), { days: 14 }),
-  end: new Date()
-})
-const period = ref<Period>('daily')
+function resetFilters() {
+  resetSignal.value = !resetSignal.value; // toggle to always trigger
+  range.value.start = null;
+  range.value.end = null;
+  group_id.value = null;
+}
+const hasFilter = computed(() => {
+  return range.value.start || range.value.end || group_id.value;
+});
 </script>
 
 <template>
@@ -27,9 +52,14 @@ const period = ref<Period>('daily')
           <UDashboardSidebarCollapse />
         </template>
 
-        <template #right>
+        <template #right v-if="authStore.hasPermission('read-notification')">
           <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              square
+              @click="isNotificationsSlideoverOpen = true"
+            >
               <UChip color="error" inset>
                 <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
               </UChip>
@@ -40,16 +70,33 @@ const period = ref<Period>('daily')
 
       <UDashboardToolbar>
         <template #left>
-          <!-- NOTE: The `-ms-1` class is used to align with the `DashboardSidebarCollapse` button here. -->
-          <HomeDateRangePicker v-model="range" class="-ms-1" />
+          <HomeDateRangePicker
+            :reset-signal="resetSignal"
+            v-model="range"
+            class="-ms-1"
+          />
 
-          <HomePeriodSelect v-model="period" :range="range" />
+          <HomeGroupSelect v-model="group_id" :range="range" />
+
+          <UButton
+            v-if="hasFilter"
+            icon="i-lucide-x"
+            color="gray"
+            size="sm"
+            @click="resetFilters()"
+            class="hover:bg-gray-200"
+          />
         </template>
       </UDashboardToolbar>
     </template>
 
     <template #body>
-      <HomeStats :period="period" :range="range" />
+      <HomeStats
+        :period="period"
+        :range="range"
+        :stats="stats"
+        v-if="hasPermission"
+      />
       <HomeChart :period="period" :range="range" v-if="hasPermission" />
       <HomeSales :period="period" :range="range" v-if="hasPermission" />
     </template>

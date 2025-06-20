@@ -11,8 +11,8 @@ class Course extends Model implements Auditable
 {
     /** @use HasFactory<\Database\Factories\GroupFactory> */
     use HasFactory;
-     use \OwenIt\Auditing\Auditable;   
- public static bool $inPermission = true;
+    use \OwenIt\Auditing\Auditable;
+    public static bool $inPermission = true;
 
     protected $fillable = ['name', 'description'];
 
