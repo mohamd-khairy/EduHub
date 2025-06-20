@@ -13,6 +13,7 @@ const examStore = useExamStore()
 const groupStore = useGroupStore()
 const examResultStore = useExamResultStore()
 const studentStore = useStudentStore()
+const authStore = useAuthStore();
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -39,19 +40,23 @@ onMounted(() => {
 
 // Adjust typing here (replace `User` or your row type)
 function getRowItems(row: any) {
-  return [
+  const items = [
     { type: 'label', label: 'الاجراءات' },
     { type: 'separator' },
-    {
+  ]
+
+  if (authStore.hasPermission('read-examresult')) {
+    items.push({
       label: 'مشاهدة درجات الاختبار',
       icon: 'i-lucide-list',
       onSelect() {
         examResultStore.showExamResultItem = row.original
         examResultStore.showExamResultModalOpen = true
       }
-    },
-    { type: 'separator' },
-    {
+    })
+  }
+  if (authStore.hasPermission('update-exam')) {
+    items.push({
       label: 'تعديل الاختبار',
       icon: 'i-lucide-edit',
       color: 'primary',
@@ -59,8 +64,10 @@ function getRowItems(row: any) {
         examStore.editItem = row.original
         examStore.editModalOpen = true
       }
-    },
-    {
+    })
+  }
+  if (authStore.hasPermission('delete-exam')) {
+    items.push({
       label: 'حذف الاختبار',
       icon: 'i-lucide-trash',
       color: 'error',
@@ -68,8 +75,9 @@ function getRowItems(row: any) {
         examStore.addId(row.original.id)
         examStore.deleteModalOpen = true
       }
-    }
-  ]
+    })
+  }
+  return items
 }
 
 const columns: TableColumn<User>[] = [

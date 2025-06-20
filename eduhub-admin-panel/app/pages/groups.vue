@@ -14,6 +14,7 @@ import ExamsModal from "~/components/groups/ExamsModal.vue";
 const groupStore = useGroupStore();
 const courseStore = useCourseStore();
 const teacherStore = useTeacherStore();
+const authStore = useAuthStore();
 
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
@@ -27,27 +28,33 @@ const columnFilters = ref([{ id: "اسم المجموعة", value: "" }]);
 const columnVisibility = ref();
 
 function getRowItems(row: any) {
-  return [
+  const items = [
     { type: "label", label: "الاجراءات" },
     { type: "separator" },
-    {
+  ];
+
+  if (authStore.hasPermission("read-student")) {
+    items.push({
       label: "مشاهدة الطلاب",
-      icon: "i-lucide-list",
+      icon: "i-lucide-users",
       onSelect() {
         groupStore.selectedItem = row.original;
         groupStore.showGroupStudentsModal = true;
       },
-    },
-    {
+    });
+  }
+  if (authStore.hasPermission("read-exam")) {
+    items.push({
       label: "مشاهدة الاختبارات",
       icon: "i-lucide-list",
       onSelect() {
         groupStore.selectedItem = row.original;
         groupStore.showGroupExamsModal = true;
       },
-    },
-    { type: "separator" },
-    {
+    });
+  }
+  if (authStore.hasPermission("update-group")) {
+    items.push({
       label: "تعديل المجموعة",
       icon: "i-lucide-edit",
       color: "primary",
@@ -55,8 +62,10 @@ function getRowItems(row: any) {
         groupStore.editItem = row.original;
         groupStore.editModalOpen = true;
       },
-    },
-    {
+    });
+  }
+  if (authStore.hasPermission("delete-group")) {
+    items.push({
       label: "حذف المجموعة",
       icon: "i-lucide-trash",
       color: "error",
@@ -64,8 +73,9 @@ function getRowItems(row: any) {
         groupStore.addId(row.original.id);
         groupStore.deleteModalOpen = true;
       },
-    },
-  ];
+    });
+  }
+  return items;
 }
 
 const columns: TableColumn[] = [
@@ -75,12 +85,12 @@ const columns: TableColumn[] = [
       h(UCheckbox, {
         modelValue:
           groupStore.selectedIds.length > 0 &&
-          groupStore.selectedIds.length ===
+            groupStore.selectedIds.length ===
             table.getFilteredRowModel().rows.length
             ? true
             : groupStore.selectedIds?.length > 0
-            ? "indeterminate"
-            : false,
+              ? "indeterminate"
+              : false,
         "onUpdate:modelValue": (value: boolean | "indeterminate") => {
           if (value) {
             // Select all visible rows
@@ -228,57 +238,34 @@ onMounted(() => {
           <AddModal />
         </template>
 
-        <DeleteModal
-          :count="groupStore.selectedIds.length"
-          v-model:open="groupStore.deleteModalOpen"
-        />
+        <DeleteModal :count="groupStore.selectedIds.length" v-model:open="groupStore.deleteModalOpen" />
 
-        <EditModal
-          :item="groupStore.editItem"
-          v-model:open="groupStore.editModalOpen"
-        />
+        <EditModal :item="groupStore.editItem" v-model:open="groupStore.editModalOpen" />
 
-        <StudentsModal
-          :students="groupStore.selectedItem?.students"
-          v-model:open="groupStore.showGroupStudentsModal"
-        />
+        <StudentsModal :students="groupStore.selectedItem?.students" v-model:open="groupStore.showGroupStudentsModal" />
 
-        <ExamsModal
-          :exams="groupStore.selectedItem?.exams"
-          v-model:open="groupStore.showGroupExamsModal"
-        />
+        <ExamsModal :exams="groupStore.selectedItem?.exams" v-model:open="groupStore.showGroupExamsModal" />
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput
-          :model-value="(table?.tableApi?.getColumn('اسم المجموعة')?.getFilterValue() as string)"
-          class="max-w-sm"
-          icon="i-lucide-search"
-          placeholder="ابحث ..."
-          @update:model-value="
+        <UInput :model-value="(table?.tableApi?.getColumn('اسم المجموعة')?.getFilterValue() as string)" class="max-w-sm"
+          icon="i-lucide-search" placeholder="ابحث ..." @update:model-value="
             table?.tableApi?.getColumn('اسم المجموعة')?.setFilterValue($event)
-          "
-        />
+            " />
 
         <div class="flex flex-wrap items-center gap-1.5">
           <DeleteModal :count="groupStore.selectedIds.length">
-            <UButton
-              v-if="groupStore.selectedIds.length"
-              label="حذف"
-              color="error"
-              variant="subtle"
-              icon="i-lucide-trash"
-            >
+            <UButton v-if="groupStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>{{ groupStore.selectedIds.length }}</UKbd>
               </template>
             </UButton>
           </DeleteModal>
 
-          <UDropdownMenu
-            :items="table?.tableApi
+          <UDropdownMenu :items="table?.tableApi
             ?.getAllColumns()
             .filter((column) => column.getCanHide())
             .map((column) => ({
@@ -292,48 +279,26 @@ onMounted(() => {
                 e?.preventDefault()
               }
             }))
-            "
-            :content="{ align: 'end' }"
-          >
-            <UButton
-              label="الاعمدة"
-              color="neutral"
-              variant="outline"
-              trailing-icon="i-lucide-settings-2"
-            />
+            " :content="{ align: 'end' }">
+            <UButton label="الاعمدة" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
           </UDropdownMenu>
         </div>
       </div>
 
-      <UTable
-        ref="table"
-        v-model:column-filters="columnFilters"
-        v-model:column-visibility="columnVisibility"
-        v-model:pagination="groupStore.pagination"
-        class="shrink-0"
-        :data="groupStore.items"
-        :columns="columns"
-        :ui="{
+      <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+        v-model:pagination="groupStore.pagination" class="shrink-0" :data="groupStore.items" :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
           th: 'py-2  border-y border-default ',
           td: 'border-b border-default',
-        }"
-      />
+        }" />
 
-      <div
-        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
-        dir="ltr"
-      >
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
         <div class="flex items-center gap-1.5" dir="ltr">
-          <UPagination
-            dir="ltr"
-            :total="groupStore?.pagination?.total"
-            :items-per-page="groupStore?.pagination?.pageSize"
-            :default-page="groupStore?.pagination?.page"
-            @update:page="(p) => groupStore.loadAllGroups(p)"
-          />
+          <UPagination dir="ltr" :total="groupStore?.pagination?.total"
+            :items-per-page="groupStore?.pagination?.pageSize" :default-page="groupStore?.pagination?.page"
+            @update:page="(p) => groupStore.loadAllGroups(p)" />
         </div>
       </div>
     </template>

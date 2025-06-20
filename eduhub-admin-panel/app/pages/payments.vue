@@ -10,6 +10,7 @@ import EditModal from "~/components/payments/EditModal.vue";
 
 const paymentStore = usePaymentStore();
 const studentStore = useStudentStore();
+const authStore = useAuthStore();
 
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
@@ -33,11 +34,15 @@ onMounted(() => {
 });
 
 function getRowItems(row: any) {
-  return [
-    { type: "label", label: "الاجراءات" },
-    { label: "مشاهدة الفاتورة", icon: "i-lucide-wallet" },
-    { type: "separator" },
-    {
+  const items = [{ type: "label", label: "الاجراءات" }, { type: "separator" }];
+  if (authStore.hasPermission("read-payment")) {
+    items.push({
+      label: "مشاهدة الفاتورة",
+      icon: "i-lucide-wallet",
+    });
+  }
+  if (authStore.hasPermission("update-payment")) {
+    items.push({
       label: "تعديل الدفع",
       icon: "i-lucide-edit",
       color: "primary",
@@ -45,8 +50,10 @@ function getRowItems(row: any) {
         paymentStore.editItem = row.original;
         paymentStore.editModalOpen = true;
       },
-    },
-    {
+    });
+  }
+  if (authStore.hasPermission("delete-payment")) {
+    items.push({
       label: "حذف الدفع",
       icon: "i-lucide-trash",
       color: "error",
@@ -54,8 +61,9 @@ function getRowItems(row: any) {
         paymentStore.addId(row.original.id);
         paymentStore.deleteModalOpen = true;
       },
-    },
-  ];
+    });
+  }
+  return items;
 }
 
 const getColorByStatus = (status) => {
@@ -65,7 +73,6 @@ const getColorByStatus = (status) => {
     pending: "warning",
   }[status];
 };
-
 
 const getStatus = (status) => {
   return {
@@ -177,9 +184,7 @@ const columns: TableColumn[] = [
     cell: ({ row }) => {
       const color = "warning";
 
-      return h(
-        () => row.original.method
-      );
+      return h(() => row.original.method);
     },
   },
   {

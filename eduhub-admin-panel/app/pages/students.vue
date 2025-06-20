@@ -9,6 +9,8 @@ import StudentList from "~/components/students/StudentList.vue";
 import StudentDetails from "~/components/students/StudentDetails.vue";
 
 const studentStore = useStudentStore();
+const authStore = useAuthStore();
+
 const currentPage = ref(1);
 const pageSize = 10;
 const isLoading = ref(false);
@@ -201,6 +203,7 @@ async function handleAddStudent(addStudent: object) {
       @click="onAddStudent"
       size="lg"
       class="mt-2"
+      v-if="authStore.permissions.includes('create-student')"
     />
   </div>
 

@@ -12,14 +12,14 @@ export const useLinksStore = defineStore("links", () => {
   const links = [
     [
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "الصفحة الرئيسية",
         icon: "i-lucide-house",
         to: "/",
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "المواد الدراسية",
         icon: "i-lucide-book-open",
         to: "/courses",
@@ -27,7 +27,7 @@ export const useLinksStore = defineStore("links", () => {
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "المدرسيين",
         icon: "i-lucide-users",
         to: "/teachers",
@@ -35,15 +35,15 @@ export const useLinksStore = defineStore("links", () => {
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "أولياء الامور",
         icon: "i-lucide-users",
         to: "/parents",
-        permission: "read-parent",
+        permission: "read-parentmodel",
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "الطلاب",
         icon: "i-heroicons-user-group",
         to: "/students",
@@ -51,7 +51,7 @@ export const useLinksStore = defineStore("links", () => {
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "المجموعات",
         icon: "i-lucide-group",
         to: "/groups",
@@ -59,7 +59,7 @@ export const useLinksStore = defineStore("links", () => {
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "الاختبارات",
         icon: "i-lucide-book-open",
         to: "/exams",
@@ -67,15 +67,15 @@ export const useLinksStore = defineStore("links", () => {
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "الدرجات",
         icon: "i-lucide-pencil",
         to: "/results",
-        permission: "read-result",
+        permission: "read-examresult",
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
+        class: "text-xl",
         label: "المدفوعات",
         icon: "i-lucide-dollar-sign",
         to: "/payments",
@@ -83,15 +83,7 @@ export const useLinksStore = defineStore("links", () => {
         onSelect: () => (open.value = false),
       },
       {
-        class: "text-lg",
-        label: "الموظفين",
-        icon: "i-lucide-users",
-        to: "/users",
-        permission: "read-user",
-        onSelect: () => (open.value = false),
-      },
-      {
-        class: "text-lg",
+        class: "text-xl",
         label: "الحضور والغياب",
         icon: "i-lucide-check-check",
         to: "/attendance",
@@ -101,7 +93,15 @@ export const useLinksStore = defineStore("links", () => {
     ],
     [
       {
-        class: "text-lg",
+        class: "text-xl",
+        label: "الموظفين",
+        icon: "i-lucide-users",
+        to: "/users",
+        permission: "read-user",
+        onSelect: () => (open.value = false),
+      },
+      {
+        class: "text-xl",
         label: "الاعدادات",
         icon: "i-lucide-settings",
         to: "/settings/roles",

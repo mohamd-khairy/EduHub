@@ -5,7 +5,9 @@ import type { TabsItem } from "@nuxt/ui";
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 const UBadge = resolveComponent("UBadge");
-
+definePageMeta({
+  permission: "read-student-exam",
+});
 const props = defineProps<{
   student: any; // use `any` or define a type if available
 }>();

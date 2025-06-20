@@ -13,6 +13,16 @@ class Student extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
     public static bool $inPermission = true;
+    public static array $customPermission = [
+        'read-student-parent',
+        'read-student-group',
+        'create-student-group',
+        'delete-student-group',
+        'update-student-group-status',
+        'read-student-exam',
+        'read-student-attendance',
+        'read-student-payment',
+    ];
 
 
     protected $fillable = [

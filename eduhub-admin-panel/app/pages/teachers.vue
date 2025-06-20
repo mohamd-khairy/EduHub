@@ -9,6 +9,7 @@ import DeleteModal from "~/components/teachers/DeleteModal.vue";
 import EditModal from "~/components/teachers/EditModal.vue";
 
 const teacherStore = useTeacherStore();
+const authStore = useAuthStore();
 
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
@@ -32,10 +33,12 @@ onMounted(() => {
 });
 
 function getRowItems(row: any) {
-  return [
+  const items = [
     { type: "label", label: "الاجراءات" },
     { type: "separator" },
-    {
+  ];
+  if (authStore.hasPermission("update-teacher")) {
+    items.push({
       label: "تعديل المدرس",
       icon: "i-lucide-edit",
       color: "primary",
@@ -43,8 +46,10 @@ function getRowItems(row: any) {
         teacherStore.editItem = row.original;
         teacherStore.editModalOpen = true;
       },
-    },
-    {
+    });
+  }
+  if (authStore.hasPermission("delete-teacher")) {
+    items.push({
       label: "حذف المدرس",
       icon: "i-lucide-trash",
       color: "error",
@@ -52,8 +57,9 @@ function getRowItems(row: any) {
         teacherStore.addId(row.original.id);
         teacherStore.deleteModalOpen = true;
       },
-    },
-  ];
+    });
+  }
+  return items;
 }
 
 const columns: TableColumn<object>[] = [
@@ -63,12 +69,12 @@ const columns: TableColumn<object>[] = [
       h(UCheckbox, {
         modelValue:
           teacherStore.selectedIds.length > 0 &&
-          teacherStore.selectedIds.length ===
+            teacherStore.selectedIds.length ===
             table.getFilteredRowModel().rows.length
             ? true
             : teacherStore.selectedIds?.length > 0
-            ? "indeterminate"
-            : false,
+              ? "indeterminate"
+              : false,
         "onUpdate:modelValue": (value: boolean | "indeterminate") => {
           if (value) {
             // Select all visible rows
@@ -228,39 +234,23 @@ const columns: TableColumn<object>[] = [
           <AddModal />
         </template>
 
-        <DeleteModal
-          :count="teacherStore.selectedIds.length"
-          v-model:open="teacherStore.deleteModalOpen"
-        />
+        <DeleteModal :count="teacherStore.selectedIds.length" v-model:open="teacherStore.deleteModalOpen" />
 
-        <EditModal
-          :item="teacherStore.editItem"
-          v-model:open="teacherStore.editModalOpen"
-        />
+        <EditModal :item="teacherStore.editItem" v-model:open="teacherStore.editModalOpen" />
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput
-          :model-value="(table?.tableApi?.getColumn('اسم المدرس')?.getFilterValue() as string)"
-          class="max-w-sm"
-          icon="i-lucide-search"
-          placeholder="ابحث ..."
-          @update:model-value="
+        <UInput :model-value="(table?.tableApi?.getColumn('اسم المدرس')?.getFilterValue() as string)" class="max-w-sm"
+          icon="i-lucide-search" placeholder="ابحث ..." @update:model-value="
             table?.tableApi?.getColumn('اسم المدرس')?.setFilterValue($event)
-          "
-        />
+            " />
 
         <div class="flex flex-wrap items-center gap-1.5">
           <DeleteModal :count="teacherStore.selectedIds.length">
-            <UButton
-              v-if="teacherStore.selectedIds.length"
-              label="حذف"
-              color="error"
-              variant="subtle"
-              icon="i-lucide-trash"
-            >
+            <UButton v-if="teacherStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
                   {{ teacherStore.selectedIds.length }}
@@ -269,8 +259,7 @@ const columns: TableColumn<object>[] = [
             </UButton>
           </DeleteModal>
 
-          <UDropdownMenu
-            :items="table?.tableApi
+          <UDropdownMenu :items="table?.tableApi
             ?.getAllColumns()
             .filter((column) => column.getCanHide())
             .map((column) => ({
@@ -284,48 +273,26 @@ const columns: TableColumn<object>[] = [
                 e?.preventDefault()
               }
             }))
-            "
-            :content="{ align: 'end' }"
-          >
-            <UButton
-              label="الاعمدة"
-              color="neutral"
-              variant="outline"
-              trailing-icon="i-lucide-settings-2"
-            />
+            " :content="{ align: 'end' }">
+            <UButton label="الاعمدة" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
           </UDropdownMenu>
         </div>
       </div>
 
-      <UTable
-        ref="table"
-        v-model:column-filters="columnFilters"
-        v-model:column-visibility="columnVisibility"
-        v-model:pagination="teacherStore.pagination"
-        class="shrink-0"
-        :data="teacherStore.items"
-        :columns="columns"
-        :ui="{
+      <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+        v-model:pagination="teacherStore.pagination" class="shrink-0" :data="teacherStore.items" :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
           th: 'py-2  border-y border-default ',
           td: 'border-b border-default',
-        }"
-      />
+        }" />
 
-      <div
-        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
-        dir="ltr"
-      >
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
         <div class="flex items-center gap-1.5" dir="ltr">
-          <UPagination
-            dir="ltr"
-            :total="teacherStore.pagination?.total"
-            :items-per-page="teacherStore.pagination?.pageSize"
-            :default-page="teacherStore.pagination?.page"
-            @update:page="(p) => teacherStore.loadAllTeachers(p)"
-          />
+          <UPagination dir="ltr" :total="teacherStore.pagination?.total"
+            :items-per-page="teacherStore.pagination?.pageSize" :default-page="teacherStore.pagination?.page"
+            @update:page="(p) => teacherStore.loadAllTeachers(p)" />
         </div>
       </div>
     </template>

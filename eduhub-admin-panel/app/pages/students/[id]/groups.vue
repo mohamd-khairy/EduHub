@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import AddGroup from "~/components/students/AddGroup.vue";
-
+definePageMeta({
+  permission: "read-student-group",
+});
 const studentStore = useStudentStore();
+const authStore = useAuthStore();
 
 const toast = useToast();
 
@@ -64,25 +67,14 @@ async function handleUpdateStudent(updatedStudent: object) {
 </script>
 
 <template>
-  <UPageCard
-    title="المجموعات الخاصة بالطالب"
-    variant="naked"
-    orientation="horizontal"
-    size="xl"
-  >
-    <AddGroup :student="student" @updateStudent="handleUpdateStudent" />
+  <UPageCard title="المجموعات الخاصة بالطالب" variant="naked" orientation="horizontal" size="xl">
+    <AddGroup :student="student" @updateStudent="handleUpdateStudent"
+      v-if="authStore.permissions.includes('create-student-group')" />
   </UPageCard>
 
-  <UPageCard
-    v-for="field in groups"
-    :key="field.id"
-    variant="soft"
-    style="font-size: 18px; width: 100%"
-    class="p-2 shadow-sm border border-gray-200 rounded-2xl hover:shadow-md transition-all"
-  >
-    <div
-      class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2"
-    >
+  <UPageCard v-for="field in groups" :key="field.id" variant="soft" style="font-size: 18px; width: 100%"
+    class="p-2 shadow-sm border border-gray-200 rounded-2xl hover:shadow-md transition-all">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
       <!-- Left: Group Info -->
       <div class="flex-1 space-y-2 text-lg leading-relaxed">
         <h3 class="text-2xl font-bold text-primary">{{ field.name }}</h3>
@@ -123,18 +115,11 @@ async function handleUpdateStudent(updatedStudent: object) {
       </div>
 
       <div class="pt-2 sm:pt-0 flex items-center gap-4">
-        <USwitch
-          :model-value="field.pivot.status"
-          @update:model-value="(value) => onGroupActiveChange(field, value)"
-        />
-        <UButton
-          icon="i-lucide-trash"
-          color="red"
-          variant="soft"
-          size="lg"
-          @click="onGroupEnrollmentDelete(field)"
+        <USwitch :model-value="field.pivot.status" @update:model-value="(value) => onGroupActiveChange(field, value)"
+          v-if="authStore.permissions.includes('update-student-group-status')" />
+        <UButton icon="i-lucide-trash" color="red" variant="soft" size="lg" @click="onGroupEnrollmentDelete(field)"
           class="hover:bg-red-100 hover:text-red-700 transition-colors duration-200"
-        />
+          v-if="authStore.permissions.includes('delete-student-group')" />
       </div>
     </div>
   </UPageCard>

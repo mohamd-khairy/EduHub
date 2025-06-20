@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  permission: "read-parent",
+  permission: "read-parentmodel",
 });
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
@@ -9,6 +9,7 @@ import DeleteModal from '~/components/parents/DeleteModal.vue'
 import EditModal from '~/components/parents/EditModal.vue'
 
 const parentStore = useParentStore()
+const authStore = useAuthStore();
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -30,10 +31,13 @@ onMounted(() => {
 })
 
 function getRowItems(row: any) {
-  return [
+  const items = [
     { type: 'label', label: 'الاجراءات' },
     { type: 'separator' },
-    {
+  ]
+
+  if (authStore.hasPermission('update-parentmodel')) {
+    items.push({
       label: 'تعديل ولي الامر',
       icon: 'i-lucide-edit',
       color: 'primary',
@@ -41,8 +45,11 @@ function getRowItems(row: any) {
         parentStore.editItem = row.original
         parentStore.editModalOpen = true
       }
-    },
-    {
+    })
+  }
+
+  if (authStore.hasPermission('delete-parentmodel')) {
+    items.push({
       label: 'حذف ولي الامر',
       icon: 'i-lucide-trash',
       color: 'error',
@@ -50,8 +57,10 @@ function getRowItems(row: any) {
         parentStore.addId(row.original.id)
         parentStore.deleteModalOpen = true
       }
-    }
-  ]
+    })
+  }
+
+  return items
 }
 
 const columns: TableColumn<User>[] = [
@@ -217,14 +226,14 @@ const columns: TableColumn<User>[] = [
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput :model-value="(table?.tableApi?.getColumn('اسم ولي الامر')?.getFilterValue() as string)" class="max-w-sm"
-          icon="i-lucide-search" placeholder="ابحث ..."
+        <UInput :model-value="(table?.tableApi?.getColumn('اسم ولي الامر')?.getFilterValue() as string)"
+          class="max-w-sm" icon="i-lucide-search" placeholder="ابحث ..."
           @update:model-value="table?.tableApi?.getColumn('اسم ولي الامر')?.setFilterValue($event)" />
 
         <div class="flex flex-wrap items-center gap-1.5">
           <DeleteModal :count="parentStore.selectedIds.length">
-            <UButton v-if="parentStore.selectedIds.length" label="حذف" color="error"
-              variant="subtle" icon="i-lucide-trash">
+            <UButton v-if="parentStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
                   {{ parentStore.selectedIds.length }}
@@ -265,8 +274,9 @@ const columns: TableColumn<User>[] = [
 
       <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
         <div class="flex items-center gap-1.5" dir="ltr">
-          <UPagination dir="ltr" :total="parentStore.pagination?.total" :items-per-page="parentStore.pagination?.pageSize"
-            :default-page="parentStore.pagination?.page" @update:page="(p) => parentStore.loadAllParents(p)" />
+          <UPagination dir="ltr" :total="parentStore.pagination?.total"
+            :items-per-page="parentStore.pagination?.pageSize" :default-page="parentStore.pagination?.page"
+            @update:page="(p) => parentStore.loadAllParents(p)" />
         </div>
       </div>
     </template>

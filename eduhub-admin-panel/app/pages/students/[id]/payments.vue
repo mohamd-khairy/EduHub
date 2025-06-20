@@ -4,6 +4,9 @@ import type { TableColumn } from "@nuxt/ui";
 const UBadge = resolveComponent("UBadge");
 const UButton = resolveComponent("UButton");
 
+definePageMeta({
+  permission: "read-student-payment",
+});
 const props = defineProps<{
   student: any; // use `any` or define a type if available
 }>();

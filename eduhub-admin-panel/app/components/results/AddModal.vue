@@ -58,7 +58,7 @@ async function onSubmit() {
 
 <template>
   <UModal v-model:open="open" title="اضافة اختبار" description="إضافة اختبار جديد" dir="rtl">
-    <UButton label="إضافة اختبار جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-result')" />
+    <UButton label="إضافة اختبار جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-examresult')" />
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">

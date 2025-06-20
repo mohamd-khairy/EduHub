@@ -10,6 +10,7 @@ import EditModal from '~/components/courses/EditModal.vue'
 import type { User } from '~/types'
 
 const courseStore = useCourseStore()
+const authStore = useAuthStore();
 
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -30,10 +31,13 @@ onMounted(() => {
 })
 
 function getRowItems(row: any) {
-  return [
+  const items = [
     { type: 'label', label: 'الاجراءات' },
     { type: 'separator' },
-    {
+  ]
+
+  if (authStore.hasPermission('update-course')) {
+    items.push({
       label: 'تعديل الكورس',
       icon: 'i-lucide-edit',
       color: 'primary',
@@ -41,8 +45,11 @@ function getRowItems(row: any) {
         courseStore.editItem = row.original
         courseStore.editModalOpen = true
       }
-    },
-    {
+    })
+  }
+
+  if (authStore.hasPermission('delete-course')) {
+    items.push({
       label: 'حذف الكورس',
       icon: 'i-lucide-trash',
       color: 'error',
@@ -50,8 +57,10 @@ function getRowItems(row: any) {
         courseStore.addId(row.original.id)
         courseStore.deleteModalOpen = true
       }
-    }
-  ]
+    })
+  }
+
+  return items
 }
 
 const columns: TableColumn<User>[] = [
@@ -202,7 +211,8 @@ const columns: TableColumn<User>[] = [
         </template>
 
 
-        <DeleteModal :count="courseStore.selectedIds.length" v-model:open="courseStore.deleteModalOpen" v-can="'delete-course'" />
+        <DeleteModal :count="courseStore.selectedIds.length" v-model:open="courseStore.deleteModalOpen"
+          v-can="'delete-course'" />
 
         <EditModal :item="courseStore.editItem" v-model:open="courseStore.editModalOpen" v-can="'update-course'" />
 

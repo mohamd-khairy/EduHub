@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const studentStore = useStudentStore();
-
+definePageMeta({
+  permission: "read-student-parent",
+});
 const props = defineProps<{
   student: object;
 }>();

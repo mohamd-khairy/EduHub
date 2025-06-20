@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-
+definePageMeta({
+  permission: "read-student-attendance",
+});
 const props = defineProps<{
   student: any; // use `any` or define a type if available
 }>();

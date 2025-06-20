@@ -2,9 +2,12 @@
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
 import { defineEmits } from "vue";
-
+definePageMeta({
+  permission: "read-student",
+});
 const parentStore = useParentStore();
 const studentStore = useStudentStore();
+const authStore = useAuthStore()
 const emit = defineEmits(["updateStudent"]);
 
 const props = defineProps<{
@@ -39,7 +42,7 @@ const profile = reactive<Partial<ProfileSchema>>({
 onMounted(async () => {
   if (props.student) {
     console.log("props.student:", props.student);
-    
+
     parentStore.loadParentsForSelect();
     Object.assign(profile, props.student);
     profile.parent_id = {
@@ -95,160 +98,56 @@ function onFileClick() {
 </script>
 
 <template>
-  <UForm
-    id="settings"
-    :schema="profileSchema"
-    :state="profile"
-    @submit="onSubmit"
-  >
-    <UPageCard
-      title="تعديل بيانات الطالب"
-      variant="naked"
-      orientation="horizontal"
-      class="mb-4"
-      style="font-size: 20px"
-    >
-      <UButton
-        form="settings"
-        label="حفظ التغييرات"
-        color="neutral"
-        type="submit"
-        class="w-fit lg:ms-auto"
-        style="font-size: 18px"
-      />
+  <UForm id="settings" :schema="profileSchema" :state="profile" @submit="onSubmit">
+    <UPageCard title="تعديل بيانات الطالب" variant="naked" orientation="horizontal" class="mb-4"
+      style="font-size: 20px">
+      <UButton form="settings" label="حفظ التغييرات" color="neutral" type="submit" class="w-fit lg:ms-auto"
+        style="font-size: 18px" v-if="authStore.permissions.includes('update-student')" />
     </UPageCard>
 
     <UPageCard variant="subtle">
-      <UFormField
-        name="name"
-        label="اسم الطالب"
-        description="اسم الطالب المستخدم الخاص بك."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        style="font-size: 18px"
-      >
-        <UInput
-          v-model="profile.name"
-          autocomplete="off"
-          style="width: 300px"
-        />
+      <UFormField name="name" label="اسم الطالب" description="اسم الطالب المستخدم الخاص بك." required
+        class="flex max-sm:flex-col justify-between items-start gap-4" style="font-size: 18px">
+        <UInput v-model="profile.name" autocomplete="off" style="width: 300px" />
       </UFormField>
       <USeparator />
-      <UFormField
-        name="email"
-        label="البريد الإلكتروني"
-        description="البريد الإلكتروني الفريد الخاص بك لتسجيل الدخول ."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        style="font-size: 18px"
-      >
-        <UInput
-          v-model="profile.email"
-          type="email"
-          autocomplete="off"
-          style="width: 300px"
-        />
+      <UFormField name="email" label="البريد الإلكتروني" description="البريد الإلكتروني الفريد الخاص بك لتسجيل الدخول ."
+        required class="flex max-sm:flex-col justify-between items-start gap-4" style="font-size: 18px">
+        <UInput v-model="profile.email" type="email" autocomplete="off" style="width: 300px" />
       </UFormField>
       <USeparator />
-      <UFormField
-        name="phone"
-        label="رقم الهاتف"
-        description="رقم الهاتف الفريد الخاص بك في ملفك الشخصي."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        style="font-size: 18px"
-      >
-        <UInput
-          v-model="profile.phone"
-          type="tel"
-          autocomplete="off"
-          style="width: 300px"
-        />
+      <UFormField name="phone" label="رقم الهاتف" description="رقم الهاتف الفريد الخاص بك في ملفك الشخصي." required
+        class="flex max-sm:flex-col justify-between items-start gap-4" style="font-size: 18px">
+        <UInput v-model="profile.phone" type="tel" autocomplete="off" style="width: 300px" />
       </UFormField>
       <USeparator />
-      <UFormField
-        name="gender"
-        label="الجنس"
-        description="جنسك المستخدمالخاص بك في ملفك الشخصي."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        style="font-size: 18px"
-      >
-        <UInput
-          v-model="profile.gender"
-          autocomplete="off"
-          style="width: 300px"
-        />
+      <UFormField name="gender" label="الجنس" description="جنسك المستخدمالخاص بك في ملفك الشخصي." required
+        class="flex max-sm:flex-col justify-between items-start gap-4" style="font-size: 18px">
+        <UInput v-model="profile.gender" autocomplete="off" style="width: 300px" />
       </UFormField>
       <USeparator />
-      <UFormField
-        name="grade_level"
-        label="السنة الدراسية"
-        description="السنة الدراسية الخاصة بك في ملفك الشخصي."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        style="font-size: 18px"
-      >
-        <UInput
-          v-model="profile.grade_level"
-          autocomplete="off"
-          style="width: 300px"
-        />
+      <UFormField name="grade_level" label="السنة الدراسية" description="السنة الدراسية الخاصة بك في ملفك الشخصي."
+        required class="flex max-sm:flex-col justify-between items-start gap-4" style="font-size: 18px">
+        <UInput v-model="profile.grade_level" autocomplete="off" style="width: 300px" />
       </UFormField>
       <USeparator />
-      <UFormField
-        name="school_name"
-        label="اسم المدرسة"
-        description="اسم المدرسة الفريد الخاص بك في ملفك الشخصي."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        style="font-size: 18px"
-      >
-        <UInput
-          v-model="profile.school_name"
-          autocomplete="off"
-          style="width: 300px"
-        />
+      <UFormField name="school_name" label="اسم المدرسة" description="اسم المدرسة الفريد الخاص بك في ملفك الشخصي."
+        required class="flex max-sm:flex-col justify-between items-start gap-4" style="font-size: 18px">
+        <UInput v-model="profile.school_name" autocomplete="off" style="width: 300px" />
       </UFormField>
       <USeparator />
-      <UFormField
-        name="parent_id"
-        label="ولي الأمر"
-        description="اسم ولي الأمر الفريد الخاص بالطالب ."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        style="font-size: 18px"
-      >
-        <USelectMenu
-          :items="parentStore.parentOptions"
-          v-model="profile.parent_id"
-          autocomplete="off"
-          style="width: 300px"
-        />
+      <UFormField name="parent_id" label="ولي الأمر" description="اسم ولي الأمر الفريد الخاص بالطالب ." required
+        class="flex max-sm:flex-col justify-between items-start gap-4" style="font-size: 18px">
+        <USelectMenu :items="parentStore.parentOptions" v-model="profile.parent_id" autocomplete="off"
+          style="width: 300px" />
       </UFormField>
       <USeparator />
-      <UFormField
-        name="image"
-        label="صورة الملف الشخصي"
-        description="JPG, GIF or PNG. 1MB Max."
-        class="flex max-sm:flex-col justify-between sm:items-center gap-4"
-        style="font-size: 18px"
-      >
+      <UFormField name="image" label="صورة الملف الشخصي" description="JPG, GIF or PNG. 1MB Max."
+        class="flex max-sm:flex-col justify-between sm:items-center gap-4" style="font-size: 18px">
         <div class="flex flex-wrap items-center gap-3">
           <UAvatar :src="profile.image" :alt="profile.name" size="lg" />
-          <UButton
-            label="اختر صورة"
-            color="neutral"
-            @click="onFileClick"
-            style="width: 300px"
-          />
-          <input
-            ref="fileRef"
-            type="file"
-            class="hidden"
-            accept=".jpg, .jpeg, .png, .gif"
-            @change="onFileChange"
-          />
+          <UButton label="اختر صورة" color="neutral" @click="onFileClick" style="width: 300px" />
+          <input ref="fileRef" type="file" class="hidden" accept=".jpg, .jpeg, .png, .gif" @change="onFileChange" />
         </div>
       </UFormField>
     </UPageCard>

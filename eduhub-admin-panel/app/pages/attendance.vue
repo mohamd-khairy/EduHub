@@ -6,6 +6,8 @@ import { ref, computed, onMounted } from "vue";
 
 const groupStore = useGroupStore();
 const attendanceStore = useAttendanceStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 const now = new Date();
 const dashboardTitle = ref("نظام الحضور والغياب");

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  permission: "read-result",
+  permission: "read-examresult",
 });
 import type { TableColumn } from "@nuxt/ui";
 import { upperFirst } from "scule";
@@ -12,6 +12,7 @@ import type { User } from "~/types";
 const examResultStore = useExamResultStore();
 const examStore = useExamStore();
 const studentStore = useStudentStore();
+const authStore = useAuthStore();
 
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
@@ -38,10 +39,12 @@ onMounted(() => {
 
 // Adjust typing here (replace `User` or your row type)
 function getRowItems(row: any) {
-  return [
+  const items = [
     { type: "label", label: "الاجراءات" },
     { type: "separator" },
-    {
+  ];
+  if (authStore.hasPermission("update-examresult")) {
+    items.push({
       label: "تعديل النتيجة",
       icon: "i-lucide-edit",
       color: "primary",
@@ -49,8 +52,10 @@ function getRowItems(row: any) {
         examResultStore.editItem = row.original;
         examResultStore.editModalOpen = true;
       },
-    },
-    {
+    });
+  }
+  if (authStore.hasPermission("delete-examresult")) {
+    items.push({
       label: "حذف النتيجة",
       icon: "i-lucide-trash",
       color: "error",
@@ -58,8 +63,9 @@ function getRowItems(row: any) {
         examResultStore.addId(row.original.id);
         examResultStore.deleteModalOpen = true;
       },
-    },
-  ];
+    });
+  }
+  return items;
 }
 
 const columns: TableColumn<User>[] = [
@@ -69,12 +75,12 @@ const columns: TableColumn<User>[] = [
       h(UCheckbox, {
         modelValue:
           examResultStore.selectedIds.length > 0 &&
-          examResultStore.selectedIds.length ===
+            examResultStore.selectedIds.length ===
             table.getFilteredRowModel().rows.length
             ? true
             : examResultStore.selectedIds?.length > 0
-            ? "indeterminate"
-            : false,
+              ? "indeterminate"
+              : false,
         "onUpdate:modelValue": (value: boolean | "indeterminate") => {
           if (value) {
             // Select all visible rows
@@ -237,39 +243,23 @@ const columns: TableColumn<User>[] = [
           <AddModal />
         </template>
 
-        <DeleteModal
-          :count="examResultStore.selectedIds.length"
-          v-model:open="examResultStore.deleteModalOpen"
-        />
+        <DeleteModal :count="examResultStore.selectedIds.length" v-model:open="examResultStore.deleteModalOpen" />
 
-        <EditModal
-          :item="examResultStore.editItem"
-          v-model:open="examResultStore.editModalOpen"
-        />
+        <EditModal :item="examResultStore.editItem" v-model:open="examResultStore.editModalOpen" />
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput
-          :model-value="(table?.tableApi?.getColumn('درجةالطالب')?.getFilterValue() as string)"
-          class="max-w-sm"
-          icon="i-lucide-search"
-          placeholder="ابحث ..."
-          @update:model-value="
+        <UInput :model-value="(table?.tableApi?.getColumn('درجةالطالب')?.getFilterValue() as string)" class="max-w-sm"
+          icon="i-lucide-search" placeholder="ابحث ..." @update:model-value="
             table?.tableApi?.getColumn('درجةالطالب')?.setFilterValue($event)
-          "
-        />
+            " />
 
         <div class="flex flex-wrap items-center gap-1.5">
           <DeleteModal :count="examResultStore.selectedIds.length">
-            <UButton
-              v-if="examResultStore.selectedIds.length"
-              label="حذف"
-              color="error"
-              variant="subtle"
-              icon="i-lucide-trash"
-            >
+            <UButton v-if="examResultStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
                   {{ examResultStore.selectedIds.length }}
@@ -278,8 +268,7 @@ const columns: TableColumn<User>[] = [
             </UButton>
           </DeleteModal>
 
-          <UDropdownMenu
-            :items="table?.tableApi
+          <UDropdownMenu :items="table?.tableApi
             ?.getAllColumns()
             .filter((column) => column.getCanHide())
             .map((column) => ({
@@ -293,48 +282,27 @@ const columns: TableColumn<User>[] = [
                 e?.preventDefault()
               }
             }))
-            "
-            :content="{ align: 'end' }"
-          >
-            <UButton
-              label="الاعمدة"
-              color="neutral"
-              variant="outline"
-              trailing-icon="i-lucide-settings-2"
-            />
+            " :content="{ align: 'end' }">
+            <UButton label="الاعمدة" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
           </UDropdownMenu>
         </div>
       </div>
 
-      <UTable
-        ref="table"
-        v-model:column-filters="columnFilters"
-        v-model:column-visibility="columnVisibility"
-        v-model:pagination="examResultStore.pagination"
-        class="shrink-0"
-        :data="examResultStore.items"
-        :columns="columns"
-        :ui="{
+      <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+        v-model:pagination="examResultStore.pagination" class="shrink-0" :data="examResultStore.items"
+        :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
           th: 'py-2  border-y border-default ',
           td: 'border-b border-default',
-        }"
-      />
+        }" />
 
-      <div
-        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
-        dir="ltr"
-      >
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
         <div class="flex items-center gap-1.5" dir="ltr">
-          <UPagination
-            dir="ltr"
-            :total="examResultStore.pagination?.total"
-            :items-per-page="examResultStore.pagination?.pageSize"
-            :default-page="examResultStore.pagination?.page"
-            @update:page="(p) => examResultStore.loadAllExamResults(p)"
-          />
+          <UPagination dir="ltr" :total="examResultStore.pagination?.total"
+            :items-per-page="examResultStore.pagination?.pageSize" :default-page="examResultStore.pagination?.page"
+            @update:page="(p) => examResultStore.loadAllExamResults(p)" />
         </div>
       </div>
     </template>
