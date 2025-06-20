@@ -566,7 +566,8 @@ const exportAttendance = () => {
                     </template>
                     <div class="relative">
                       <div
-                        class="border-2 border-dashed border-gray-300 rounded-xl aspect-square flex items-center justify-center bg-gray-50 mb-4"
+                        class="border-2 border-dashed border-gray-300 rounded-xl aspect-square flex items-center justify-center bg-gray-50 mb-4
+                        dark:bg-(--chip-dark) dark:border-gray-600"
                         :class="{
                           'border-green-500': scanSuccess,
                           'border-red-500': scanError,

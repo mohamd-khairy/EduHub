@@ -152,14 +152,14 @@ watch(() => student_id?.value, (val) => {
 
     <template #body dir="rtl">
 
-      <div class="flex items-center space-x-4 mb-6 w-full" style="margin-bottom: 10px;" dir="rtl">
+      <div class="flex items-center space-x-4 w-full"  dir="rtl">
 
         <UFormField label="اسم الاختبار" placeholder="اسم الاختبار" name="exam_id">
           <USelectMenu dir="rtl" v-model:search-term="searchExamTerm" v-model="exam_id" :items="examStore.examOptions"
             placeholder="اختر الاختبار" :search-input="{
               placeholder: 'بحث...',
               icon: 'i-lucide-search'
-            }" />
+            }" class="w-62 mb-6" />
         </UFormField>
 
         <UFormField label="اسم الطالب" placeholder="اختر الطالب" name="student_id">
@@ -167,8 +167,16 @@ watch(() => student_id?.value, (val) => {
             :items="studentStore.studentOptions" placeholder="اختر الطالب" :search-input="{
               placeholder: 'بحث...',
               icon: 'i-lucide-search'
-            }" />
+            }" class="w-62 mb-6" />
         </UFormField>
+
+        <UButton
+          icon="i-lucide-x"
+          color="gray"
+          size="xl"
+          @click="student_id = null ; exam_id = null"
+          class="hover:bg-gray-200 "
+        />
       </div>
       <UTable ref="table" v-model:pagination="examResultStore.pagination" class="shrink-0" :data="examResultStore.items"
         :columns="columns" :ui="{

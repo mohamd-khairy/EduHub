@@ -19,6 +19,50 @@ export const useLinksStore = defineStore("links", () => {
         onSelect: () => (open.value = false),
       },
       {
+        label: "التقارير",
+        icon: "i-lucide-bar-chart-2",
+        class: "text-xl",
+        defaultOpen: false,
+        children: [
+          {
+            label: "تقارير أداء الطلاب",
+            icon: "i-lucide-users",
+            to: "/reports/students",
+            permission: "read-studentreport",
+          },
+          {
+            label: "تقارير الحجز والحضور",
+            icon: "i-lucide-check-check",
+            to: "/reports/attendance",
+            permission: "read-attendancereport",
+          },
+          {
+            label: "تقارير مالية",
+            icon: "i-lucide-dollar-sign",
+            to: "/reports/payments",
+            permission: "read-paymentreport",
+          },
+          {
+            label: "تقارير  أداء المدرسين",
+            icon: "i-lucide-pencil",
+            to: "/reports/teachers",
+            permission: "read-teacherreport",
+          },
+          {
+            label: "تقارير  المواد الدراسية",
+            icon: "i-lucide-book-open",
+            to: "/reports/courses",
+            permission: "read-coursereport",
+          },
+          {
+            label: "تقارير  المجموعات",
+            icon: "i-lucide-group",
+            to: "/reports/groups",
+            permission: "read-groupreport",
+          },
+        ],
+      },
+      {
         class: "text-xl",
         label: "المواد الدراسية",
         icon: "i-lucide-book-open",

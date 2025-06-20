@@ -58,9 +58,11 @@ class User extends Authenticatable implements Auditable
 
     public function setImageAttribute($value)
     {
-        if ($value) {
+        if ($value && strpos($value, 'http') === false) {
             $image = $value->store('images', 'public');
             $this->attributes['image'] = url('/storage/' . $image);
+        } else {
+            $this->attributes['image'] = $value;
         }
     }
 

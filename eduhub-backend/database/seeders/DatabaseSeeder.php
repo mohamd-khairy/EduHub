@@ -49,6 +49,7 @@ class DatabaseSeeder extends Seeder
             'password' => 'password',
             'email_verified_at' => now(),
             'phone' => '1234567890',
+            'image' => 'http://eduhub.test/eduhub-backend/public/images/photo.jpg'
         ])->assignRole('admin');
 
         Role::findByName('parent')->givePermissionTo(Permission::where('group', 'parentmodel')->pluck('id'));

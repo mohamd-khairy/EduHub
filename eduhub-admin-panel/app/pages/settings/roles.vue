@@ -212,7 +212,7 @@ watch(
               class="mb-6 border border-gray-200 rounded-lg p-4"
             >
               <div
-                class="flex items-center justify-between px-2 py-2 mb-2 bg-gray-100 rounded-t-lg"
+                class="flex items-center justify-between px-2 py-2 mb-2 bg-gray-100 rounded-t-lg dark:bg-gray-500"
               >
                 <USwitch
                   :model-value="permissions.every((p) => state[p.name])"

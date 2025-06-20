@@ -128,6 +128,7 @@ watch(
             icon: 'i-lucide-search',
           }"
           size="xl"
+          class="w-62"
         />
 
         <UButton

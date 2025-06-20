@@ -177,6 +177,7 @@ watch(
             icon: 'i-lucide-search',
           }"
           size="xl"
+          class="w-62"
         />
 
         <UButton
@@ -184,6 +185,7 @@ watch(
           color="gray"
           size="sm"
           @click="student_id = null"
+          class="hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-300"
         />
       </div>
       <UTable

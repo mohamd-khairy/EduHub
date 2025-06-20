@@ -13,7 +13,7 @@ const router = useRouter();
 const user = ref({
   name: authStore.user?.name,
   avatar: {
-    src: "https://github.com/benjamincanac.png",
+    src: authStore.user?.image,
     alt: authStore.user?.name,
   },
 });
