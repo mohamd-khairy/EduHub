@@ -36,7 +36,12 @@ ChartJS.register(
 const { isNotificationsSlideoverOpen } = useDashboard();
 const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();
-
+const group_id = ref(null);
+const student_id = ref(null);
+const range = shallowRef<Range>({
+  start: null,
+  end: null,
+});
 const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
 
 onMounted(async () => {
@@ -45,9 +50,20 @@ onMounted(async () => {
   studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
 });
 
-const range = shallowRef<Range>({ start: null, end: null });
-const group_id = ref(null);
-const student_id = ref(null);
+watch(
+  [range, group_id, student_id],
+  async ([newRange, newGroupId, newStudentId]) => {
+    await dashboardStore.fetchStudentPerformancePerGroup({
+      start: newRange.start?.toISOString() || "",
+      end: newRange.end?.toISOString() || "",
+      group_id: newGroupId || "",
+      student_id: newStudentId || "",
+    });
+    studentPerformancePerGroup.value =
+      dashboardStore.studentPerformancePerGroup;
+  }
+);
+
 const resetSignal = ref(false);
 const hasFilter = computed(
   () =>

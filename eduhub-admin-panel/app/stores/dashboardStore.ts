@@ -24,9 +24,12 @@ export const useDashboardStore = defineStore("dashboard", () => {
     }
   }
 
-  async function fetchStudentPerformancePerGroup(groupId = "") {
+  async function fetchStudentPerformancePerGroup(params = {}) {
     try {
-      const url = `/dashboard/student-performance-per-group?group_id=${groupId}`;
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/student-performance-per-group${
+        query ? `?${query}` : ""
+      }`;
       const res = await api(url, { method: "GET" });
 
       // Assume `api` returns a standard fetch-like response

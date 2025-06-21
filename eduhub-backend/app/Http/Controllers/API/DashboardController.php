@@ -100,7 +100,26 @@ class DashboardController extends Controller
 
     public function studentPerformancePerGroup(Request $request)
     {
-        $groups = Group::with(['students.examResults'])->get();
+        $start = filled($request->start) ? date('Y-m-d H:i:s', strtotime($request->start)) : false;
+        $end = filled($request->end) ? date('Y-m-d H:i:s', strtotime($request->end)) : false;
+        $group_id = filled($request->group_id) ? $request->group_id : false;
+        $student_id = filled($request->student_id) ? $request->student_id : false;
+
+        $groups = Group::with(['students', 'students.examResults'])
+            ->when($group_id, function ($q) use ($group_id) {
+                $q->where('id', $group_id);
+            })
+            ->when($student_id, function ($q) use ($student_id) {
+                $q->whereHas('students', function ($q) use ($student_id) {
+                    $q->where('student_id', $student_id);
+                });
+            })
+            ->when($start && $end, function ($q) use ($start, $end) {
+                $start = date('Y-m-d H:i:s', strtotime($start));
+                $end = date('Y-m-d H:i:s', strtotime($end));
+                $q->whereBetween('created_at', [$start, $end]);
+            })
+            ->get();
 
         $labels = [];
         $data = [];
@@ -124,7 +143,7 @@ class DashboardController extends Controller
             'labels' => $labels,
             'datasets' => [
                 [
-                    'label' => 'مجموع درجات الطلاب في المجموعة',
+                    'label' => ($student_id ? 'مجموع درجات الطالب ' . Student::find($student_id)->name : 'مجموع درجات الطلاب') . ' ' . ($group_id ? 'في المجموعة ' . Group::find($group_id)->name : ' في جميع المجموعات'),
                     'data' => $data,
                     'backgroundColor' => $colors,
                 ],
