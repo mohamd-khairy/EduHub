@@ -141,6 +141,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [DashboardController::class, 'index']);
+        Route::get('/student-performance-per-group', [DashboardController::class, 'studentPerformancePerGroup']);
     });
 
     Route::group(['prefix' => 'auth'], function () {

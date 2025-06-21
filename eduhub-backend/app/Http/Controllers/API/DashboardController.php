@@ -97,4 +97,40 @@ class DashboardController extends Controller
 
         return $this->success($data);
     }
+
+    public function studentPerformancePerGroup(Request $request)
+    {
+        $groups = Group::with(['students.examResults'])->get();
+
+        $labels = [];
+        $data = [];
+        $colors = [];
+
+        foreach ($groups as $group) {
+            $labels[] = $group->name;
+
+            $totalScore = 0;
+
+            foreach ($group->students as $student) {
+                $totalScore += $student->examResults->sum('score');
+            }
+
+            $data[] = $totalScore;
+
+            $colors[] = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        }
+
+        $chartData = [
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'label' => 'مجموع درجات الطلاب في المجموعة',
+                    'data' => $data,
+                    'backgroundColor' => $colors,
+                ],
+            ],
+        ];
+
+        return $this->success($chartData);
+    }
 }

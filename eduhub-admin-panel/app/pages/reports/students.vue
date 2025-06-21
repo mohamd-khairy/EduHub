@@ -35,6 +35,15 @@ ChartJS.register(
 
 const { isNotificationsSlideoverOpen } = useDashboard();
 const authStore = useAuthStore();
+const dashboardStore = useDashboardStore();
+
+const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
+
+onMounted(async () => {
+  await dashboardStore.fetchStudentPerformancePerGroup();
+
+  studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
+});
 
 const range = shallowRef<Range>({ start: null, end: null });
 const group_id = ref(null);
@@ -77,6 +86,7 @@ const baseOptions = {
       display: false,
     },
     customLabels: {
+      display: false,
       color: "#000",
       font: {
         weight: "bold",
@@ -89,18 +99,21 @@ const baseOptions = {
 ChartJS.register({
   id: "customLabels",
   afterDatasetDraw(chart, args, options) {
+    const meta = chart.getDatasetMeta(0);
+
+    if (meta.type === "bar") return;
+
     const {
       ctx,
       chartArea: { width, height },
     } = chart;
-    const meta = chart.getDatasetMeta(0);
 
     meta.data.forEach((arc, index) => {
       const { x, y } = arc.tooltipPosition();
       const label = chart.data.labels?.[index] || "";
       const value = chart.data.datasets[0].data[index];
       ctx.save();
-      ctx.fillStyle = options.color || "#000"; // ← اللون الأسود
+      ctx.fillStyle = options.color || "#000";
       ctx.font = `${options.font?.weight || "bold"} ${
         options.font?.size || 14
       }px sans-serif`;
@@ -125,19 +138,6 @@ const performanceOverTime = {
       borderColor: primary,
       tension: 0.4,
       fill: false,
-    },
-  ],
-};
-
-const unitLabels = ["الوحدة 1", "الوحدة 2", "الوحدة 3", "الوحدة 4", "الوحدة 5"];
-const unitScores = [85, 78, 92, 66, 74];
-const unitPerformance = {
-  labels: ["الوحدة 1", "الوحدة 2", "الوحدة 3", "الوحدة 4", "الوحدة 5"],
-  datasets: [
-    {
-      label: "درجة الطالب",
-      data: [85, 78, 92, 66, 74],
-      backgroundColor: ["#36A2EB", "#FF6384", "#FFCE56", "#9966FF", "#4BC0C0"],
     },
   ],
 };
@@ -216,12 +216,12 @@ const attendanceChart = {
 
     <template #body>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
-        <div class="w-full">
+        <div class="w-full" v-if="studentPerformancePerGroup">
           <h2 class="text-xl font-bold mb-2">أداء الطالب في كل وحدة دراسية</h2>
           <p class="text-sm text-gray-600 mb-4">
             يوضح درجات الطالب في كل وحدة على حدة، لتحديد نقاط القوة والضعف.
           </p>
-          <Bar :data="unitPerformance" :options="baseOptions" />
+          <Bar :data="studentPerformancePerGroup" :options="baseOptions" />
         </div>
 
         <div class="w-full">

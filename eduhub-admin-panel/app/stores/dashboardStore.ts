@@ -2,7 +2,8 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
 export const useDashboardStore = defineStore("dashboard", () => {
-  const items = ref([[], []]);
+  const items = ref([]);
+  const studentPerformancePerGroup = ref([]);
   const api = useApi(); // Assuming useApi is a composable for API calls
 
   async function fetchDashboardData(params = {}) {
@@ -23,5 +24,26 @@ export const useDashboardStore = defineStore("dashboard", () => {
     }
   }
 
-  return { items, fetchDashboardData };
+  async function fetchStudentPerformancePerGroup(groupId = "") {
+    try {
+      const url = `/dashboard/student-performance-per-group?group_id=${groupId}`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        studentPerformancePerGroup.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching student performance data:", error);
+    }
+  }
+
+  return {
+    items,
+    studentPerformancePerGroup,
+    fetchDashboardData,
+    fetchStudentPerformancePerGroup,
+  };
 });

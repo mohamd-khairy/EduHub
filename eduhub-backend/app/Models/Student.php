@@ -84,4 +84,9 @@ class Student extends Model implements Auditable
     {
         return $this->hasMany(Attendance::class);
     }
+
+    public function examResults()
+    {
+        return $this->hasMany(ExamResult::class);
+    }
 }
