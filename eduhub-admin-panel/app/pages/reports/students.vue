@@ -43,11 +43,14 @@ const range = shallowRef<Range>({
   end: null,
 });
 const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
+const studentPerformanceOverTime = ref({ labels: [], datasets: [] });
 
 onMounted(async () => {
   await dashboardStore.fetchStudentPerformancePerGroup();
-
   studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
+
+  await dashboardStore.fetchStudentOverTimePerformance();
+  studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
 });
 
 watch(
@@ -61,6 +64,15 @@ watch(
     });
     studentPerformancePerGroup.value =
       dashboardStore.studentPerformancePerGroup;
+
+    await dashboardStore.fetchStudentOverTimePerformance({
+      start: newRange.start?.toISOString() || "",
+      end: newRange.end?.toISOString() || "",
+      group_id: newGroupId || "",
+      student_id: newStudentId || "",
+    });
+    studentPerformanceOverTime.value =
+      dashboardStore.studentPerformanceOverTime;
   }
 );
 
@@ -145,18 +157,18 @@ const students = ["أحمد", "سارة", "خالد", "ريم", "فهد"];
 const studentAverages = [88, 72, 80, 90, 65];
 const classAverage = Array(students.length).fill(75);
 
-const performanceOverTime = {
-  labels: ["الشهر 1", "الشهر 2", "الشهر 3", "الشهر 4"],
-  datasets: [
-    {
-      label: "أداء الطالب",
-      data: [70, 75, 78, 85],
-      borderColor: primary,
-      tension: 0.4,
-      fill: false,
-    },
-  ],
-};
+// const performanceOverTime = {
+//   labels: ["الشهر 1", "الشهر 2", "الشهر 3", "الشهر 4"],
+//   datasets: [
+//     {
+//       label: "أداء الطالب",
+//       data: [70, 75, 78, 85],
+//       borderColor: primary,
+//       tension: 0.4,
+//       fill: false,
+//     },
+//   ],
+// };
 
 const examLabels = ["اختبار 1", "اختبار 2", "اختبار 3", "اختبار 4", "اختبار 5"];
 const examScores = [78, 82, 69, 88, 74];
@@ -245,7 +257,7 @@ const attendanceChart = {
           <p class="text-sm text-gray-600 mb-4">
             يعكس هذا المخطط كيف تحسن أداء الطالب أو تراجع خلال عدة أشهر.
           </p>
-          <Line :data="performanceOverTime" :options="baseOptions" />
+          <Line :data="studentPerformanceOverTime" :options="baseOptions" />
         </div>
 
         <div class="w-full">

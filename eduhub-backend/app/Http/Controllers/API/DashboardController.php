@@ -11,7 +11,9 @@ use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -146,6 +148,68 @@ class DashboardController extends Controller
                     'label' => ($student_id ? 'مجموع درجات الطالب ' . Student::find($student_id)->name : 'مجموع درجات الطلاب') . ' ' . ($group_id ? 'في المجموعة ' . Group::find($group_id)->name : ' في جميع المجموعات'),
                     'data' => $data,
                     'backgroundColor' => $colors,
+                ],
+            ],
+        ];
+
+        return $this->success($chartData);
+    }
+
+
+
+    public function studentPerformanceOverTime(Request $request)
+    {
+        $groupId = $request->input('group_id');
+        $studentId = $request->input('student_id');
+        $startDate = $request->input('start');
+        $endDate = $request->input('end');
+
+        $query = DB::table('exam_results')
+            ->select(
+                DB::raw("DATE_FORMAT(exam_results.created_at, '%Y-%m') as month"),
+                DB::raw("SUM(score) as score")
+            )
+            ->join('exams', 'exam_results.exam_id', '=', 'exams.id');
+
+        if ($studentId) {
+            $query->where('exam_results.student_id', $studentId);
+        }
+
+        if ($groupId) {
+            $query->where('exams.group_id', $groupId);
+        }
+
+        if ($startDate) {
+            $query->whereDate('exam_results.created_at', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->whereDate('exam_results.created_at', '<=', $endDate);
+        }
+
+        $results = $query
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $labels = [];
+        $data = [];
+
+        foreach ($results as $row) {
+            $monthName = Carbon::createFromFormat('Y-m', $row->month)->translatedFormat('F');
+            $labels[] = $monthName;
+            $data[] = round($row->score, 2);
+        }
+
+        $chartData = [
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'label' => ($studentId ? 'مجموع درجات الطالب ' . Student::find($studentId)->name : 'مجموع درجات الطلاب') . ' ' . ($groupId ? 'في المجموعة ' . Group::find($groupId)->name : ' في جميع المجموعات'),
+                    'data' => $data,
+                    'borderColor' => "rgba(59,130,246,0.7)",
+                    'tension' => 0.4,
+                    'fill' => false,
                 ],
             ],
         ];
