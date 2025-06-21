@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Bar, Line } from "vue-chartjs";
 import {
   Chart as ChartJS,
   Title,
@@ -6,33 +7,21 @@ import {
   Legend,
   BarElement,
   LineElement,
-  PointElement,
   CategoryScale,
   LinearScale,
-  RadialLinearScale,
-  ArcElement,
-  Filler,
+  PointElement,
 } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
 
-import { Bar, Line, Pie, Doughnut, PolarArea } from "vue-chartjs";
-
-// Register all chart elements + datalabels plugin
 ChartJS.register(
   Title,
   Tooltip,
   Legend,
   BarElement,
   LineElement,
-  PointElement,
   CategoryScale,
   LinearScale,
-  RadialLinearScale,
-  ArcElement,
-  Filler,
-  ChartDataLabels
+  PointElement
 );
-
 const { isNotificationsSlideoverOpen } = useDashboard();
 const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();
@@ -55,41 +44,64 @@ function resetFilters() {
   group_id.value = null;
   student_id.value = null;
 }
-const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
-const studentPerformanceOverTime = ref({ labels: [], datasets: [] });
-const studentPerformancePerExam = ref({ labels: [], datasets: [] });
-const studentAttendanceSummary = ref({ labels: [], datasets: [] });
-async function getDashboardReports(params = {}) {
-  await dashboardStore.fetchStudentPerformancePerGroup(params);
-  studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
 
-  await dashboardStore.fetchStudentOverTimePerformance(params);
-  studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
+const studentCommitment = {
+  labels: ["أحمد", "سارة", "خالد", "ريم", "فهد"],
+  datasets: [
+    {
+      label: "نسبة الالتزام",
+      data: [90, 75, 80, 95, 60],
+      backgroundColor: ["#36A2EB", "#FF6384", "#FFCE56", "#4BC0C0", "#9966FF"],
+    },
+  ],
+};
 
-  await dashboardStore.fetchStudentAttendanceSummary(params);
-  studentAttendanceSummary.value = dashboardStore.studentAttendanceSummary;
+const commitmentOverTime = {
+  labels: ["يناير", "فبراير", "مارس", "أبريل"],
+  datasets: [
+    {
+      label: "الحضور الفعلي",
+      data: [40, 50, 45, 60],
+      borderColor: "#36A2EB",
+      fill: false,
+      tension: 0.4,
+    },
+    {
+      label: "الدروس المحجوزة",
+      data: [50, 55, 50, 65],
+      borderColor: "#FF6384",
+      fill: false,
+      tension: 0.4,
+    },
+  ],
+};
 
-  await dashboardStore.fetchStudentPerformancePerExam(params);
-  studentPerformancePerExam.value = dashboardStore.studentPerformancePerExam;
-}
+const groupComparison = {
+  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
+  datasets: [
+    {
+      label: "محجوز",
+      data: [60, 45, 70],
+      backgroundColor: "#36A2EB",
+    },
+    {
+      label: "حضور فعلي",
+      data: [55, 40, 65],
+      backgroundColor: "#FF6384",
+    },
+  ],
+};
 
-onMounted(async () => {
-  await getDashboardReports();
-});
-
-watch(
-  [range, group_id, student_id],
-  async ([newRange, newGroupId, newStudentId]) => {
-    const params = {
-      start: newRange.start?.toISOString() || "",
-      end: newRange.end?.toISOString() || "",
-      group_id: newGroupId || "",
-      student_id: newStudentId || "",
-    };
-    await getDashboardReports(params);
-  }
-);
-
+const topBottomStudents = {
+  labels: ["ريم", "أحمد", "خالد", "سارة", "فهد"],
+  datasets: [
+    {
+      label: "نسبة الحضور",
+      data: [95, 90, 80, 75, 60],
+      backgroundColor: "#4BC0C0",
+    },
+  ],
+};
 
 const baseOptions = {
   responsive: true,
@@ -194,48 +206,42 @@ ChartJS.register({
 
     <template #body>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
-        <div class="w-full" v-if="studentPerformancePerGroup">
-          <h2 class="text-xl font-bold mb-2">1. أداء الطالب في كل وحدة دراسية</h2>
+        <div class="w-full">
+          <h3 class="text-xl font-bold mb-2">1. تقرير الالتزام العام للطالب</h3>
           <p class="text-sm text-gray-600 mb-4">
-            يوضح درجات الطالب في كل وحدة على حدة، لتحديد نقاط القوة والضعف.
+            يوضح نسبة حضور كل طالب من إجمالي عدد الجلسات المحجوزة له، مما يساعد في تحديد الطلاب الذين يحتاجون
+            إلى دعم إضافي.
           </p>
-          <Bar :data="studentPerformancePerGroup" :options="baseOptions" />
+          <Bar :data="studentCommitment" :options="baseOptions" />
         </div>
 
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">2. أداء طالب بمرور الوقت</h2>
+          <h3 class="text-xl font-bold mb-2">2. تطور الالتزام بمرور الوقت</h3>
           <p class="text-sm text-gray-600 mb-4">
-            يعكس هذا المخطط كيف تحسن أداء الطالب أو تراجع خلال عدة أشهر.
+            يعرض الحضور الفعلي والدروس المحجوزة لكل طالب على مدار الأشهر، مما
+            يساعد في تتبع التقدم.
           </p>
-          <Line :data="studentPerformanceOverTime" :options="baseOptions" />
+          <Line :data="commitmentOverTime" :options="baseOptions" />
         </div>
 
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">3. أداء الطالب في الحضور والغياب</h2>
+          <h3 class="text-xl font-bold mb-2">3. مقارنة الحضور حسب المجموعة</h3>
           <p class="text-sm text-gray-600 mb-4">
-            يعرض هذا الرسم عدد الأيام التي حضرها الطالب مقابل الأيام التي تغيب
-            فيها لكل شهر، مما يساعد على تقييم التزامه.
+            يقارن بين الحضور الفعلي والدروس المحجوزة لكل مجموعة، مما يساعد في
+            تحديد المجموعات التي تحتاج إلى تحسين.
           </p>
-          <Bar :data="studentAttendanceSummary" :options="baseOptions" />
+          <Bar :data="groupComparison" :options="baseOptions" />
         </div>
 
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">4. أداء الطالب في الاختبارات</h2>
+          <h3 class="text-xl font-bold mb-2">4. ترتيب الطلاب حسب الالتزام</h3>
           <p class="text-sm text-gray-600 mb-4">
-            يقدم هذا الرسم نظرة على نتائج الطالب في الاختبارات المختلفة خلال
-            الفترة.
+            يعرض ترتيب الطلاب بناءً على نسبة الحضور، مما يساعد في تحديد الطلاب
+            الأكثر التزامًا.
           </p>
-          <Pie :data="studentPerformancePerExam" :options="baseOptions" />
+          <Bar :data="topBottomStudents" :options="baseOptions" />
         </div>
       </div>
     </template>
   </UDashboardPanel>
 </template>
-
-<style scoped>
-canvas {
-  width: 100% !important;
-  height: auto !important;
-  min-width: 0;
-}
-</style>

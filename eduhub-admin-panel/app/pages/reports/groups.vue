@@ -1,36 +1,30 @@
-<script setup lang="ts">
+<script setup>
 import {
   Chart as ChartJS,
   Title,
   Tooltip,
   Legend,
   BarElement,
-  LineElement,
-  PointElement,
   CategoryScale,
   LinearScale,
-  RadialLinearScale,
   ArcElement,
-  Filler,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
 } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
+import { Bar, Doughnut, Radar } from "vue-chartjs";
 
-import { Bar, Line, Pie, Doughnut, PolarArea } from "vue-chartjs";
-
-// Register all chart elements + datalabels plugin
 ChartJS.register(
   Title,
   Tooltip,
   Legend,
   BarElement,
-  LineElement,
-  PointElement,
   CategoryScale,
   LinearScale,
-  RadialLinearScale,
   ArcElement,
-  Filler,
-  ChartDataLabels
+  RadialLinearScale,
+  PointElement,
+  LineElement
 );
 
 const { isNotificationsSlideoverOpen } = useDashboard();
@@ -55,41 +49,6 @@ function resetFilters() {
   group_id.value = null;
   student_id.value = null;
 }
-const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
-const studentPerformanceOverTime = ref({ labels: [], datasets: [] });
-const studentPerformancePerExam = ref({ labels: [], datasets: [] });
-const studentAttendanceSummary = ref({ labels: [], datasets: [] });
-async function getDashboardReports(params = {}) {
-  await dashboardStore.fetchStudentPerformancePerGroup(params);
-  studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
-
-  await dashboardStore.fetchStudentOverTimePerformance(params);
-  studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
-
-  await dashboardStore.fetchStudentAttendanceSummary(params);
-  studentAttendanceSummary.value = dashboardStore.studentAttendanceSummary;
-
-  await dashboardStore.fetchStudentPerformancePerExam(params);
-  studentPerformancePerExam.value = dashboardStore.studentPerformancePerExam;
-}
-
-onMounted(async () => {
-  await getDashboardReports();
-});
-
-watch(
-  [range, group_id, student_id],
-  async ([newRange, newGroupId, newStudentId]) => {
-    const params = {
-      start: newRange.start?.toISOString() || "",
-      end: newRange.end?.toISOString() || "",
-      group_id: newGroupId || "",
-      student_id: newStudentId || "",
-    };
-    await getDashboardReports(params);
-  }
-);
-
 
 const baseOptions = {
   responsive: true,
@@ -148,6 +107,57 @@ ChartJS.register({
     });
   },
 });
+
+const averageScoreData = {
+  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
+  datasets: [
+    {
+      label: "متوسط الدرجات",
+      data: [82.5, 74.3, 88.1],
+      backgroundColor: "#1E93C8",
+    },
+  ],
+};
+
+const attendanceRateData = {
+  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
+  datasets: [
+    {
+      label: "نسبة الحضور (%)",
+      data: [91, 76, 84],
+      backgroundColor: ["#48BC7E", "#FF6384", "#36A2EB"],
+    },
+  ],
+};
+
+const mathComparisonData = {
+  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
+  datasets: [
+    {
+      label: "الدرجة في الرياضيات",
+      data: [85, 70, 90],
+      backgroundColor: "rgba(54, 162, 235, 0.2)",
+      borderColor: "rgba(54, 162, 235, 1)",
+      borderWidth: 2,
+    },
+  ],
+};
+
+const activityData = {
+  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
+  datasets: [
+    {
+      label: "نشط",
+      data: [25, 18, 22],
+      backgroundColor: "#4BC0C0",
+    },
+    {
+      label: "غير نشط",
+      data: [5, 7, 3],
+      backgroundColor: "#FF9F40",
+    },
+  ],
+};
 </script>
 
 <template>
@@ -194,38 +204,37 @@ ChartJS.register({
 
     <template #body>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
-        <div class="w-full" v-if="studentPerformancePerGroup">
-          <h2 class="text-xl font-bold mb-2">1. أداء الطالب في كل وحدة دراسية</h2>
-          <p class="text-sm text-gray-600 mb-4">
-            يوضح درجات الطالب في كل وحدة على حدة، لتحديد نقاط القوة والضعف.
-          </p>
-          <Bar :data="studentPerformancePerGroup" :options="baseOptions" />
+        <!-- تقرير المدفوعات حسب الطالب -->
+        <div>
+          <h2 class="text-xl font-bold mb-2">
+            متوسط درجات الطلاب في كل مجموعة
+          </h2>
+          <Bar :data="averageScoreData" :options="baseOptions" />
+        </div>
+        <!-- 4. الطلاب النشطين وغير النشطين في كل مجموعة -->
+        <div>
+          <h2 class="text-xl font-bold mb-2">
+            عدد الطلاب النشطين وغير النشطين في كل مجموعة
+          </h2>
+          <Bar :data="activityData" :options="baseOptions" />
         </div>
 
-        <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">2. أداء طالب بمرور الوقت</h2>
-          <p class="text-sm text-gray-600 mb-4">
-            يعكس هذا المخطط كيف تحسن أداء الطالب أو تراجع خلال عدة أشهر.
-          </p>
-          <Line :data="studentPerformanceOverTime" :options="baseOptions" />
+        <!-- 3. مقارنة أداء المجموعات في مادة الرياضيات -->
+        <div>
+          <h2 class="text-xl font-bold mb-2">
+            مقارنة أداء المجموعات في مادة الرياضيات
+          </h2>
+          <Radar :data="mathComparisonData" :options="baseOptions" />
         </div>
 
-        <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">3. أداء الطالب في الحضور والغياب</h2>
-          <p class="text-sm text-gray-600 mb-4">
-            يعرض هذا الرسم عدد الأيام التي حضرها الطالب مقابل الأيام التي تغيب
-            فيها لكل شهر، مما يساعد على تقييم التزامه.
-          </p>
-          <Bar :data="studentAttendanceSummary" :options="baseOptions" />
-        </div>
-
-        <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">4. أداء الطالب في الاختبارات</h2>
-          <p class="text-sm text-gray-600 mb-4">
-            يقدم هذا الرسم نظرة على نتائج الطالب في الاختبارات المختلفة خلال
-            الفترة.
-          </p>
-          <Pie :data="studentPerformancePerExam" :options="baseOptions" />
+        <!-- 2. نسبة الحضور لكل مجموعة -->
+        <div>
+          <h2 class="text-xl font-bold mb-2">نسبة الحضور لكل مجموعة</h2>
+          <Doughnut
+            :data="attendanceRateData"
+            :options="baseOptions"
+            style="max-width: 400px; margin: auto"
+          />
         </div>
       </div>
     </template>
@@ -236,6 +245,5 @@ ChartJS.register({
 canvas {
   width: 100% !important;
   height: auto !important;
-  min-width: 0;
 }
 </style>

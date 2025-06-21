@@ -4,14 +4,14 @@ use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\AuditController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CourseController;
-use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\EnrollmentController;
 use App\Http\Controllers\API\ExamController;
-use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\GroupController;
+use App\Http\Controllers\API\Reports\HomeController;
 use App\Http\Controllers\API\ParentController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\PermissionController;
+use App\Http\Controllers\API\Reports\StudentReportController;
 use App\Http\Controllers\API\ResultController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StudentController;
@@ -140,13 +140,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::group(['prefix' => 'dashboard'], function () {
-        Route::get('/', [DashboardController::class, 'index']);
-        Route::get('/student-performance-per-group', [DashboardController::class, 'studentPerformancePerGroup']);
-        Route::get('/student-performance-over-time', [DashboardController::class, 'studentPerformanceOverTime']);
-        Route::get('/student-performance-per-exam', [DashboardController::class, 'studentPerformancePerExam']);
-        Route::get('/student-attendance-summary', [DashboardController::class, 'studentAttendanceSummary']);
-
-
+        Route::get('/', [HomeController::class, 'index']);
+        Route::get('/student-performance-per-group', [StudentReportController::class, 'studentPerformancePerGroup']);
+        Route::get('/student-performance-over-time', [StudentReportController::class, 'studentPerformanceOverTime']);
+        Route::get('/student-performance-per-exam', [StudentReportController::class, 'studentPerformancePerExam']);
+        Route::get('/student-attendance-summary', [StudentReportController::class, 'studentAttendanceSummary']);
     });
 
     Route::group(['prefix' => 'auth'], function () {

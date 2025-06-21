@@ -97,6 +97,12 @@ export const useLinksStore = defineStore("links", () => {
         defaultOpen: true,
         children: [
           {
+            label: "تقارير  المجموعات",
+            icon: "i-lucide-group",
+            to: "/reports/groups",
+            permission: "read-groupreport",
+          },
+          {
             label: "تقارير أداء الطلاب",
             icon: "i-lucide-users",
             to: "/reports/students",
@@ -105,32 +111,14 @@ export const useLinksStore = defineStore("links", () => {
           {
             label: "تقارير الحجز والحضور",
             icon: "i-lucide-check-check",
-            to: "/reports/attendance",
+            to: "/reports/attendances",
             permission: "read-attendancereport",
           },
           {
-            label: "تقارير مالية",
+            label: "تقارير المالية والمصاريف",
             icon: "i-lucide-dollar-sign",
             to: "/reports/payments",
             permission: "read-paymentreport",
-          },
-          {
-            label: "تقارير  أداء المدرسين",
-            icon: "i-lucide-pencil",
-            to: "/reports/teachers",
-            permission: "read-teacherreport",
-          },
-          {
-            label: "تقارير  المواد الدراسية",
-            icon: "i-lucide-book-open",
-            to: "/reports/courses",
-            permission: "read-coursereport",
-          },
-          {
-            label: "تقارير  المجموعات",
-            icon: "i-lucide-group",
-            to: "/reports/groups",
-            permission: "read-groupreport",
           },
         ],
       },

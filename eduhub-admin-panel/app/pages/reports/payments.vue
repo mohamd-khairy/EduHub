@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Bar, Line, Doughnut } from "vue-chartjs";
 import {
   Chart as ChartJS,
   Title,
@@ -9,15 +10,9 @@ import {
   PointElement,
   CategoryScale,
   LinearScale,
-  RadialLinearScale,
   ArcElement,
-  Filler,
 } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
 
-import { Bar, Line, Pie, Doughnut, PolarArea } from "vue-chartjs";
-
-// Register all chart elements + datalabels plugin
 ChartJS.register(
   Title,
   Tooltip,
@@ -27,10 +22,7 @@ ChartJS.register(
   PointElement,
   CategoryScale,
   LinearScale,
-  RadialLinearScale,
-  ArcElement,
-  Filler,
-  ChartDataLabels
+  ArcElement
 );
 
 const { isNotificationsSlideoverOpen } = useDashboard();
@@ -55,41 +47,6 @@ function resetFilters() {
   group_id.value = null;
   student_id.value = null;
 }
-const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
-const studentPerformanceOverTime = ref({ labels: [], datasets: [] });
-const studentPerformancePerExam = ref({ labels: [], datasets: [] });
-const studentAttendanceSummary = ref({ labels: [], datasets: [] });
-async function getDashboardReports(params = {}) {
-  await dashboardStore.fetchStudentPerformancePerGroup(params);
-  studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
-
-  await dashboardStore.fetchStudentOverTimePerformance(params);
-  studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
-
-  await dashboardStore.fetchStudentAttendanceSummary(params);
-  studentAttendanceSummary.value = dashboardStore.studentAttendanceSummary;
-
-  await dashboardStore.fetchStudentPerformancePerExam(params);
-  studentPerformancePerExam.value = dashboardStore.studentPerformancePerExam;
-}
-
-onMounted(async () => {
-  await getDashboardReports();
-});
-
-watch(
-  [range, group_id, student_id],
-  async ([newRange, newGroupId, newStudentId]) => {
-    const params = {
-      start: newRange.start?.toISOString() || "",
-      end: newRange.end?.toISOString() || "",
-      group_id: newGroupId || "",
-      student_id: newStudentId || "",
-    };
-    await getDashboardReports(params);
-  }
-);
-
 
 const baseOptions = {
   responsive: true,
@@ -148,6 +105,52 @@ ChartJS.register({
     });
   },
 });
+
+const paymentsPerStudent = {
+  labels: ["أحمد", "سارة", "خالد", "ريم"],
+  datasets: [
+    {
+      label: "إجمالي المدفوعات",
+      data: [5000, 4000, 2500, 6000],
+      backgroundColor: "#36A2EB",
+    },
+  ],
+};
+
+const monthlyRevenue = {
+  labels: ["يناير", "فبراير", "مارس", "أبريل"],
+  datasets: [
+    {
+      label: "الإيرادات (ر.س)",
+      data: [10000, 12000, 11000, 15000],
+      borderColor: "#4BC0C0",
+      fill: false,
+      tension: 0.3,
+    },
+  ],
+};
+
+const overduePayments = {
+  labels: ["أحمد", "خالد", "سارة"],
+  datasets: [
+    {
+      label: "المتأخرات",
+      data: [1000, 2000, 500],
+      backgroundColor: "#FF6384",
+    },
+  ],
+};
+
+const paymentsByGroup = {
+  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
+  datasets: [
+    {
+      label: "مدفوعات المجموعة",
+      data: [10000, 8000, 6000],
+      backgroundColor: ["#FFCE56", "#36A2EB", "#9966FF"],
+    },
+  ],
+};
 </script>
 
 <template>
@@ -194,38 +197,34 @@ ChartJS.register({
 
     <template #body>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
-        <div class="w-full" v-if="studentPerformancePerGroup">
-          <h2 class="text-xl font-bold mb-2">1. أداء الطالب في كل وحدة دراسية</h2>
-          <p class="text-sm text-gray-600 mb-4">
-            يوضح درجات الطالب في كل وحدة على حدة، لتحديد نقاط القوة والضعف.
-          </p>
-          <Bar :data="studentPerformancePerGroup" :options="baseOptions" />
+        <!-- تقرير المدفوعات حسب الطالب -->
+        <div class="w-full">
+          <h2 class="text-xl font-bold mb-2">تقرير المدفوعات حسب الطالب</h2>
+          <Bar :data="paymentsPerStudent" :options="baseOptions" />
         </div>
 
+        <!-- تقرير الإيرادات الشهرية -->
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">2. أداء طالب بمرور الوقت</h2>
-          <p class="text-sm text-gray-600 mb-4">
-            يعكس هذا المخطط كيف تحسن أداء الطالب أو تراجع خلال عدة أشهر.
-          </p>
-          <Line :data="studentPerformanceOverTime" :options="baseOptions" />
+          <h2 class="text-xl font-bold mb-2">تقرير الإيرادات الشهرية</h2>
+          <Line :data="monthlyRevenue" :options="baseOptions" />
         </div>
 
+        <!-- تقرير الدفعات المتأخرة -->
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">3. أداء الطالب في الحضور والغياب</h2>
-          <p class="text-sm text-gray-600 mb-4">
-            يعرض هذا الرسم عدد الأيام التي حضرها الطالب مقابل الأيام التي تغيب
-            فيها لكل شهر، مما يساعد على تقييم التزامه.
-          </p>
-          <Bar :data="studentAttendanceSummary" :options="baseOptions" />
+          <h2 class="text-xl font-bold mb-2">تقرير الدفعات المتأخرة</h2>
+          <Bar :data="overduePayments" :options="baseOptions" />
         </div>
 
+        <!-- تقرير المدفوعات حسب المجموعة أو المستوى -->
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">4. أداء الطالب في الاختبارات</h2>
-          <p class="text-sm text-gray-600 mb-4">
-            يقدم هذا الرسم نظرة على نتائج الطالب في الاختبارات المختلفة خلال
-            الفترة.
-          </p>
-          <Pie :data="studentPerformancePerExam" :options="baseOptions" />
+          <h2 class="text-xl font-bold mb-2">
+            تقرير المدفوعات حسب المجموعة أو المستوى
+          </h2>
+          <Doughnut
+            :data="paymentsByGroup"
+            :options="baseOptions"
+            style="max-width: 400px; margin: auto"
+          />
         </div>
       </div>
     </template>
