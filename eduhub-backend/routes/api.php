@@ -143,6 +143,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::get('/student-performance-per-group', [DashboardController::class, 'studentPerformancePerGroup']);
         Route::get('/student-performance-over-time', [DashboardController::class, 'studentPerformanceOverTime']);
+        Route::get('/student-performance-per-exam', [DashboardController::class, 'studentPerformancePerExam']);
+        Route::get('/student-attendance-summary', [DashboardController::class, 'studentAttendanceSummary']);
+
+
     });
 
     Route::group(['prefix' => 'auth'], function () {

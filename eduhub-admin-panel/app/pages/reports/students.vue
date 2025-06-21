@@ -42,45 +42,47 @@ const range = shallowRef<Range>({
   start: null,
   end: null,
 });
-const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
-const studentPerformanceOverTime = ref({ labels: [], datasets: [] });
-
-onMounted(async () => {
-  await dashboardStore.fetchStudentPerformancePerGroup();
-  studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
-
-  await dashboardStore.fetchStudentOverTimePerformance();
-  studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
-});
-
-watch(
-  [range, group_id, student_id],
-  async ([newRange, newGroupId, newStudentId]) => {
-    await dashboardStore.fetchStudentPerformancePerGroup({
-      start: newRange.start?.toISOString() || "",
-      end: newRange.end?.toISOString() || "",
-      group_id: newGroupId || "",
-      student_id: newStudentId || "",
-    });
-    studentPerformancePerGroup.value =
-      dashboardStore.studentPerformancePerGroup;
-
-    await dashboardStore.fetchStudentOverTimePerformance({
-      start: newRange.start?.toISOString() || "",
-      end: newRange.end?.toISOString() || "",
-      group_id: newGroupId || "",
-      student_id: newStudentId || "",
-    });
-    studentPerformanceOverTime.value =
-      dashboardStore.studentPerformanceOverTime;
-  }
-);
-
 const resetSignal = ref(false);
 const hasFilter = computed(
   () =>
     range.value.start || range.value.end || group_id.value || student_id.value
 );
+
+const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
+const studentPerformanceOverTime = ref({ labels: [], datasets: [] });
+const studentPerformancePerExam = ref({ labels: [], datasets: [] });
+const studentAttendanceSummary = ref({ labels: [], datasets: [] });
+async function getDashboardReports(params = {}) {
+  await dashboardStore.fetchStudentPerformancePerGroup(params);
+  studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
+
+  await dashboardStore.fetchStudentOverTimePerformance(params);
+  studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
+
+  await dashboardStore.fetchStudentAttendanceSummary(params);
+  studentAttendanceSummary.value = dashboardStore.studentAttendanceSummary;
+
+  await dashboardStore.fetchStudentPerformancePerExam(params);
+  studentPerformancePerExam.value = dashboardStore.studentPerformancePerExam;
+}
+
+onMounted(async () => {
+  await getDashboardReports();
+});
+
+watch(
+  [range, group_id, student_id],
+  async ([newRange, newGroupId, newStudentId]) => {
+    const params = {
+      start: newRange.start?.toISOString() || "",
+      end: newRange.end?.toISOString() || "",
+      group_id: newGroupId || "",
+      student_id: newStudentId || "",
+    };
+    await getDashboardReports(params);
+  }
+);
+
 function resetFilters() {
   resetSignal.value = !resetSignal.value;
   range.value.start = null;
@@ -88,21 +90,6 @@ function resetFilters() {
   group_id.value = null;
   student_id.value = null;
 }
-
-// Theme colors
-function getCSSVariableColor(variable: string): string {
-  if (typeof window === "undefined") return "";
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(variable)
-    .trim();
-}
-const primary =
-  getCSSVariableColor("--color-primary-500") || "rgba(59,130,246,0.7)";
-const secondary =
-  getCSSVariableColor("--color-secondary-500") || "rgba(234,88,12,0.7)";
-const info = getCSSVariableColor("--color-info-500") || "rgba(6,182,212,0.7)";
-const muted =
-  getCSSVariableColor("--color-muted-500") || "rgba(148,163,184,0.7)";
 
 const baseOptions = {
   responsive: true,
@@ -112,13 +99,20 @@ const baseOptions = {
     },
     datalabels: {
       display: false,
+      color: "#000",
+      font: {
+        weight: "bold",
+        size: 12,
+      },
+      align: "center", // ← لضبط النص داخل العنصر
+      anchor: "center", // ← لضبط موقع النص نسبةً للعُنصر
     },
     customLabels: {
       display: false,
       color: "#000",
       font: {
         weight: "bold",
-        size: 14,
+        size: 10,
       },
     },
   },
@@ -129,7 +123,8 @@ ChartJS.register({
   afterDatasetDraw(chart, args, options) {
     const meta = chart.getDatasetMeta(0);
 
-    if (meta.type === "bar") return;
+    // if (meta.type === "bar") return;
+    // if (meta.type === "pie") return;
 
     const {
       ctx,
@@ -147,57 +142,12 @@ ChartJS.register({
       }px sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(`${label}: ${value}`, x, y);
+      // ctx.fillText(`${label}: ${value}`, x, y);
+      ctx.fillText(`${value}`, x, y);
       ctx.restore();
     });
   },
 });
-
-const students = ["أحمد", "سارة", "خالد", "ريم", "فهد"];
-const studentAverages = [88, 72, 80, 90, 65];
-const classAverage = Array(students.length).fill(75);
-
-// const performanceOverTime = {
-//   labels: ["الشهر 1", "الشهر 2", "الشهر 3", "الشهر 4"],
-//   datasets: [
-//     {
-//       label: "أداء الطالب",
-//       data: [70, 75, 78, 85],
-//       borderColor: primary,
-//       tension: 0.4,
-//       fill: false,
-//     },
-//   ],
-// };
-
-const examLabels = ["اختبار 1", "اختبار 2", "اختبار 3", "اختبار 4", "اختبار 5"];
-const examScores = [78, 82, 69, 88, 74];
-const examPerformance = {
-  labels: examLabels,
-  datasets: [
-    {
-      label: "درجة الطالب",
-      data: examScores,
-      backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
-    },
-  ],
-};
-
-const attendanceChart = {
-  labels: ["يناير", "فبراير", "مارس", "أبريل"],
-  datasets: [
-    {
-      label: "حضور",
-      data: [18, 15, 20, 17],
-      backgroundColor: primary,
-    },
-    {
-      label: "غياب",
-      data: [2, 5, 0, 3],
-      backgroundColor: secondary,
-    },
-  ],
-};
 </script>
 
 <template>
@@ -266,7 +216,7 @@ const attendanceChart = {
             يعرض هذا الرسم عدد الأيام التي حضرها الطالب مقابل الأيام التي تغيب
             فيها لكل شهر، مما يساعد على تقييم التزامه.
           </p>
-          <Bar :data="attendanceChart" :options="baseOptions" />
+          <Bar :data="studentAttendanceSummary" :options="baseOptions" />
         </div>
 
         <div class="w-full">
@@ -275,11 +225,7 @@ const attendanceChart = {
             يقدم هذا الرسم نظرة على نتائج الطالب في الاختبارات المختلفة خلال
             الفترة.
           </p>
-          <Pie
-            :data="examPerformance"
-            :options="baseOptions"
-            style="max-width: 400px; margin: auto"
-          />
+          <Pie :data="studentPerformancePerExam" :options="baseOptions" />
         </div>
       </div>
     </template>
