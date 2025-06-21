@@ -24,7 +24,7 @@ export const useAuditStore = defineStore("audit", () => {
   async function loadAllAudits(page = 1) {
     items.value = []; // clear current items
 
-    const res = await api(`audit?&page=${page}`);
+    const res = await api(`audit?page=${page}`);
     const json = await res.json();
 
     if (json?.data) {

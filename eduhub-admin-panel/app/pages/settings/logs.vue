@@ -26,100 +26,12 @@ const getStatus = (status) => {
   }[status];
 };
 
-const columnFilters = ref([{
-  id: 'اسم الكورس',
-  value: ''
-}])
 
-const columnVisibility = ref()
-
-const columns: TableColumn<Payment>[] = [
-  {
-    accessorKey: "id",
-    header: "#",
-    cell: ({ row }) => `#${row.getValue("id")}`,
-  },
-  {
-    accessorKey: "created_at",
-    header: "تاريخ الدفع",
-    cell: ({ row }) => {
-      return new Date(row.getValue("created_at")).toLocaleString("en-US", {
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "حالة الدفع",
-    cell: ({ row }) => {
-      const state = row.getValue("status");
-      const color = getColorByStatus(state);
-      return h(
-        UBadge,
-        {
-          color: color,
-          class: "capitalize",
-        },
-        () => getStatus(state)
-      );
-    },
-  },
-  {
-    accessorKey: "method",
-    header: "طريقة الدفع",
-  },
-  {
-    accessorKey: "amount",
-    header: "قيمة الدفع",
-    header: () => h("div", { class: "text-right" }, "قيمة الدفع"),
-    cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue("amount"));
-
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "EGP",
-      }).format(amount);
-
-      return h("div", { class: "text-right font-medium" }, formatted);
-    },
-  },
-  {
-    id: "note",
-    accessorKey: "note",
-    header: "الملاحظات",
-  },
-  {
-    id: "actions",
-    accessorKey: "actions",
-    header: "الاجراءات",
-    cell: ({ row }) => {
-      return h(
-        UButton,
-        {
-          color: "neutral",
-          variant: "soft",
-          icon: "i-lucide-dollar-sign",
-          onClick: () => {
-            // Handle delete action
-            console.log("Delete payment", row.getValue("id"));
-          },
-        },
-        () => "الفاتورة"
-      );
-    },
-  },
-];
 </script>
 
 <template>
   <UTable
     ref="table"
-    v-model:column-filters="columnFilters"
-    v-model:column-visibility="columnVisibility"
     v-model:pagination="auditStore.pagination"
     class="shrink-0"
     :data="auditStore.items"
