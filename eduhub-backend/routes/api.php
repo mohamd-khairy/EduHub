@@ -11,6 +11,7 @@ use App\Http\Controllers\API\Reports\HomeController;
 use App\Http\Controllers\API\ParentController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\PermissionController;
+use App\Http\Controllers\API\Reports\AttendanceReportController;
 use App\Http\Controllers\API\Reports\GroupReportController;
 use App\Http\Controllers\API\Reports\StudentReportController;
 use App\Http\Controllers\API\ResultController;
@@ -153,6 +154,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/group-attendance-percentage', [GroupReportController::class, 'attendancePercentage']);
         Route::get('/group-absent-percentage', [GroupReportController::class, 'absentPercentage']);
         Route::get('/group-late-percentage', [GroupReportController::class, 'latePercentage']);
+        /************************************************ */
+        Route::get('/attendance-overall-student-commitment', [AttendanceReportController::class, 'overallStudentCommitment']);
+        Route::get('/attendance-commitment-over-time', [AttendanceReportController::class, 'commitmentOverTime']);
     });
 
     Route::group(['prefix' => 'auth'], function () {

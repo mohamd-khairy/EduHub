@@ -13,6 +13,9 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const groupAttendancePercentage = ref([]);
   const groupLatePercentage = ref([]);
   const groupAbsentPercentage = ref([]);
+  const attendanceOverallStudentCommitment = ref([]);
+  const attendanceCommitmentOverTime = ref([]);
+
   async function fetchDashboardData(params = {}) {
     try {
       const query = new URLSearchParams(params).toString();
@@ -196,6 +199,44 @@ export const useDashboardStore = defineStore("dashboard", () => {
     }
   }
 
+  async function fetchAttendanceoverallStudentCommitment(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/attendance-overall-student-commitment${
+        query ? `?${query}` : ""
+      }`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        attendanceOverallStudentCommitment.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching overall student commitment:", error);
+    }
+  }
+
+  async function fetchAttendanceCommitmentOverTime(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/attendance-commitment-over-time${
+        query ? `?${query}` : ""
+      }`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        attendanceCommitmentOverTime.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching attendance commitment over time:", error);
+    }
+  }
+
   return {
     items,
     studentPerformancePerGroup,
@@ -207,6 +248,8 @@ export const useDashboardStore = defineStore("dashboard", () => {
     groupAttendancePercentage,
     groupLatePercentage,
     groupAbsentPercentage,
+    attendanceOverallStudentCommitment,
+    attendanceCommitmentOverTime,
     fetchDashboardData,
     fetchStudentPerformancePerGroup,
     fetchStudentOverTimePerformance,
@@ -217,5 +260,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     fetchGroupAttendancePercentage,
     fetchGroupAbsentPercentage,
     fetchGroupLatePercentage,
+    fetchAttendanceoverallStudentCommitment,
+    fetchAttendanceCommitmentOverTime,
   };
 });

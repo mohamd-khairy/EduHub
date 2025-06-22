@@ -45,16 +45,34 @@ function resetFilters() {
   student_id.value = null;
 }
 
-const studentCommitment = {
-  labels: ["أحمد", "سارة", "خالد", "ريم", "فهد"],
-  datasets: [
-    {
-      label: "نسبة الالتزام",
-      data: [90, 75, 80, 95, 60],
-      backgroundColor: ["#36A2EB", "#FF6384", "#FFCE56", "#4BC0C0", "#9966FF"],
-    },
-  ],
-};
+const attendanceOverallStudentCommitment = ref({ labels: [], datasets: [] });
+const attendanceCommitmentOverTime = ref({ labels: [], datasets: [] });
+
+async function getDashboardReports(params = {}) {
+  await dashboardStore.fetchAttendanceoverallStudentCommitment(params);
+  attendanceOverallStudentCommitment.value = dashboardStore.attendanceOverallStudentCommitment;
+
+  await dashboardStore.fetchAttendanceCommitmentOverTime(params);
+  attendanceCommitmentOverTime.value = dashboardStore.attendanceCommitmentOverTime;
+}
+
+onMounted(async () => {
+  await getDashboardReports();
+});
+
+watch(
+  [range, group_id, student_id],
+  async ([newRange, newGroupId, newStudentId]) => {
+    const params = {
+      start: newRange.start?.toISOString() || "",
+      end: newRange.end?.toISOString() || "",
+      group_id: newGroupId || "",
+      student_id: newStudentId || "",
+    };
+    await getDashboardReports(params);
+  }
+);
+
 
 const commitmentOverTime = {
   labels: ["يناير", "فبراير", "مارس", "أبريل"],
@@ -149,9 +167,8 @@ ChartJS.register({
       const value = chart.data.datasets[0].data[index];
       ctx.save();
       ctx.fillStyle = options.color || "#000";
-      ctx.font = `${options.font?.weight || "bold"} ${
-        options.font?.size || 14
-      }px sans-serif`;
+      ctx.font = `${options.font?.weight || "bold"} ${options.font?.size || 14
+        }px sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // ctx.fillText(`${label}: ${value}`, x, y);
@@ -166,18 +183,15 @@ ChartJS.register({
   <UDashboardPanel id="home">
     <template #header>
       <UDashboardNavbar title="الصفحة الرئيسية" :ui="{ right: 'gap-3' }">
-        <template #leading><UDashboardSidebarCollapse /></template>
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
         <template #right v-if="authStore.hasPermission('read-notification')">
           <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              @click="isNotificationsSlideoverOpen = true"
-            >
-              <UChip color="error" inset
-                ><UIcon name="i-lucide-bell" class="size-5 shrink-0"
-              /></UChip>
+            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
+              <UChip color="error" inset>
+                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
+              </UChip>
             </UButton>
           </UTooltip>
         </template>
@@ -185,21 +199,11 @@ ChartJS.register({
 
       <UDashboardToolbar>
         <template #left>
-          <HomeDateRangePicker
-            :reset-signal="resetSignal"
-            v-model="range"
-            class="-ms-1"
-          />
+          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" />
           <HomeStudentSelect v-model="student_id" :range="range" />
           <HomeGroupSelect v-model="group_id" :range="range" />
-          <UButton
-            v-if="hasFilter"
-            icon="i-lucide-x"
-            color="gray"
-            size="sm"
-            @click="resetFilters()"
-            class="hover:bg-gray-200"
-          />
+          <UButton v-if="hasFilter" icon="i-lucide-x" color="gray" size="sm" @click="resetFilters()"
+            class="hover:bg-gray-200" />
         </template>
       </UDashboardToolbar>
     </template>
@@ -212,7 +216,7 @@ ChartJS.register({
             يوضح نسبة حضور كل طالب من إجمالي عدد الجلسات المحجوزة له، مما يساعد في تحديد الطلاب الذين يحتاجون
             إلى دعم إضافي.
           </p>
-          <Bar :data="studentCommitment" :options="baseOptions" />
+          <Bar :data="attendanceOverallStudentCommitment" :options="baseOptions" />
         </div>
 
         <div class="w-full">
@@ -221,7 +225,7 @@ ChartJS.register({
             يعرض الحضور الفعلي والدروس المحجوزة لكل طالب على مدار الأشهر، مما
             يساعد في تتبع التقدم.
           </p>
-          <Line :data="commitmentOverTime" :options="baseOptions" />
+          <Line :data="attendanceCommitmentOverTime" :options="baseOptions" />
         </div>
 
         <div class="w-full">
