@@ -11,6 +11,7 @@ use App\Http\Controllers\API\Reports\HomeController;
 use App\Http\Controllers\API\ParentController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\PermissionController;
+use App\Http\Controllers\API\Reports\GroupReportController;
 use App\Http\Controllers\API\Reports\StudentReportController;
 use App\Http\Controllers\API\ResultController;
 use App\Http\Controllers\API\RoleController;
@@ -141,10 +142,17 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [HomeController::class, 'index']);
+        /************************************************ */
         Route::get('/student-performance-per-group', [StudentReportController::class, 'studentPerformancePerGroup']);
         Route::get('/student-performance-over-time', [StudentReportController::class, 'studentPerformanceOverTime']);
         Route::get('/student-performance-per-exam', [StudentReportController::class, 'studentPerformancePerExam']);
         Route::get('/student-attendance-summary', [StudentReportController::class, 'studentAttendanceSummary']);
+        /************************************************ */
+        Route::get('/group-average-scores', [GroupReportController::class, 'averageScores']);
+        Route::get('/group-active-students', [GroupReportController::class, 'activeStudents']);
+        Route::get('/group-attendance-percentage', [GroupReportController::class, 'attendancePercentage']);
+        Route::get('/group-absent-percentage', [GroupReportController::class, 'absentPercentage']);
+        Route::get('/group-late-percentage', [GroupReportController::class, 'latePercentage']);
     });
 
     Route::group(['prefix' => 'auth'], function () {

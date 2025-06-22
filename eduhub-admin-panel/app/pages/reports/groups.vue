@@ -96,9 +96,8 @@ ChartJS.register({
       const value = chart.data.datasets[0].data[index];
       ctx.save();
       ctx.fillStyle = options.color || "#000";
-      ctx.font = `${options.font?.weight || "bold"} ${
-        options.font?.size || 14
-      }px sans-serif`;
+      ctx.font = `${options.font?.weight || "bold"} ${options.font?.size || 14
+        }px sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // ctx.fillText(`${label}: ${value}`, x, y);
@@ -108,74 +107,61 @@ ChartJS.register({
   },
 });
 
-const averageScoreData = {
-  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
-  datasets: [
-    {
-      label: "متوسط الدرجات",
-      data: [82.5, 74.3, 88.1],
-      backgroundColor: "#1E93C8",
-    },
-  ],
-};
+const groupAverageScores = ref({ labels: [], datasets: [] });
+const groupActiveStudents = ref({ labels: [], datasets: [] });
+const groupAttendancePercentage = ref({ labels: [], datasets: [] });
+const groupAbsentPercentage = ref({ labels: [], datasets: [] });
+const groupLatePercentage = ref({ labels: [], datasets: [] });
 
-const attendanceRateData = {
-  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
-  datasets: [
-    {
-      label: "نسبة الحضور (%)",
-      data: [91, 76, 84],
-      backgroundColor: ["#48BC7E", "#FF6384", "#36A2EB"],
-    },
-  ],
-};
+async function getDashboardReports(params = {}) {
+  await dashboardStore.fetchGroupAverageScores(params);
+  groupAverageScores.value = dashboardStore.groupAverageScores;
 
-const mathComparisonData = {
-  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
-  datasets: [
-    {
-      label: "الدرجة في الرياضيات",
-      data: [85, 70, 90],
-      backgroundColor: "rgba(54, 162, 235, 0.2)",
-      borderColor: "rgba(54, 162, 235, 1)",
-      borderWidth: 2,
-    },
-  ],
-};
+  await dashboardStore.fetchGroupActiveStudents(params);
+  groupActiveStudents.value = dashboardStore.groupActiveStudents;
 
-const activityData = {
-  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
-  datasets: [
-    {
-      label: "نشط",
-      data: [25, 18, 22],
-      backgroundColor: "#4BC0C0",
-    },
-    {
-      label: "غير نشط",
-      data: [5, 7, 3],
-      backgroundColor: "#FF9F40",
-    },
-  ],
-};
+  await dashboardStore.fetchGroupAttendancePercentage(params);
+  groupAttendancePercentage.value = dashboardStore.groupAttendancePercentage;
+
+  await dashboardStore.fetchGroupAbsentPercentage(params);
+  groupAbsentPercentage.value = dashboardStore.groupAbsentPercentage;
+
+  await dashboardStore.fetchGroupLatePercentage(params);
+  groupLatePercentage.value = dashboardStore.groupLatePercentage;
+}
+
+onMounted(async () => {
+  await getDashboardReports();
+});
+
+watch(
+  [range, group_id, student_id],
+  async ([newRange, newGroupId, newStudentId]) => {
+    const params = {
+      start: newRange.start?.toISOString() || "",
+      end: newRange.end?.toISOString() || "",
+      group_id: newGroupId || "",
+      student_id: newStudentId || "",
+    };
+    await getDashboardReports(params);
+  }
+);
+
 </script>
 
 <template>
   <UDashboardPanel id="home">
     <template #header>
       <UDashboardNavbar title="الصفحة الرئيسية" :ui="{ right: 'gap-3' }">
-        <template #leading><UDashboardSidebarCollapse /></template>
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
         <template #right v-if="authStore.hasPermission('read-notification')">
           <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              @click="isNotificationsSlideoverOpen = true"
-            >
-              <UChip color="error" inset
-                ><UIcon name="i-lucide-bell" class="size-5 shrink-0"
-              /></UChip>
+            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
+              <UChip color="error" inset>
+                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
+              </UChip>
             </UButton>
           </UTooltip>
         </template>
@@ -183,21 +169,11 @@ const activityData = {
 
       <UDashboardToolbar>
         <template #left>
-          <HomeDateRangePicker
-            :reset-signal="resetSignal"
-            v-model="range"
-            class="-ms-1"
-          />
+          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" />
           <HomeStudentSelect v-model="student_id" :range="range" />
           <HomeGroupSelect v-model="group_id" :range="range" />
-          <UButton
-            v-if="hasFilter"
-            icon="i-lucide-x"
-            color="gray"
-            size="sm"
-            @click="resetFilters()"
-            class="hover:bg-gray-200"
-          />
+          <UButton v-if="hasFilter" icon="i-lucide-x" color="gray" size="sm" @click="resetFilters()"
+            class="hover:bg-gray-200" />
         </template>
       </UDashboardToolbar>
     </template>
@@ -207,36 +183,68 @@ const activityData = {
         <!-- تقرير المدفوعات حسب الطالب -->
         <div>
           <h2 class="text-xl font-bold mb-2">
-            متوسط درجات الطلاب في كل مجموعة
+            1. متوسط درجات الطلاب في كل مجموعة
           </h2>
-          <Bar :data="averageScoreData" :options="baseOptions" />
+          <!-- Description: This chart shows the average scores of students in each group -->
+          <p class="text-sm text-gray-600 mb-2">
+            يعرض هذا الرسم البياني متوسط درجات الطلاب في كل مجموعة. يمكنك من معرفة مدى أداء الطلاب في مجموعاتهم
+            المختلفة.
+          </p>
+          <Bar :data="groupAverageScores" :options="baseOptions" />
         </div>
+
         <!-- 4. الطلاب النشطين وغير النشطين في كل مجموعة -->
         <div>
           <h2 class="text-xl font-bold mb-2">
-            عدد الطلاب النشطين وغير النشطين في كل مجموعة
+            2. عدد الطلاب النشطين وغير النشطين في كل مجموعة
           </h2>
-          <Bar :data="activityData" :options="baseOptions" />
+          <!-- Description: This chart displays the number of active and inactive students in each group -->
+          <p class="text-sm text-gray-600 mb-2">
+            يعرض هذا الرسم البياني عدد الطلاب النشطين وغير النشطين في كل مجموعة، مما يساعد في تقييم تفاعل الطلاب مع
+            المواد الدراسية.
+          </p>
+          <Bar :data="groupActiveStudents" :options="baseOptions" />
         </div>
 
-        <!-- 3. مقارنة أداء المجموعات في مادة الرياضيات -->
+
+        <!-- 2. نسبة الحضور لكل مجموعة -->
         <div>
           <h2 class="text-xl font-bold mb-2">
-            مقارنة أداء المجموعات في مادة الرياضيات
+            4. نسبة الحضور لكل مجموعة
           </h2>
-          <Radar :data="mathComparisonData" :options="baseOptions" />
+          <!-- Description: This doughnut chart shows the attendance rate for each group -->
+          <p class="text-sm text-gray-600 mb-2">
+            يعرض هذا الرسم البياني نسبة الحضور لكل مجموعة، مما يساعد في مراقبة التزام الطلاب بالحضور.
+          </p>
+          <Doughnut :data="groupAttendancePercentage" :options="baseOptions" style="max-width: 400px; margin: auto" />
         </div>
 
         <!-- 2. نسبة الحضور لكل مجموعة -->
         <div>
-          <h2 class="text-xl font-bold mb-2">نسبة الحضور لكل مجموعة</h2>
-          <Doughnut
-            :data="attendanceRateData"
-            :options="baseOptions"
-            style="max-width: 400px; margin: auto"
-          />
+          <h2 class="text-xl font-bold mb-2">
+            4. نسبة الغياب لكل مجموعة
+          </h2>
+          <!-- Description: This doughnut chart shows the attendance rate for each group -->
+          <p class="text-sm text-gray-600 mb-2">
+            يعرض هذا الرسم البياني نسبة الغياب لكل مجموعة، مما يساعد في مراقبة التزام الطلاب بالغياب.
+          </p>
+          <Doughnut :data="groupAbsentPercentage" :options="baseOptions" style="max-width: 400px; margin: auto" />
+        </div>
+
+
+        <!-- 2. نسبة الحضور لكل مجموعة -->
+        <div>
+          <h2 class="text-xl font-bold mb-2">
+            4. نسبة التأخير لكل مجموعة
+          </h2>
+          <!-- Description: This doughnut chart shows the attendance rate for each group -->
+          <p class="text-sm text-gray-600 mb-2">
+            يعرض هذا الرسم البياني نسبة التأخير لكل مجموعة، مما يساعد في مراقبة التزام الطلاب بالتأخير.
+          </p>
+          <Doughnut :data="groupLatePercentage" :options="baseOptions" style="max-width: 400px; margin: auto" />
         </div>
       </div>
+
     </template>
   </UDashboardPanel>
 </template>

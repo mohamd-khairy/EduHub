@@ -8,7 +8,11 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const studentPerformanceOverTime = ref([]);
   const studentPerformancePerExam = ref([]);
   const studentAttendanceSummary = ref([]);
-
+  const groupAverageScores = ref([]);
+  const groupActiveStudents = ref([]);
+  const groupAttendancePercentage = ref([]);
+  const groupLatePercentage = ref([]);
+  const groupAbsentPercentage = ref([]);
   async function fetchDashboardData(params = {}) {
     try {
       const query = new URLSearchParams(params).toString();
@@ -102,16 +106,116 @@ export const useDashboardStore = defineStore("dashboard", () => {
       console.error("Error fetching student attendance summary:", error);
     }
   }
+
+  async function fetchGroupAverageScores(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/group-average-scores${query ? `?${query}` : ""}`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        groupAverageScores.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching group average scores:", error);
+    }
+  }
+
+  async function fetchGroupActiveStudents(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/group-active-students${query ? `?${query}` : ""}`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        groupActiveStudents.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching group active students:", error);
+    }
+  }
+
+  async function fetchGroupAttendancePercentage(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/group-attendance-percentage${
+        query ? `?${query}` : ""
+      }`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        groupAttendancePercentage.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching group attendance percentage:", error);
+    }
+  }
+
+  async function fetchGroupAbsentPercentage(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/group-absent-percentage${
+        query ? `?${query}` : ""
+      }`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        groupAbsentPercentage.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching group absent percentage:", error);
+    }
+  }
+
+  async function fetchGroupLatePercentage(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/group-late-percentage${query ? `?${query}` : ""}`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        groupLatePercentage.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching group late percentage:", error);
+    }
+  }
+
   return {
     items,
     studentPerformancePerGroup,
     studentPerformanceOverTime,
     studentPerformancePerExam,
     studentAttendanceSummary,
+    groupAverageScores,
+    groupActiveStudents,
+    groupAttendancePercentage,
+    groupLatePercentage,
+    groupAbsentPercentage,
     fetchDashboardData,
     fetchStudentPerformancePerGroup,
     fetchStudentOverTimePerformance,
     fetchStudentPerformancePerExam,
     fetchStudentAttendanceSummary,
+    fetchGroupAverageScores,
+    fetchGroupActiveStudents,
+    fetchGroupAttendancePercentage,
+    fetchGroupAbsentPercentage,
+    fetchGroupLatePercentage,
   };
 });

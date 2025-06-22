@@ -58,7 +58,7 @@ class StudentReportController extends Controller
                 [
                     'label' => ($student_id ? 'مجموع درجات الطالب ' . Student::find($student_id)->name : 'مجموع درجات الطلاب') . ' ' . ($group_id ? 'في المجموعة ' . Group::find($group_id)->name : ' في جميع المجموعات'),
                     'data' => $data,
-                    'backgroundColor' => $colors,
+                    'backgroundColor' => '#1E93C8', //$colors,
                 ],
             ],
         ];
