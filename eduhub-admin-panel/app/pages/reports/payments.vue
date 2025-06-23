@@ -12,6 +12,7 @@ import {
   LinearScale,
   ArcElement,
 } from "chart.js";
+import DashboardHeader from "~/components/reports/DashboardHeader.vue";
 
 ChartJS.register(
   Title,
@@ -152,30 +153,10 @@ watch(
 <template>
   <UDashboardPanel id="home">
     <template #header>
-      <UDashboardNavbar title="الصفحة الرئيسية" :ui="{ right: 'gap-3' }">
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-        <template #right v-if="authStore.hasPermission('read-notification')">
-          <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
-              <UChip color="error" inset>
-                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
-              </UChip>
-            </UButton>
-          </UTooltip>
-        </template>
-      </UDashboardNavbar>
-
-      <UDashboardToolbar>
-        <template #left>
-          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" :disabled="isLoading" />
-          <HomeStudentSelect v-model="student_id" :range="range" :disabled="isLoading" />
-          <HomeGroupSelect v-model="group_id" :range="range" :disabled="isLoading" />
-          <UButton v-if="hasFilter" icon="i-lucide-x" color="gray" size="sm" @click="resetFilters()"
-            class="hover:bg-gray-200" />
-        </template>
-      </UDashboardToolbar>
+      <DashboardHeader title="تقارير المالية والمصاريف" :reset-signal="resetSignal" :range="range"
+        :group_id="group_id" :student_id="student_id" :is-loading="isLoading" :has-filter="hasFilter"
+        @update:range="val => range = val" @update:group_id="val => group_id = val"
+        @update:student_id="val => student_id = val" @reset="resetFilters" />
     </template>
 
     <template #body>
