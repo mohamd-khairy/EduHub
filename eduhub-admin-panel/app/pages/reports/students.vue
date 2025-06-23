@@ -55,22 +55,30 @@ function resetFilters() {
   group_id.value = null;
   student_id.value = null;
 }
+
+const isLoading = ref(false);
 const studentPerformancePerGroup = ref({ labels: [], datasets: [] });
 const studentPerformanceOverTime = ref({ labels: [], datasets: [] });
 const studentPerformancePerExam = ref({ labels: [], datasets: [] });
 const studentAttendanceSummary = ref({ labels: [], datasets: [] });
+
 async function getDashboardReports(params = {}) {
-  await dashboardStore.fetchStudentPerformancePerGroup(params);
-  studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
+  isLoading.value = true; // ⏳ بداية التحميل
 
-  await dashboardStore.fetchStudentOverTimePerformance(params);
-  studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
-
-  await dashboardStore.fetchStudentAttendanceSummary(params);
-  studentAttendanceSummary.value = dashboardStore.studentAttendanceSummary;
-
-  await dashboardStore.fetchStudentPerformancePerExam(params);
-  studentPerformancePerExam.value = dashboardStore.studentPerformancePerExam;
+  try {
+    await Promise.all([
+      dashboardStore.fetchStudentPerformancePerGroup(params),
+      dashboardStore.fetchStudentOverTimePerformance(params),
+      dashboardStore.fetchStudentAttendanceSummary(params),
+      dashboardStore.fetchStudentPerformancePerExam(params),
+    ]);
+    studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
+    studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
+    studentAttendanceSummary.value = dashboardStore.studentAttendanceSummary;
+    studentPerformancePerExam.value = dashboardStore.studentPerformancePerExam;
+  } finally {
+    isLoading.value = false; // ✅ التحميل انتهى في كل الحالات
+  }
 }
 
 onMounted(async () => {
@@ -137,9 +145,8 @@ ChartJS.register({
       const value = chart.data.datasets[0].data[index];
       ctx.save();
       ctx.fillStyle = options.color || "#000";
-      ctx.font = `${options.font?.weight || "bold"} ${
-        options.font?.size || 14
-      }px sans-serif`;
+      ctx.font = `${options.font?.weight || "bold"} ${options.font?.size || 14
+        }px sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // ctx.fillText(`${label}: ${value}`, x, y);
@@ -154,18 +161,15 @@ ChartJS.register({
   <UDashboardPanel id="home">
     <template #header>
       <UDashboardNavbar title="الصفحة الرئيسية" :ui="{ right: 'gap-3' }">
-        <template #leading><UDashboardSidebarCollapse /></template>
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
         <template #right v-if="authStore.hasPermission('read-notification')">
           <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              @click="isNotificationsSlideoverOpen = true"
-            >
-              <UChip color="error" inset
-                ><UIcon name="i-lucide-bell" class="size-5 shrink-0"
-              /></UChip>
+            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
+              <UChip color="error" inset>
+                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
+              </UChip>
             </UButton>
           </UTooltip>
         </template>
@@ -173,27 +177,23 @@ ChartJS.register({
 
       <UDashboardToolbar>
         <template #left>
-          <HomeDateRangePicker
-            :reset-signal="resetSignal"
-            v-model="range"
-            class="-ms-1"
-          />
-          <HomeStudentSelect v-model="student_id" :range="range" />
-          <HomeGroupSelect v-model="group_id" :range="range" />
-          <UButton
-            v-if="hasFilter"
-            icon="i-lucide-x"
-            color="gray"
-            size="sm"
-            @click="resetFilters()"
-            class="hover:bg-gray-200"
-          />
+          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" :disabled="isLoading" />
+          <HomeStudentSelect v-model="student_id" :range="range" :disabled="isLoading" />
+          <HomeGroupSelect v-model="group_id" :range="range" :disabled="isLoading" />
+          <UButton v-if="hasFilter" icon="i-lucide-x" color="gray" size="sm" @click="resetFilters()"
+            class="hover:bg-gray-200" />
         </template>
       </UDashboardToolbar>
     </template>
 
     <template #body>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
+      <div v-if="isLoading" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+        <span
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
         <div class="w-full" v-if="studentPerformancePerGroup">
           <h2 class="text-xl font-bold mb-2">1. أداء الطالب في كل وحدة دراسية</h2>
           <p class="text-sm text-gray-600 mb-4">

@@ -107,6 +107,7 @@ ChartJS.register({
   },
 });
 
+const isLoading = ref(false);
 const groupAverageScores = ref({ labels: [], datasets: [] });
 const groupActiveStudents = ref({ labels: [], datasets: [] });
 const groupAttendancePercentage = ref({ labels: [], datasets: [] });
@@ -114,20 +115,25 @@ const groupAbsentPercentage = ref({ labels: [], datasets: [] });
 const groupLatePercentage = ref({ labels: [], datasets: [] });
 
 async function getDashboardReports(params = {}) {
-  await dashboardStore.fetchGroupAverageScores(params);
-  groupAverageScores.value = dashboardStore.groupAverageScores;
+  isLoading.value = true; // ⏳ بداية التحميل
 
-  await dashboardStore.fetchGroupActiveStudents(params);
-  groupActiveStudents.value = dashboardStore.groupActiveStudents;
+  try {
+    await Promise.all([
+      dashboardStore.fetchGroupAverageScores(params),
+      dashboardStore.fetchGroupActiveStudents(params),
+      dashboardStore.fetchGroupAttendancePercentage(params),
+      dashboardStore.fetchGroupAbsentPercentage(params),
+      dashboardStore.fetchGroupLatePercentage(params),
+    ]);
 
-  await dashboardStore.fetchGroupAttendancePercentage(params);
-  groupAttendancePercentage.value = dashboardStore.groupAttendancePercentage;
-
-  await dashboardStore.fetchGroupAbsentPercentage(params);
-  groupAbsentPercentage.value = dashboardStore.groupAbsentPercentage;
-
-  await dashboardStore.fetchGroupLatePercentage(params);
-  groupLatePercentage.value = dashboardStore.groupLatePercentage;
+    groupAverageScores.value = dashboardStore.groupAverageScores;
+    groupActiveStudents.value = dashboardStore.groupActiveStudents;
+    groupAttendancePercentage.value = dashboardStore.groupAttendancePercentage;
+    groupAbsentPercentage.value = dashboardStore.groupAbsentPercentage;
+    groupLatePercentage.value = dashboardStore.groupLatePercentage;
+  } finally {
+    isLoading.value = false; // ✅ التحميل انتهى في كل الحالات
+  }
 }
 
 onMounted(async () => {
@@ -169,9 +175,9 @@ watch(
 
       <UDashboardToolbar>
         <template #left>
-          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" />
-          <HomeStudentSelect v-model="student_id" :range="range" />
-          <HomeGroupSelect v-model="group_id" :range="range" />
+          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" :disabled="isLoading" />
+          <HomeStudentSelect v-model="student_id" :range="range" :disabled="isLoading" />
+          <HomeGroupSelect v-model="group_id" :range="range" :disabled="isLoading" />
           <UButton v-if="hasFilter" icon="i-lucide-x" color="gray" size="sm" @click="resetFilters()"
             class="hover:bg-gray-200" />
         </template>
@@ -179,7 +185,15 @@ watch(
     </template>
 
     <template #body>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
+
+      <div v-if="isLoading" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+        <span
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+      </div>
+
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
         <!-- تقرير المدفوعات حسب الطالب -->
         <div>
           <h2 class="text-xl font-bold mb-2">

@@ -13,6 +13,7 @@ use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\Reports\AttendanceReportController;
 use App\Http\Controllers\API\Reports\GroupReportController;
+use App\Http\Controllers\API\Reports\PaymentReportController;
 use App\Http\Controllers\API\Reports\StudentReportController;
 use App\Http\Controllers\API\ResultController;
 use App\Http\Controllers\API\RoleController;
@@ -157,6 +158,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         /************************************************ */
         Route::get('/attendance-overall-student-commitment', [AttendanceReportController::class, 'overallStudentCommitment']);
         Route::get('/attendance-commitment-over-time', [AttendanceReportController::class, 'commitmentOverTime']);
+        Route::get('/attendance-compare-groups', [AttendanceReportController::class, 'compareGroups']);
+        Route::get('/attendance-rank-students', [AttendanceReportController::class, 'rankStudents']);
+        /************************************************ */
+        Route::get('/payment-per-students', [PaymentReportController::class, 'paymentsPerStudent']);
+        Route::get('/payment-monthly-revenue', [PaymentReportController::class, 'monthlyRevenueReport']);
+        Route::get('/payment-overdue-student-payment', [PaymentReportController::class, 'overduePaymentsReport']);
+        Route::get('/payment-per-groups', [PaymentReportController::class, 'paymentsByGroupReport']);
     });
 
     Route::group(['prefix' => 'auth'], function () {

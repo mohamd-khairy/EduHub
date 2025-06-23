@@ -115,7 +115,7 @@ export const useLinksStore = defineStore("links", () => {
             permission: "read-attendancereport",
           },
           {
-            label: "تقارير المالية والمصاريف",
+            label: "تقارير المالية و المصاريف",
             icon: "i-lucide-dollar-sign",
             to: "/reports/payments",
             permission: "read-paymentreport",

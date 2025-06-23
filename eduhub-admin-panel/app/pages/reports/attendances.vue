@@ -45,15 +45,30 @@ function resetFilters() {
   student_id.value = null;
 }
 
+const isLoading = ref(false);
 const attendanceOverallStudentCommitment = ref({ labels: [], datasets: [] });
 const attendanceCommitmentOverTime = ref({ labels: [], datasets: [] });
+const attendanceCompareGroups = ref({ labels: [], datasets: [] });
+const attendanceRankStudents = ref({ labels: [], datasets: [] });
 
 async function getDashboardReports(params = {}) {
-  await dashboardStore.fetchAttendanceoverallStudentCommitment(params);
-  attendanceOverallStudentCommitment.value = dashboardStore.attendanceOverallStudentCommitment;
+  isLoading.value = true; // ⏳ بداية التحميل
 
-  await dashboardStore.fetchAttendanceCommitmentOverTime(params);
-  attendanceCommitmentOverTime.value = dashboardStore.attendanceCommitmentOverTime;
+  try {
+    await Promise.all([
+      dashboardStore.fetchAttendanceoverallStudentCommitment(params),
+      dashboardStore.fetchAttendanceCommitmentOverTime(params),
+      dashboardStore.fetchAttendanceCompareGroups(params),
+      dashboardStore.fetchAttendanceRankStudents(params),
+    ]);
+
+    attendanceOverallStudentCommitment.value = dashboardStore.attendanceOverallStudentCommitment;
+    attendanceCommitmentOverTime.value = dashboardStore.attendanceCommitmentOverTime;
+    attendanceCompareGroups.value = dashboardStore.attendanceCompareGroups;
+    attendanceRankStudents.value = dashboardStore.attendanceRankStudents;
+  } finally {
+    isLoading.value = false; // ✅ التحميل انتهى في كل الحالات
+  }
 }
 
 onMounted(async () => {
@@ -73,53 +88,6 @@ watch(
   }
 );
 
-
-const commitmentOverTime = {
-  labels: ["يناير", "فبراير", "مارس", "أبريل"],
-  datasets: [
-    {
-      label: "الحضور الفعلي",
-      data: [40, 50, 45, 60],
-      borderColor: "#36A2EB",
-      fill: false,
-      tension: 0.4,
-    },
-    {
-      label: "الدروس المحجوزة",
-      data: [50, 55, 50, 65],
-      borderColor: "#FF6384",
-      fill: false,
-      tension: 0.4,
-    },
-  ],
-};
-
-const groupComparison = {
-  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
-  datasets: [
-    {
-      label: "محجوز",
-      data: [60, 45, 70],
-      backgroundColor: "#36A2EB",
-    },
-    {
-      label: "حضور فعلي",
-      data: [55, 40, 65],
-      backgroundColor: "#FF6384",
-    },
-  ],
-};
-
-const topBottomStudents = {
-  labels: ["ريم", "أحمد", "خالد", "سارة", "فهد"],
-  datasets: [
-    {
-      label: "نسبة الحضور",
-      data: [95, 90, 80, 75, 60],
-      backgroundColor: "#4BC0C0",
-    },
-  ],
-};
 
 const baseOptions = {
   responsive: true,
@@ -199,9 +167,9 @@ ChartJS.register({
 
       <UDashboardToolbar>
         <template #left>
-          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" />
-          <HomeStudentSelect v-model="student_id" :range="range" />
-          <HomeGroupSelect v-model="group_id" :range="range" />
+          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" :disabled="isLoading" />
+          <HomeStudentSelect v-model="student_id" :range="range" :disabled="isLoading" />
+          <HomeGroupSelect v-model="group_id" :range="range" :disabled="isLoading" />
           <UButton v-if="hasFilter" icon="i-lucide-x" color="gray" size="sm" @click="resetFilters()"
             class="hover:bg-gray-200" />
         </template>
@@ -209,7 +177,13 @@ ChartJS.register({
     </template>
 
     <template #body>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
+
+      <div v-if="isLoading" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+        <span
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+      </div>
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
         <div class="w-full">
           <h3 class="text-xl font-bold mb-2">1. تقرير الالتزام العام للطالب</h3>
           <p class="text-sm text-gray-600 mb-4">
@@ -234,7 +208,7 @@ ChartJS.register({
             يقارن بين الحضور الفعلي والدروس المحجوزة لكل مجموعة، مما يساعد في
             تحديد المجموعات التي تحتاج إلى تحسين.
           </p>
-          <Bar :data="groupComparison" :options="baseOptions" />
+          <Bar :data="attendanceCompareGroups" :options="baseOptions" />
         </div>
 
         <div class="w-full">
@@ -243,7 +217,7 @@ ChartJS.register({
             يعرض ترتيب الطلاب بناءً على نسبة الحضور، مما يساعد في تحديد الطلاب
             الأكثر التزامًا.
           </p>
-          <Bar :data="topBottomStudents" :options="baseOptions" />
+          <Bar :data="attendanceRankStudents" :options="baseOptions" />
         </div>
       </div>
     </template>

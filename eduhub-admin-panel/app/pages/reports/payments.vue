@@ -94,9 +94,8 @@ ChartJS.register({
       const value = chart.data.datasets[0].data[index];
       ctx.save();
       ctx.fillStyle = options.color || "#000";
-      ctx.font = `${options.font?.weight || "bold"} ${
-        options.font?.size || 14
-      }px sans-serif`;
+      ctx.font = `${options.font?.weight || "bold"} ${options.font?.size || 14
+        }px sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // ctx.fillText(`${label}: ${value}`, x, y);
@@ -106,69 +105,63 @@ ChartJS.register({
   },
 });
 
-const paymentsPerStudent = {
-  labels: ["أحمد", "سارة", "خالد", "ريم"],
-  datasets: [
-    {
-      label: "إجمالي المدفوعات",
-      data: [5000, 4000, 2500, 6000],
-      backgroundColor: "#36A2EB",
-    },
-  ],
-};
+const isLoading = ref(false);
+const paymentPerStudent = ref({ labels: [], datasets: [] });
+const paymentMonthlyRevenue = ref({ labels: [], datasets: [] });
+const paymentOverdueStudentPayments = ref({ labels: [], datasets: [] });
+const paymentPerGroups = ref({ labels: [], datasets: [] });
 
-const monthlyRevenue = {
-  labels: ["يناير", "فبراير", "مارس", "أبريل"],
-  datasets: [
-    {
-      label: "الإيرادات (ر.س)",
-      data: [10000, 12000, 11000, 15000],
-      borderColor: "#4BC0C0",
-      fill: false,
-      tension: 0.3,
-    },
-  ],
-};
+async function getDashboardReports(params = {}) {
+  isLoading.value = true; // ⏳ بداية التحميل
 
-const overduePayments = {
-  labels: ["أحمد", "خالد", "سارة"],
-  datasets: [
-    {
-      label: "المتأخرات",
-      data: [1000, 2000, 500],
-      backgroundColor: "#FF6384",
-    },
-  ],
-};
+  try {
+    await Promise.all([
+      dashboardStore.fetchPaymentPerStudent(params),
+      dashboardStore.fetchPaymentMonthlyRevenue(params),
+      dashboardStore.fetchPaymentOverdueStudentPayments(params),
+      dashboardStore.fetchPaymentPerGroup(params),
+    ]);
 
-const paymentsByGroup = {
-  labels: ["المجموعة أ", "المجموعة ب", "المجموعة ج"],
-  datasets: [
-    {
-      label: "مدفوعات المجموعة",
-      data: [10000, 8000, 6000],
-      backgroundColor: ["#FFCE56", "#36A2EB", "#9966FF"],
-    },
-  ],
-};
+    paymentPerStudent.value = dashboardStore.paymentPerStudent;
+    paymentMonthlyRevenue.value = dashboardStore.paymentMonthlyRevenue;
+    paymentOverdueStudentPayments.value = dashboardStore.paymentOverdueStudentPayments;
+    paymentPerGroups.value = dashboardStore.paymentPerGroups;
+  } finally {
+    isLoading.value = false; // ✅ التحميل انتهى في كل الحالات
+  }
+}
+
+onMounted(async () => {
+  await getDashboardReports();
+});
+
+watch(
+  [range, group_id, student_id],
+  async ([newRange, newGroupId, newStudentId]) => {
+    const params = {
+      start: newRange.start?.toISOString() || "",
+      end: newRange.end?.toISOString() || "",
+      group_id: newGroupId || "",
+      student_id: newStudentId || "",
+    };
+    await getDashboardReports(params);
+  }
+);
 </script>
 
 <template>
   <UDashboardPanel id="home">
     <template #header>
       <UDashboardNavbar title="الصفحة الرئيسية" :ui="{ right: 'gap-3' }">
-        <template #leading><UDashboardSidebarCollapse /></template>
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
         <template #right v-if="authStore.hasPermission('read-notification')">
           <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              @click="isNotificationsSlideoverOpen = true"
-            >
-              <UChip color="error" inset
-                ><UIcon name="i-lucide-bell" class="size-5 shrink-0"
-              /></UChip>
+            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
+              <UChip color="error" inset>
+                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
+              </UChip>
             </UButton>
           </UTooltip>
         </template>
@@ -176,55 +169,57 @@ const paymentsByGroup = {
 
       <UDashboardToolbar>
         <template #left>
-          <HomeDateRangePicker
-            :reset-signal="resetSignal"
-            v-model="range"
-            class="-ms-1"
-          />
-          <HomeStudentSelect v-model="student_id" :range="range" />
-          <HomeGroupSelect v-model="group_id" :range="range" />
-          <UButton
-            v-if="hasFilter"
-            icon="i-lucide-x"
-            color="gray"
-            size="sm"
-            @click="resetFilters()"
-            class="hover:bg-gray-200"
-          />
+          <HomeDateRangePicker :reset-signal="resetSignal" v-model="range" class="-ms-1" :disabled="isLoading" />
+          <HomeStudentSelect v-model="student_id" :range="range" :disabled="isLoading" />
+          <HomeGroupSelect v-model="group_id" :range="range" :disabled="isLoading" />
+          <UButton v-if="hasFilter" icon="i-lucide-x" color="gray" size="sm" @click="resetFilters()"
+            class="hover:bg-gray-200" />
         </template>
       </UDashboardToolbar>
     </template>
 
     <template #body>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
-        <!-- تقرير المدفوعات حسب الطالب -->
+      <div v-if="isLoading" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+        <span
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+      </div>
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
+        <!-- 1. تقرير المدفوعات حسب الطالب -->
         <div class="w-full">
           <h2 class="text-xl font-bold mb-2">تقرير المدفوعات حسب الطالب</h2>
-          <Bar :data="paymentsPerStudent" :options="baseOptions" />
+          <p class="text-sm text-muted mb-4">
+            يوضح إجمالي المدفوعات التي قام بها كل طالب خلال الفترة المحددة. يساعد على تتبع الالتزام المالي لكل طالب.
+          </p>
+          <Bar :data="paymentPerStudent" :options="baseOptions" />
         </div>
 
-        <!-- تقرير الإيرادات الشهرية -->
+        <!-- 2. تقرير الإيرادات الشهرية -->
         <div class="w-full">
           <h2 class="text-xl font-bold mb-2">تقرير الإيرادات الشهرية</h2>
-          <Line :data="monthlyRevenue" :options="baseOptions" />
+          <p class="text-sm text-muted mb-4">
+            يعرض تطور الإيرادات شهريًا، مما يساعد في تقييم الأداء المالي وتحديد أشهر النشاط الأعلى أو الأدنى.
+          </p>
+          <Line :data="paymentMonthlyRevenue" :options="baseOptions" />
         </div>
 
-        <!-- تقرير الدفعات المتأخرة -->
+        <!-- 3. تقرير الدفعات المتأخرة -->
         <div class="w-full">
           <h2 class="text-xl font-bold mb-2">تقرير الدفعات المتأخرة</h2>
-          <Bar :data="overduePayments" :options="baseOptions" />
+          <p class="text-sm text-muted mb-4">
+            يعرض الطلاب الذين لديهم دفعات مستحقة لم تُسدَّد بعد، مما يساعد على تحسين التحصيل المالي.
+          </p>
+          <Bar :data="paymentOverdueStudentPayments" :options="baseOptions" />
         </div>
 
-        <!-- تقرير المدفوعات حسب المجموعة أو المستوى -->
+        <!-- 4. تقرير المدفوعات حسب المجموعة أو المستوى -->
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">
-            تقرير المدفوعات حسب المجموعة أو المستوى
-          </h2>
-          <Doughnut
-            :data="paymentsByGroup"
-            :options="baseOptions"
-            style="max-width: 400px; margin: auto"
-          />
+          <h2 class="text-xl font-bold mb-2">تقرير المدفوعات حسب المجموعة أو المستوى</h2>
+          <p class="text-sm text-muted mb-4">
+            يوضح توزيع إجمالي المدفوعات على المجموعات الدراسية أو المستويات المختلفة، مما يساعد في تحليل أداء كل مجموعة
+            ماليًا.
+          </p>
+          <Doughnut :data="paymentPerGroups" :options="baseOptions" style="max-width: 400px; margin: auto" />
         </div>
       </div>
     </template>
