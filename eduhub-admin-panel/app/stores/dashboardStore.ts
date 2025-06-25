@@ -4,6 +4,8 @@ import { ref, computed } from "vue";
 export const useDashboardStore = defineStore("dashboard", () => {
   const api = useApi(); // Assuming useApi is a composable for API calls
   const items = ref([]);
+  const monthlyStudentCount = ref([]);
+  const groupScoreRatio = ref([]);
   const studentPerformancePerGroup = ref([]);
   const studentPerformanceOverTime = ref([]);
   const studentPerformancePerExam = ref([]);
@@ -301,7 +303,9 @@ export const useDashboardStore = defineStore("dashboard", () => {
   async function fetchPaymentMonthlyRevenue(params = {}) {
     try {
       const query = new URLSearchParams(params).toString();
-      const url = `/dashboard/payment-monthly-revenue${query ? `?${query}` : ""}`;
+      const url = `/dashboard/payment-monthly-revenue${
+        query ? `?${query}` : ""
+      }`;
       const res = await api(url, { method: "GET" });
 
       // Assume `api` returns a standard fetch-like response
@@ -351,9 +355,44 @@ export const useDashboardStore = defineStore("dashboard", () => {
     }
   }
 
+  async function fetchMonthlyStudentCount(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/monthly-student-count${query ? `?${query}` : ""}`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        monthlyStudentCount.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching monthly student count:", error);
+    }
+  }
+
+  async function fetchGroupScoreRatio(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const url = `/dashboard/group-scores-ratio${query ? `?${query}` : ""}`;
+      const res = await api(url, { method: "GET" });
+
+      // Assume `api` returns a standard fetch-like response
+      const json = await res.json();
+
+      if (json?.data) {
+        groupScoreRatio.value = json.data;
+      }
+    } catch (error) {
+      console.error("Error fetching group score ratio:", error);
+    }
+  }
+
   return {
     items,
     studentPerformancePerGroup,
+    groupScoreRatio,
     studentPerformanceOverTime,
     studentPerformancePerExam,
     studentAttendanceSummary,
@@ -370,7 +409,10 @@ export const useDashboardStore = defineStore("dashboard", () => {
     paymentMonthlyRevenue,
     paymentOverdueStudentPayments,
     paymentPerGroups,
+    monthlyStudentCount,
     fetchDashboardData,
+    fetchMonthlyStudentCount,
+    fetchGroupScoreRatio,
     fetchStudentPerformancePerGroup,
     fetchStudentOverTimePerformance,
     fetchStudentPerformancePerExam,

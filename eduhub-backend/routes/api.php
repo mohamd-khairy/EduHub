@@ -21,11 +21,12 @@ use App\Http\Controllers\API\StudentController;
 use App\Http\Controllers\API\TeacherController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+
+Route::get('/test', function (Request $request) {
+});
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
@@ -144,6 +145,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [HomeController::class, 'index']);
+        Route::get('/monthly-student-count', [HomeController::class, 'monthlyStudentCount']);
+        Route::get('/group-scores-ratio', [HomeController::class, 'getGroupScoresRatio']);
         /************************************************ */
         Route::get('/student-performance-per-group', [StudentReportController::class, 'studentPerformancePerGroup']);
         Route::get('/student-performance-over-time', [StudentReportController::class, 'studentPerformanceOverTime']);

@@ -1,112 +1,154 @@
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue'
-import type { TableColumn } from '@nuxt/ui'
-import type { Period, Range, Sale } from '~/types'
+const students = ref([]);
 
-const props = defineProps<{
-  period: Period
-  range: Range
-}>()
+const studentStore = useStudentStore();
 
-const UBadge = resolveComponent('UBadge')
+onMounted(async () => {
+  await studentStore.loadAllStudents(1, null, "", 5);
+  students.value = studentStore.items;
+});
 
-const sampleEmails = [
-  'james.anderson@example.com',
-  'mia.white@example.com',
-  'william.brown@example.com',
-  'emma.davis@example.com',
-  'ethan.harris@example.com'
-]
+const open = ref(false);
+const student_id = ref(null);
+const searchStudentTerm = ref("");
+const UButton = resolveComponent("UButton");
+const UBadge = resolveComponent("UBadge");
+const data = ref([]);
+const filteredStudent = ref([]);
 
-const { data } = await useAsyncData('sales', async () => {
-  const sales: Sale[] = []
-  const currentDate = new Date()
-
-  for (let i = 0; i < 5; i++) {
-    const hoursAgo = randomInt(0, 48)
-    const date = new Date(currentDate.getTime() - hoursAgo * 3600000)
-
-    sales.push({
-      id: (4600 - i).toString(),
-      date: date.toISOString(),
-      status: randomFrom(['paid', 'failed', 'refunded']),
-      email: randomFrom(sampleEmails),
-      amount: randomInt(100, 1000)
-    })
-  }
-
-  return sales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-}, {
-  watch: [() => props.period, () => props.range],
-  default: () => []
-})
-
-const columns: TableColumn<Sale>[] = [
+const columns: TableColumn<User>[] = [
   {
-    accessorKey: 'id',
-    header: 'ID',
-    cell: ({ row }) => `#${row.getValue('id')}`
+    accessorKey: "id",
+    id: "الرقم ",
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+
+      return h(UButton, {
+        color: "neutral",
+        variant: "ghost",
+        label: "الرقم ",
+        icon: isSorted
+          ? isSorted === "asc"
+            ? "i-lucide-arrow-up-narrow-wide"
+            : "i-lucide-arrow-down-wide-narrow"
+          : "i-lucide-arrow-up-down",
+        class: "-mx-2.5",
+        onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      });
+    },
   },
   {
-    accessorKey: 'date',
-    header: 'Date',
+    accessorKey: "name",
+    id: "اسم الطالب",
     cell: ({ row }) => {
-      return new Date(row.getValue('date')).toLocaleString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })
-    }
+      const color = "warning";
+
+      return h(() => row.original?.name);
+    },
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+
+      return h(UButton, {
+        color: "neutral",
+        variant: "ghost",
+        label: "اسم الطالب",
+        icon: isSorted
+          ? isSorted === "asc"
+            ? "i-lucide-arrow-up-narrow-wide"
+            : "i-lucide-arrow-down-wide-narrow"
+          : "i-lucide-arrow-up-down",
+        class: "-mx-2.5",
+        onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      });
+    },
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
+    accessorKey: "gender",
+    id: "نوع الطالب",
+    header: "نوع الطالب",
     cell: ({ row }) => {
-      const color = {
-        paid: 'success' as const,
-        failed: 'error' as const,
-        refunded: 'neutral' as const
-      }[row.getValue('status') as string]
+      const color = "warning";
 
-      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.getValue('status')
-      )
-    }
+      return h(() => row.original.gender);
+    },
   },
   {
-    accessorKey: 'email',
-    header: 'Email'
-  },
-  {
-    accessorKey: 'amount',
-    header: () => h('div', { class: 'text-right' }, 'Amount'),
+    accessorKey: "grade_level",
+    id: "مستوي الطالب ",
+    header: "مستوي الطالب ",
     cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue('amount'))
-
-      const formatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'EUR'
-      }).format(amount)
-
-      return h('div', { class: 'text-right font-medium' }, formatted)
-    }
-  }
-]
+      const color = "warning";
+      return h(
+        UBadge,
+        { class: "capitalize", variant: "subtle", color },
+        () => row.original?.grade_level
+      );
+    },
+  },
+  {
+    accessorKey: "parent",
+    id: "ولي امر الطالب ",
+    header: "ولي امر الطالب ",
+    cell: ({ row }) => {
+      const color = "success";
+      return h(
+        UBadge,
+        { class: "capitalize", variant: "subtle", color },
+        () => row.original?.parent?.name
+      );
+    },
+  },
+  {
+    accessorKey: "school_name",
+    id: "مدرسة الطالب",
+    header: "مدرسة الطالب",
+    cell: ({ row }) => {
+      return h(() => row.original.school_name);
+    },
+  },
+  {
+    accessorKey: "phone",
+    id: "تليفون الطالب",
+    header: "تليفون الطالب",
+    filterFn: "equals",
+    cell: ({ row }) => {
+      return h(() => row.original.phone);
+    },
+  },
+  {
+    accessorKey: "email",
+    id: "البريد الالكتروني ",
+    header: "البريد الالكتروني ",
+    filterFn: "equals",
+    cell: ({ row }) => {
+      return h(() => row.original.email);
+    },
+  },
+];
 </script>
 
 <template>
-  <UTable
-    :data="data"
-    :columns="columns"
-    class="shrink-0"
-    :ui="{
-      base: 'table-fixed border-separate border-spacing-0',
-      thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-      tbody: '[&>tr]:last:[&>td]:border-b-0',
-      th: 'border-y border-default ',
-      td: 'border-b border-default'
-    }"
-  />
+  <div class="w-full">
+    <h2 class="text-xl font-bold mb-2">أحدث طلاب تم انضمامهم للمجموعات</h2>
+    <p class="text-sm text-muted mb-4">
+      يعرض هذا الجدول أحدث طلاب تم انضمامهم للمجموعات، مما يساعد على تتبع
+      التحديثات الأخيرة في المجموعات ويتيح مراقبة الطلاب الجدد وتوزيعهم عبر
+      المجموعات.
+    </p>
+
+    <UTable
+      ref="table"
+      class="shrink-0"
+      :data="students"
+      :columns="columns"
+      :ui="{
+        base: 'table-fixed border-separate border-spacing-0',
+        thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+        tbody: '[&>tr]:last:[&>td]:border-b-0',
+        th: 'py-2  border-y border-default ',
+        td: 'border-b border-default',
+      }"
+      dir="rtl"
+    />
+  </div>
 </template>

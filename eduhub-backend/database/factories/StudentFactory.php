@@ -88,13 +88,11 @@ class StudentFactory extends Factory
             Enrollment::where('student_id', $student->id)->get()
                 ->each(function ($enrollment) {
                     $enrollment->group->exams()->each(function ($exam) use ($enrollment) {
-                        for ($i = 0; $i < 3; $i++) {
-                            ExamResult::factory()->create([
-                                'student_id' => $enrollment->student_id,
-                                'exam_id' => $exam->id,
-                                'score' => $this->faker->randomFloat(2, 0, $exam->total_marks ?? 100),
-                            ]);
-                        }
+                        ExamResult::factory()->create([
+                            'student_id' => $enrollment->student_id,
+                            'exam_id' => $exam->id,
+                            'score' => $this->faker->randomFloat(2, 0, $exam->total_marks ?? 100),
+                        ]);
                     });
 
                     // $enrollment->group->schedules()->each(function ($schedule) use ($enrollment) {

@@ -23,10 +23,15 @@ export const useStudentStore = defineStore("student", () => {
   });
 
   // Load all pages from backend, combine all items into one array
-  async function loadAllStudents(page = 1, params = null, search = null) {
+  async function loadAllStudents(
+    page = 1,
+    params = null,
+    search = null,
+    limit = null
+  ) {
     items.value = []; // clear current items
 
-    const relations = "";
+    const relations = "parent";
 
     if (params || search) {
       page = 1; // Reset to first page if params or search are provided
@@ -54,6 +59,10 @@ export const useStudentStore = defineStore("student", () => {
       url += `&${filterParam}`;
     }
 
+    if (limit) {
+      url += `&per_page=${limit}`;
+    }
+
     const res = await api(url);
     const json = await res.json();
 
@@ -68,10 +77,10 @@ export const useStudentStore = defineStore("student", () => {
     }
   }
 
-  async function loadStudents(search = null) {
+  async function loadStudents(search = null, limit = null) {
     items.value = []; // clear current items
 
-    const res = await api(`student/all?search=${search}`);
+    const res = await api(`student/all?search=${search}&limit=${limit}`);
     const json = await res.json();
 
     if (json?.data) {

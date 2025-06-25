@@ -127,7 +127,7 @@ class GroupReportController extends Controller
 
         $labels = [];
         $percentages = [];
-
+        $colors = [];
         foreach ($results as $row) {
             $total = $row->total_sessions;
             $present = $row->present_count ?? 0;
@@ -184,6 +184,7 @@ class GroupReportController extends Controller
 
         $labels = [];
         $percentages = [];
+        $colors = [];
 
         foreach ($results as $row) {
             $total = $row->total_sessions;
@@ -241,7 +242,8 @@ class GroupReportController extends Controller
 
         $labels = [];
         $percentages = [];
-
+        $colors = [];
+        
         foreach ($results as $row) {
             $total = $row->total_sessions;
             $present = $row->present_count ?? 0;

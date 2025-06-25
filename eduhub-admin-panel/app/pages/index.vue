@@ -12,14 +12,16 @@ const range = shallowRef({
 
 const group_id = ref(null);
 const student_id = ref(null);
-const stats = ref([]);
 const isLoading = ref(false);
 const hasPermission = ref(false);
+const stats = ref([]);
+const monthlyStudentCount = ref({ labels: [], datasets: [] });
+const groupScoreRatio = ref({ labels: [], datasets: [] });
 
 onMounted(async () => {
   await getDashboardReports();
   // Check permissions
-    hasPermission.value = authStore.hasPermission("read-dashboard");
+  hasPermission.value = authStore.hasPermission("read-dashboard");
 });
 
 async function getDashboardReports(params = {}) {
@@ -27,13 +29,16 @@ async function getDashboardReports(params = {}) {
 
   try {
     await Promise.all([
-       dashboardStore.fetchDashboardData(params),
+      dashboardStore.fetchDashboardData(params),
+      dashboardStore.fetchMonthlyStudentCount(params),
+      dashboardStore.fetchGroupScoreRatio(params),
     ]);
 
-   stats.value = dashboardStore.items;
-    // You can also set other dashboard data here if needed
+    stats.value = dashboardStore.items;
+    monthlyStudentCount.value = dashboardStore.monthlyStudentCount;
+    groupScoreRatio.value = dashboardStore.groupScoreRatio;
   } finally {
-    isLoading.value = false; 
+    isLoading.value = false;
   }
 }
 
@@ -58,7 +63,9 @@ function resetFilters() {
   student_id.value = null;
 }
 const hasFilter = computed(() => {
-  return range.value.start || range.value.end || group_id.value || student_id.value;
+  return (
+    range.value.start || range.value.end || group_id.value || student_id.value
+  );
 });
 </script>
 
@@ -88,14 +95,31 @@ const hasFilter = computed(() => {
         <span
           class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"
         ></span>
-        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">
+          جاري تحميل البيانات...
+        </p>
       </div>
-      <div
-        v-else
-        class="space-y-6"
-      >
-        <HomeStats :period="period" :range="range" :stats="stats" v-if="hasPermission" />
-        <HomeChart :period="period" :range="range" v-if="hasPermission" />
+      <div v-else class="space-y-6">
+        <HomeStats
+          :period="period"
+          :range="range"
+          :stats="stats"
+          v-if="hasPermission"
+        />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
+          <HomeChartMonthlyStudentCount
+            :monthlyStudentCount="monthlyStudentCount"
+            :period="period"
+            :range="range"
+            v-if="hasPermission"
+          />
+          <HomeChartGroupStudentRatio
+            :groupScoreRatio="groupScoreRatio"
+            :period="period"
+            :range="range"
+            v-if="hasPermission"
+          />
+        </div>
         <HomeSales :period="period" :range="range" v-if="hasPermission" />
       </div>
     </template>
