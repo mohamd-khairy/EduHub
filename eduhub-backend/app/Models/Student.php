@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class Student extends Authenticatable implements Auditable
 {
@@ -54,7 +56,36 @@ class Student extends Authenticatable implements Auditable
                 $student->assignRole('student');
             }
         });
+
+        static::addGlobalScope('roleFilter', function (Builder $builder) {
+            $user = Auth::user();
+
+            if (!$user) {
+                return; // guest view
+            }
+
+            if ($user->hasRole('admin')) {
+                return; // admin sees all
+            }
+
+            if ($user->hasRole('teacher')) {
+                $builder->whereHas('enrollments', function ($q) use ($user) {
+                    $q->whereHas('group', function ($q) use ($user) {
+                        $q->where('teacher_id', $user->id);
+                    });
+                });
+            }
+
+            if ($user->hasRole('student')) {
+                $builder->where('id', $user->id);
+            }
+
+            if ($user->hasRole('parent')) {
+                $builder->where('parent_id', $user->id);
+            }
+        });
     }
+
 
     public function todayAttendance()
     {
