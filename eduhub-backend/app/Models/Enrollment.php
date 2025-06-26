@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -22,6 +23,11 @@ use HasFactory;
         'status',
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new RoleAccessScope);
+    }
+    
     // العلاقة مع الطالب
     public function student()
     {

@@ -60,45 +60,87 @@ class DatabaseSeeder extends Seeder
         // EnrollmentFactory::new()->count(10)->create();
         // AttendanceFactory::new()->count(10)->create();
 
-        $permissions = Permission::whereIn('name', [
-            'read-student',
-            'read-exam',
-            'read-examresult',
-            'read-attendance',
-            'read-group',
-            'read-teacher'
-        ])->pluck('id');
+        $rolePermissions = [
+            'student' => [
+                'by_name' => [
+                    'read-student',
+                    'read-exam',
+                    'read-examresult',
+                    'read-attendance',
+                    'read-group',
+                    'read-teacher',
+                    'read-parentmodel',
+                    'read-student-parent',
+                    'read-student-group',
+                    'read-student-exam',
+                    'read-student-attendance',
+                    'read-student-payment',
+                    'read-payment',
+                ]
+            ],
+            'parent' => [
+                'by_name' => [
+                    'read-student',
+                    'read-exam',
+                    'read-examresult',
+                    'read-attendance',
+                    'read-group',
+                    'read-teacher',
+                    'read-parentmodel',
+                    'update-parentmodel',
+                    'read-student-group',
+                    'read-student-exam',
+                    'read-student-attendance',
+                    'read-student-payment',
+                    'read-payment',
+                ]
+            ],
+            'teacher' => [
+                'by_group' => [
+                    'student',
+                    'exam',
+                    'examresult',
+                    'attendance',
+                ],
+                'by_name' => [
+                    'read-group',
+                    'read-teacher',
+                    'read-parentmodel',
+                    'read-payment',
+                ]
+            ],
+        ];
 
-        foreach ($permissions as $key => $value) {
-            DB::table('role_has_permissions')->insert(['role_id' => Role::where('name', 'student')->value('id'), 'permission_id' => $value]);
+        foreach ($rolePermissions as $roleName => $filters) {
+            $roleId = Role::where('name', $roleName)->value('id');
+
+            $permissions = Permission::where(function ($query) use ($filters) {
+                if (isset($filters['by_name']))
+                    $query->orWhereIn('name', $filters['by_name']);
+
+                if (isset($filters['by_group']))
+                    $query->orWhereIn('group', $filters['by_group']);
+                // $query->whereIn('name', $filters['by_name'])
+                //     ->orWhereIn('group', $filters['by_group']);
+            })->pluck('id');
+
+            // if (isset($filters['by_name'])) {
+
+            // } elseif (isset($filters['by_group'])) {
+            //     $permissions = Permission::whereIn('group', $filters['by_group'])->pluck('id');
+            // } else {
+            //     continue;
+            // }
+
+            $insertData = $permissions->map(function ($permId) use ($roleId) {
+                return [
+                    'role_id' => $roleId,
+                    'permission_id' => $permId,
+                ];
+            })->toArray();
+
+            DB::table('role_has_permissions')->insert($insertData);
         }
-
-        $permissions = Permission::whereIn('name', [
-            'read-student',
-            'read-exam',
-            'read-examresult',
-            'read-attendance',
-            'read-group',
-            'read-teacher'
-        ])->pluck('id');
-
-        foreach ($permissions as $key => $value) {
-            DB::table('role_has_permissions')->insert(['role_id' => Role::where('name', 'parent')->value('id'), 'permission_id' => $value]);
-        }
-
-
-        $permissions = Permission::whereIn('group', [
-            'student',
-            'exam',
-            'examresult',
-            'attendance',
-            'group',
-        ])->pluck('id');
-
-        foreach ($permissions as $key => $value) {
-            DB::table('role_has_permissions')->insert(['role_id' => Role::where('name', 'teacher')->value('id'), 'permission_id' => $value]);
-        }
-
 
 
 

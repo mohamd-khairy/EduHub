@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -18,6 +19,11 @@ use HasFactory;
         'student_id', 'exam_id', 'score'
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new RoleAccessScope);
+    }
+    
     public function student()
     {
         return $this->belongsTo(Student::class);

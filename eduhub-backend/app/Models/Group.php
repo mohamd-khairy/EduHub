@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,11 @@ class Group extends Model implements Auditable
     protected $fillable = ['name', 'teacher_id', 'course_id', 'max_students'];
 
     protected $appends = ['schedule', 'label', 'value'];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new RoleAccessScope);
+    }
 
     public function getLabelAttribute()
     {

@@ -25,9 +25,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/test', function (Request $request) {
-});
-
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'group'], function () {

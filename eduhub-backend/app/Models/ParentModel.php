@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
@@ -25,6 +26,8 @@ class ParentModel extends Authenticatable implements Auditable
 
     protected static function booted()
     {
+        static::addGlobalScope(new RoleAccessScope);
+
         static::created(function ($parent) {
             $parent->password = Hash::make($parent->email);
             $parent->saveQuietly(); // avoid triggering events again
@@ -34,8 +37,8 @@ class ParentModel extends Authenticatable implements Auditable
         });
     }
 
-    public function parents()
+    public function students()
     {
-        return $this->hasMany(Student::class, 'parent_id');
+        return $this->hasMany(Student::class , 'parent_id');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -24,6 +25,8 @@ class Teacher extends Authenticatable implements Auditable
 
     protected static function booted()
     {
+        static::addGlobalScope(new RoleAccessScope);
+    
         static::created(function ($teacher) {
             $teacher->password = Hash::make($teacher->email);
             $teacher->saveQuietly(); // avoid triggering events again

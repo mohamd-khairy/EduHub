@@ -39,10 +39,11 @@ abstract class Controller
 
             $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate(request('per_page', 15));
 
+            // dd($data->toSql());
             return  $this->success($data);
         } catch (\Throwable $th) {
-            //throw $th;
-            return  $this->fail([]);
+            throw $th;
+            // return  $this->fail([]);
         }
     }
 
@@ -209,7 +210,7 @@ abstract class Controller
         ], 200);
     }
 
-    public function fail($msg, $code)
+    public function fail($msg = null, $code = 400)
     {
         return response()->json([
             'status' => false,

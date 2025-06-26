@@ -8,11 +8,8 @@ use App\Models\Group;
 use App\Models\Schedule;
 use Carbon\Carbon;
 
-use function App\Helpers\get_day_name_by_date;
-
 class GroupController extends Controller
 {
-
     public function groupAttendance(Request $request)
     {
         // Validate the incoming request

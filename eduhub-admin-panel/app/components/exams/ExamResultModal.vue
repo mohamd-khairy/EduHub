@@ -1,12 +1,7 @@
 <script setup lang="ts">
-const props = withDefaults(
-  defineProps<{
-    exam?: object;
-  }>(),
-  {
-    exam: null,
-  }
-);
+const props = defineProps({
+  exam: null,
+});
 
 const examResultStore = useExamResultStore();
 const examStore = useExamStore();
@@ -19,6 +14,22 @@ const searchExamTerm = ref("");
 const searchStudentTerm = ref("");
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
+
+watch(
+  () => props.exam,
+  (val) => {
+    if (!val) return;
+    exam_id.value = { value: val?.id, label: val?.title };
+  },
+  { immediate: true, deep: true }
+);
+
+watch(
+  [() => exam_id.value, () => student_id.value],
+  ([examVal, studentVal]) => {
+    examResultStore.loadAllExamResults(1, { exam_id: examVal?.value ?? '' , student_id: studentVal?.value ?? ''});
+  }
+);
 
 // Columns for the table
 const columns: TableColumn<User>[] = [
@@ -99,17 +110,6 @@ const columns: TableColumn<User>[] = [
   },
 ];
 
-// Load all exam results for props exam
-watch(
-  () => props.exam,
-  (val) => {
-    if (!val) return;
-    exam_id.value = { value: props.exam?.id, label: props.exam?.title };
-    examResultStore.loadAllExamResults(1, { exam_id: props.exam?.id });
-  },
-  { immediate: true, deep: true }
-);
-
 // For searching inside select menus
 const searchHandler = (newVal: string, loadFunction: Function) => {
   if (newVal.length >= 3 || newVal.length < 1) loadFunction(newVal);
@@ -122,22 +122,6 @@ watch(searchStudentTerm, (newVal) =>
   searchHandler(newVal, studentStore.loadStudentsForSelect)
 );
 
-// Watch for changes in both exam_id and student_id
-watch(
-  [() => exam_id.value, () => student_id.value],
-  ([examVal, studentVal]) => {
-    const params = {};
-    if (examVal) {
-      params.exam_id = examVal.value;
-    } 
-    if (studentVal) params.student_id = studentVal.value;
-
-    // Load exam results if there are valid parameters
-    examResultStore.loadAllExamResults(1, params);
-  },
-  { immediate: true, deep: true }
-);
-
 // Reset filters
 function resetFilters() {
   exam_id.value = null;
@@ -146,9 +130,7 @@ function resetFilters() {
 </script>
 
 <template>
-  <UModal fullscreen v-model:open="open" :title="`درجات الاختبار`">
-    <slot />
-
+  <UModal fullscreen v-model:open="open" :title="`درجات الاختبار`" >
     <template #body dir="rtl">
       <div class="flex items-center space-x-4 w-full" dir="rtl">
         <!-- Exam Selection -->

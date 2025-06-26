@@ -33,7 +33,6 @@ const columnVisibility = ref()
 onMounted(() => {
   examStore.loadAllExams()
   groupStore.loadGroupsForSelect()
-  examResultStore.loadAllExamResults(1) //, {exam_id: 1}
   examStore.loadExamsForSelect()
   studentStore.loadStudentsForSelect()
 })

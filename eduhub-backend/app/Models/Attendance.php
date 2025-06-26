@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -14,6 +15,11 @@ class Attendance extends Model implements Auditable
     public static bool $inPermission = true;
 
     protected $fillable = ['student_id', 'group_id',  'schedule_id', 'date', 'status', 'note'];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new RoleAccessScope);
+    }
 
     public function student()
     {

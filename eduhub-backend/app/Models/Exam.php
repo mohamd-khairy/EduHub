@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -21,6 +22,11 @@ class Exam extends Model implements Auditable
         'total_marks'
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new RoleAccessScope);
+    }
+    
     public function group()
     {
         return $this->belongsTo(Group::class);
