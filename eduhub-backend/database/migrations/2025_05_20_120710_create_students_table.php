@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
+            $table->string('password')->nullable();
             $table->string('image')->nullable();
             $table->timestamps();
         });

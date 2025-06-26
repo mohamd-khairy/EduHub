@@ -29,7 +29,6 @@ export const useAuthStore = defineStore(
         permissions.value = permissionsCookie || [];
 
         // console.log(permissions.value);
-        
       }
     };
 
@@ -77,7 +76,11 @@ export const useAuthStore = defineStore(
     };
 
     // Login action
-    const login = async (credentials: { email: string; password: string }) => {
+    const login = async (credentials: {
+      email: string;
+      password: string;
+      type: string;
+    }) => {
       try {
         const response = await api("auth/login", {
           method: "POST",
@@ -107,7 +110,8 @@ export const useAuthStore = defineStore(
         await router.push("/");
       } catch (error) {
         resetAuthState();
-        throw error;
+        // throw error;
+        throw new Error( "خطأ في بيانات الدخول");
       }
     };
 

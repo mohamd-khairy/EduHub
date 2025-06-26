@@ -5,13 +5,21 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
-class Student extends Model implements Auditable
+class Student extends Authenticatable implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
+    use HasApiTokens, HasRoles;
+
+    protected $guard_name = 'student';
     public static bool $inPermission = true;
 
     public static array $customPermissions = [
@@ -25,7 +33,6 @@ class Student extends Model implements Auditable
         'read-student-payment',
     ];
 
-
     protected $fillable = [
         'name',
         'gender',
@@ -34,10 +41,51 @@ class Student extends Model implements Auditable
         'parent_id',
         'phone',
         'email',
-        'image'
+        'image',
+        'password'
     ];
 
     protected $appends = ['attendance_status'];
+
+    protected static function booted()
+    {
+        static::created(function ($student) {
+            $student->password = Hash::make($student->email);
+            $student->saveQuietly(); // avoid triggering events again
+            if (! $student->hasRole('student')) {
+                $student->assignRole('student');
+            }
+        });
+
+        static::addGlobalScope('roleFilter', function (Builder $builder) {
+            $user = Auth::user();
+
+            if (!$user) {
+                return; // guest view
+            }
+
+            if ($user->hasRole('admin')) {
+                return; // admin sees all
+            }
+
+            if ($user->hasRole('teacher')) {
+                $builder->whereHas('enrollments', function ($q) use ($user) {
+                    $q->whereHas('group', function ($q) use ($user) {
+                        $q->where('teacher_id', $user->id);
+                    });
+                });
+            }
+
+            if ($user->hasRole('student')) {
+                $builder->where('id', $user->id);
+            }
+
+            if ($user->hasRole('parent')) {
+                $builder->where('parent_id', $user->id);
+            }
+        });
+    }
+
 
     public function todayAttendance()
     {

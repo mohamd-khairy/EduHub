@@ -9,12 +9,28 @@ use Spatie\Permission\Models\Role;
 
 class RoleService
 {
-    protected static array $defaultRoles = ['admin'];
+    protected static array $defaultRoles = [
+        [
+            'name' => 'admin',
+            'guard_name' => 'web'
+        ]
+    ];
+
+    protected static array $defaultPermissions = [
+        ['name' => 'read-report', 'group' => 'report'],
+        ['name' => 'read-groupreport', 'group' => 'report'],
+        ['name' => 'read-studentreport', 'group' => 'report'],
+        ['name' => 'read-attendancereport', 'group' => 'report'],
+        ['name' => 'read-paymentreport', 'group' => 'report'],
+    ];
+
     protected static array $defaultAccess = ['create', 'read', 'update', 'delete'];
 
     public static function create(array $roles = []): array
     {
         self::createRoles($roles);
+
+        self::createDefaultPermissions();
 
         $models = [];
 
@@ -29,7 +45,7 @@ class RoleService
                 !$ref->hasProperty('defaultAccess') ||
                 ($ref->hasProperty('defaultAccess') && $ref->getProperty('defaultAccess')->getValue())
             ) {
-                self::createDefaultPermissions($model);
+                self::createModelPermissions($model);
             }
 
             // Custom permissions
@@ -49,7 +65,15 @@ class RoleService
     protected static function createRoles(array $roles = []): void
     {
         foreach (array_merge(self::$defaultRoles, $roles) as $role) {
-            Role::firstOrCreate(['name' => $role]);
+            Role::firstOrCreate($role);
+        }
+    }
+
+    protected static function createDefaultPermissions(): void
+    {
+        foreach (self::$defaultPermissions as $permission) {
+            $permission = (object) $permission;
+            self::createPermission($permission->name, $permission->group);
         }
     }
 
@@ -73,7 +97,7 @@ class RoleService
         return false;
     }
 
-    protected static function createDefaultPermissions(string $model): void
+    protected static function createModelPermissions(string $model): void
     {
         foreach (self::$defaultAccess as $action) {
             self::createPermission("{$action}-{$model}", $model);

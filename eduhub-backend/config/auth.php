@@ -40,6 +40,19 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'student' => [
+            'driver' => 'sanctum',
+            'provider' => 'students',
+        ],
+        'parent' => [
+            'driver' => 'sanctum',
+            'provider' => 'parents',
+        ],
+        'teacher' => [
+            'driver' => 'sanctum',
+            'provider' => 'teachers',
+        ],
     ],
 
     /*
@@ -69,6 +82,19 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+
+        'students' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Student::class,
+        ],
+        'parents' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\ParentModel::class, // rename if needed
+        ],
+        'teachers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Teacher::class, // rename if needed
+        ],
     ],
 
     /*

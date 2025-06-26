@@ -49,6 +49,9 @@ class StudentFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Student $student) {
+
+            $student->assignRole("student");
+
             $start = $this->faker->dateTimeBetween('-2 months', 'now');
             $end = $this->faker->dateTimeBetween($start, '+2 months');
             $groupIds = Group::pluck('id'); // You can change 2 to any number

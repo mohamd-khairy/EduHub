@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\ParentModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,5 +23,12 @@ class ParentModelFactory extends Factory
             'email' => $this->faker->unique()->safeEmail(),
             'address' => $this->faker->address(),
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (ParentModel $parent) {
+            $parent->assignRole("parent");
+        });
     }
 }
