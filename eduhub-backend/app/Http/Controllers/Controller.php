@@ -199,21 +199,23 @@ abstract class Controller
         return $filtersArray;
     }
 
-    public function success($data = null)
+    public function success($data = null, $msg = null)
     {
         return response()->json([
             'status' => true,
             'code' => 200,
+            'message' => $msg ?? 'sucess',
             'data' => $data
         ], 200);
     }
 
-    public function fail()
+    public function fail($msg, $code)
     {
         return response()->json([
             'status' => false,
-            'code' => 400,
+            'code' => $code ?? 400,
+            'message' => $msg ?? 'fail',
             'data' => []
-        ], 400);
+        ], $code ?? 400);
     }
 }

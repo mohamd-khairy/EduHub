@@ -5,13 +5,19 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
-class Student extends Model implements Auditable
+class Student extends Authenticatable implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
+    use HasApiTokens, HasRoles;
+
+    protected $guard_name = 'student';
     public static bool $inPermission = true;
 
     public static array $customPermissions = [
@@ -25,7 +31,6 @@ class Student extends Model implements Auditable
         'read-student-payment',
     ];
 
-
     protected $fillable = [
         'name',
         'gender',
@@ -34,10 +39,22 @@ class Student extends Model implements Auditable
         'parent_id',
         'phone',
         'email',
-        'image'
+        'image',
+        'password'
     ];
 
     protected $appends = ['attendance_status'];
+
+    protected static function booted()
+    {
+        static::created(function ($student) {
+            $student->password = Hash::make($student->email);
+            $student->saveQuietly(); // avoid triggering events again
+            if (! $student->hasRole('student')) {
+                $student->assignRole('student');
+            }
+        });
+    }
 
     public function todayAttendance()
     {

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
+            $table->string('password')->nullable();
             $table->string('specialization');
             $table->decimal('salary_amount', 8, 2);
             $table->timestamps();

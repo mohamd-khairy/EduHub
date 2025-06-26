@@ -6,35 +6,53 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use App\Models\Student;
+use App\Models\ParentModel;
+use App\Models\Teacher;
 
 class AuthController extends Controller
 {
+
     public function login(Request $request)
     {
-        // Validate input
         $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string'
+            'email'    => 'required|email',
+            'password' => 'required|string',
+            'type'     => 'required|in:user,student,parent,teacher',
         ]);
-        // Attempt login
-        if (!Auth::attempt($credentials)) {
+
+        $map = [
+            'user'    => [User::class, 'user'],
+            'student' => [Student::class, 'student'],
+            'parent'  => [ParentModel::class, 'parent'],
+            'teacher' => [Teacher::class, 'teacher'],
+        ];
+
+        [$modelClass, $guard] = $map[$request->type];
+
+        $user = $modelClass::where('email', $request->email)->first();
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return $this->fail('Invalid credentials.', 401);
         }
 
-        // Create token
-        $user = Auth::user();
-        $token = $user->createToken('login-token')->plainTextToken;
-        $roles = $user->roles()->pluck('name');
-        $permissions = $user->getAllPermissions()->pluck('name');
+        // Issue Sanctum token
+        $token = $user->createToken("{$guard}-token")->plainTextToken;
 
-        unset($user->roles); // remove if loaded
-        unset($user->permissions); // remove if loaded
+        // Get roles & permissions via Spatie
+        $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [];
+        $permissions = method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name') : [];
+
+        $user->makeHidden(['roles', 'permissions', 'pivot', 'role']);
 
         return $this->success([
-            'message' => 'Login successful.',
-            'token' => $token,
-            'user' => $user,
-            'roles' =>   $roles,
+            'message'     => 'Login successful.',
+            'token'       => $token,
+            'user'        => $user,
+            'guard_type'  => $guard,
+            'roles'       => $roles,
             'permissions' => $permissions,
         ]);
     }

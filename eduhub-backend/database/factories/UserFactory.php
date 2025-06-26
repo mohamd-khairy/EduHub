@@ -48,15 +48,7 @@ class UserFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (User $user) {
-            if ($user->id == 1) {
-                $user->assignRole("parent");
-            } elseif ($user->id == 2) {
-                $user->assignRole("teacher");
-            } elseif ($user->id == 3) {
-                $user->assignRole("student");
-            } else {
-                $user->assignRole("admin");
-            }
+            $user->assignRole("admin");
         });
     }
 }

@@ -94,6 +94,7 @@ export const useLinksStore = defineStore("links", () => {
         label: "التقارير",
         icon: "i-lucide-bar-chart-2",
         class: "text-xl",
+        permission: "read-report",
         defaultOpen: true,
         children: [
           {
@@ -167,6 +168,14 @@ export const useLinksStore = defineStore("links", () => {
         permissions.includes(item.permission) ||
         item.permission == undefined
       ) {
+        if (item?.children?.length > 0) {
+          item?.children?.forEach((child) => {
+            if (!permissions.includes(child?.permission)) {
+              item?.children?.pop(child);
+            }
+          });
+        }
+
         items.value[0].push(item);
       }
     });
@@ -176,6 +185,13 @@ export const useLinksStore = defineStore("links", () => {
         permissions.includes(item.permission) ||
         item.permission == undefined
       ) {
+        if (item?.children) {
+          item?.children?.forEach((child) => {
+            if (!permissions.includes(child?.permission)) {
+              item?.children?.pop(child);
+            }
+          });
+        }
         items.value[1].push(item);
       }
     });
