@@ -38,7 +38,7 @@ async function onSubmit() {
   groupStore.editGroup(payload, props.item?.id);
 
   toast.add({
-    title: "Success",
+    title: "تم بنجاح",
     description: `مجموعة  ${state.name} تم تعديل بنجاح`,
     color: "success",
   });

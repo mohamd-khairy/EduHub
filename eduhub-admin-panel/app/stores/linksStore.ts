@@ -137,7 +137,7 @@ export const useLinksStore = defineStore("links", () => {
         class: "text-xl",
         label: "الاعدادات",
         icon: "i-lucide-settings",
-        to: "/settings/roles",
+        to: "/settings",
         permission: "read-setting",
         onSelect: () => (open.value = false),
       },

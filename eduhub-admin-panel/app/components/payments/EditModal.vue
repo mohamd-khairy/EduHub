@@ -41,7 +41,7 @@ async function onSubmit() {
   paymentStore.editPayment(payload, props.item?.id);
 
   toast.add({
-    title: "Success",
+    title: "تم بنجاح",
     description: `تم تعديل بنجاح`,
     color: "success",
   });

@@ -98,4 +98,26 @@ class AuthController extends Controller
         // Return a response indicating successful logout
         return $this->success(true);
     }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8',
+            'type' => 'required|in:user,student,parent,teacher',
+        ]);
+
+        $guard = $request->type == 'user' ? 'web' : $request->type;
+
+        $user = Auth::guard($guard)->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return $this->fail('The provided password was incorrect.');
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return $this->success(true);
+    }
 }

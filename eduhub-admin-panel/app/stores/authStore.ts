@@ -111,7 +111,7 @@ export const useAuthStore = defineStore(
       } catch (error) {
         resetAuthState();
         // throw error;
-        throw new Error( "خطأ في بيانات الدخول");
+        throw new Error("خطأ في بيانات الدخول");
       }
     };
 
@@ -120,6 +120,20 @@ export const useAuthStore = defineStore(
       try {
         // Optional: Call logout API if necessary
         await api("auth/logout", { method: "POST" });
+      } finally {
+        resetAuthState();
+        clearAuthCookies();
+        await router.push("/login");
+      }
+    };
+
+    const changePassword = async (credentials = {}) => {
+      try {
+        // Optional: Call logout API if necessary
+        await api("auth/change-password", {
+          method: "POST",
+          body: JSON.stringify(credentials),
+        });
       } finally {
         resetAuthState();
         clearAuthCookies();
@@ -187,6 +201,7 @@ export const useAuthStore = defineStore(
       loadUserData,
       login,
       logout,
+      changePassword,
       checkAuth,
       hasPermission,
       hasAnyPermission,

@@ -23,7 +23,7 @@ onMounted(async () => {
   <UDashboardGroup unit="rem">
     <UDashboardSidebar id="default" v-model:open="open" collapsible resizable class="bg-elevated/25"
       :ui="{ footer: 'lg:border-t lg:border-default' }">
-      <template #header="{ collapsed }">
+      <template #header="{ collapsed }" class="px-0">
         <TeamsMenu :collapsed="collapsed" />
       </template>
 

@@ -34,7 +34,7 @@ async function onSubmit() {
   paymentStore.addPayment(payload);
 
   toast.add({
-    title: "Success",
+    title: "تم بنجاح",
     description: `دفع جديد تم بنجاح`,
     color: "success",
   });

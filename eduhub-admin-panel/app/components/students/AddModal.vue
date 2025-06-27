@@ -61,7 +61,7 @@ async function onSubmit() {
 
   // Show success toast
   toast.add({
-    title: "Success",
+    title: "تم بنجاح",
     description: `طالب جديد ${state.name} تم اضافة بنجاح`,
     color: "success",
   });

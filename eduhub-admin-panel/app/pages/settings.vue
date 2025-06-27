@@ -9,6 +9,19 @@ definePageMeta({
 const links = [
   [
     {
+      label: "الملف الشخصي",
+      icon: "i-lucide-user",
+      to: "/settings",
+      exact: true,
+      permission: "read-setting",
+    },
+    {
+      label: "اعدادات الحماية",
+      icon: "i-lucide-shield",
+      to: "/settings/security",
+      permission: "read-setting",
+    },
+    {
       label: "الصلاحيات",
       icon: "i-lucide-bell",
       to: "/settings/roles",
@@ -20,38 +33,12 @@ const links = [
       to: "/settings/logs",
       permission: "read-audit",
     },
-    {
-      label: "General",
-      icon: "i-lucide-user",
-      to: "/settings",
-      exact: true,
-      permission: "read-setting",
-    },
-    {
-      label: "Members",
-      icon: "i-lucide-users",
-      to: "/settings/members",
-      permission: "read-setting",
-    },
-    {
-      label: "Security",
-      icon: "i-lucide-shield",
-      to: "/settings/security",
-      permission: "read-setting",
-    },
   ],
   [
     {
       label: "Documentation",
       icon: "i-lucide-book-open",
       to: "https://ui.nuxt.com/getting-started/installation/pro/nuxt",
-      target: "_blank",
-      permission: "read-setting",
-    },
-    {
-      label: "Buy now",
-      icon: "i-lucide-shopping-cart",
-      to: "https://ui.nuxt.com/pro/purchase",
       target: "_blank",
       permission: "read-setting",
     },
@@ -95,7 +82,7 @@ onMounted(() => {
 
     <template #body>
       <div
-        class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-7xl mx-auto"
+        class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-8xl mx-auto"
       >
         <NuxtPage />
       </div>

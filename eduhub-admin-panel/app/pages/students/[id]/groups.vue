@@ -35,7 +35,7 @@ async function onGroupActiveChange(field, value) {
   }
 
   toast.add({
-    title: "Success",
+    title: "تم بنجاح",
     description: `تم تغير حالة المجموعة بنجاح`,
     color: "success",
   });
@@ -53,7 +53,7 @@ async function onGroupEnrollmentDelete(field) {
     groups.value.splice(index, 1);
 
     toast.add({
-      title: "Success",
+      title: "تم بنجاح",
       description: `تم جذف المجموعة بنجاح`,
       color: "success",
     });

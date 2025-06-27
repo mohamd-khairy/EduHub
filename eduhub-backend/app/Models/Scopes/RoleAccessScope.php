@@ -29,6 +29,7 @@ class RoleAccessScope implements Scope
             'ParentModel' => $this->applyParentModelFilter($builder, $user),
             'Teacher'     => $this->applyTeacherFilter($builder, $user),
             'Attendance'  => $this->applyAttendanceFilter($builder, $user),
+            'Course'      => $this->applyCourseFilter($builder, $user),
             default       => null
         };
     }
@@ -165,6 +166,21 @@ class RoleAccessScope implements Scope
     {
         if ($user->hasRole('teacher')) {
             $builder->where('id', $user->id);
+        }
+
+        if ($user->hasRole('student')) {
+            $builder->whereHas('groups.enrollments', fn($q) => $q->where('student_id', $user->id));
+        }
+
+        if ($user->hasRole('parent')) {
+            $builder->whereHas('groups.enrollments.student', fn($q) => $q->where('parent_id', $user->id));
+        }
+    }
+
+    private function applyCourseFilter(Builder $builder, $user)
+    {
+        if ($user->hasRole('teacher')) {
+            $builder->whereHas('groups', fn($q) => $q->where('teacher_id', $user->id));
         }
 
         if ($user->hasRole('student')) {

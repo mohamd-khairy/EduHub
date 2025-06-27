@@ -119,7 +119,7 @@ function onFileClick() {
         <UInput v-model="profile.phone" type="tel" autocomplete="off" style="width: 300px" />
       </UFormField>
       <USeparator />
-      <UFormField name="gender" label="الجنس" description="جنسك المستخدمالخاص بك في ملفك الشخصي." required
+      <UFormField name="gender" label="الجنس" description="جنسك المستخدم الخاص بك في ملفك الشخصي." required
         class="flex max-sm:flex-col justify-between items-start gap-4" style="font-size: 18px">
         <UInput v-model="profile.gender" autocomplete="off" style="width: 300px" />
       </UFormField>

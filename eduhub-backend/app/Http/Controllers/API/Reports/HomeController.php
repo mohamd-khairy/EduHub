@@ -10,6 +10,7 @@ use App\Models\ParentModel;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Teacher;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -101,8 +102,8 @@ class HomeController extends Controller
     public function monthlyStudentCount(Request $request)
     {
         // Get start and end dates from request, or default to the current month
-        $start = filled($request->start) ? date('Y-m-d', strtotime($request->start)) : null;
-        $end = filled($request->end) ? date('Y-m-d', strtotime($request->end)) : null;
+        $start = filled($request->start) ? date('Y-m-d', strtotime($request->start)) : Carbon::now()->subMonths(10)->format('Y-m-d');
+        $end = filled($request->end) ? date('Y-m-d', strtotime($request->end)) : Carbon::now()->addMonths(1)->format('Y-m-d');
         $group_id = $request->group_id ?? null;
 
         // Initialize $months as an empty array
@@ -118,14 +119,15 @@ class HomeController extends Controller
                 $months[] = $start_date->format('Y-m');
                 $start_date->addMonth();
             }
-        } else {
-            // If no start and end dates are provided, generate all 12 months of the current year
-            $currentYear = now()->year;
-            $months = [];
-            for ($month = 1; $month <= 12; $month++) {
-                $months[] = $currentYear . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
-            }
-        }
+        } 
+        // else {
+        //     // If no start and end dates are provided, generate all 12 months of the current year
+        //     $currentYear = now()->year;
+        //     $months = [];
+        //     for ($month = 1; $month <= 12; $month++) {
+        //         $months[] = $currentYear . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
+        //     }
+        // }
 
         // Query to get the count of students grouped by month
         $students = DB::table('students')
@@ -153,7 +155,8 @@ class HomeController extends Controller
             'datasets' => [
                 [
                     'label' =>  'عدد الطلاب'
-                        . ($group_id ?  ' في المجموعة:  ' . DB::table('groups')->where('id', $group_id)->value('name') : '  في جميع المجموعات'),
+                        . ($group_id ?  ' في المجموعة:  ' . DB::table('groups')->where('id', $group_id)->value('name') : '  في جميع المجموعات')
+                        . ' لكل شهر ',
                     'data' => $data,
                     'backgroundColor' => '#00a155',
                 ]

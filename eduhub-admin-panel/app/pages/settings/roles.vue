@@ -137,15 +137,16 @@ watch(
       class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
     >
       <span
-          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
-        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+        class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"
+      ></span>
+      <p class="text-gray-700 dark:text-gray-300 text-sm">
+        جاري تحميل البيانات...
+      </p>
     </div>
 
     <template v-else>
-
       <!-- Right Sidebar: Role List -->
       <UCard class="w-1/4 p-0 overflow-y-auto">
-
         <template #header>
           <UInput
             icon="i-lucide-search"
@@ -156,7 +157,7 @@ watch(
         </template>
 
         <div class="divide-y divide-gray-200">
-        <AddRoleModal v-if="selectedRole && roles.length > 0" class="mb-6"/>
+          <AddRoleModal v-if="selectedRole && roles.length > 0" class="mb-6" />
 
           <UButton
             v-for="role in roles"
@@ -184,9 +185,8 @@ watch(
       </UCard>
 
       <!-- Left Side: Role Details -->
-      <div class="flex-1 overflow-y-auto ">
+      <div class="flex-1 overflow-y-auto">
         <UCard v-if="selectedRole && roles.length > 0" class="space-y-6">
-
           <template #header>
             <div class="flex items-center justify-between">
               <div>

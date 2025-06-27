@@ -29,11 +29,6 @@ const items = computed<DropdownMenuItem[][]>(() => [
   ],
   [
     {
-      label: "الملف الشخصي",
-      icon: "i-lucide-user",
-      class: "text-lg",
-    },
-    {
       label: "المظهر",
       icon: "i-lucide-sun-moon",
       class: "text-lg",

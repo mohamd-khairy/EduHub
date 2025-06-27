@@ -44,7 +44,7 @@ async function onSubmit() {
 
   // Show success toast
   toast.add({
-    title: "Success",
+    title: "تم بنجاح",
     description: `مجموعة جديدة ${state.name} تم اضافة بنجاح`,
     color: "success",
   });

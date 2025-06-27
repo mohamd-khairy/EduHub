@@ -26,7 +26,7 @@ async function onSubmit() {
   groupStore.addGroup(payload);
 
   toast.add({
-    title: "Success",
+    title: "تم بنجاح",
     description: `مجموعة جديد ${state.name} تم اضافة بنجاح`,
     color: "success",
   });

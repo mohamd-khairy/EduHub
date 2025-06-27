@@ -37,7 +37,7 @@ abstract class Controller
                     }
                 }
 
-            $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate(request('per_page', 15));
+            $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate(request('per_page', 10));
 
             // dd($data->toSql());
             return  $this->success($data);

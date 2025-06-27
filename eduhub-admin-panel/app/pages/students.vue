@@ -12,7 +12,7 @@ const studentStore = useStudentStore();
 const authStore = useAuthStore();
 
 const currentPage = ref(1);
-const pageSize = 10;
+const pageSize = 15;
 const isLoading = ref(false);
 const isEmpty = ref(false);
 const hasMore = ref(true);
@@ -38,9 +38,14 @@ async function setFilterValue(value: string) {
   debounceTimer = setTimeout(async () => {
     if (value?.length >= 3) {
       search.value = value;
-      await studentStore.loadAllStudents(1, null, {
-        name: value.toLowerCase(),
-      });
+      await studentStore.loadAllStudents(
+        1,
+        null,
+        {
+          name: value.toLowerCase(),
+        },
+        pageSize
+      );
       filteredStudents.value = studentStore.items;
     } else {
       filteredStudents.value = allStudents.value;
@@ -67,7 +72,7 @@ function handleUpdateStudent(updatedStudent: object) {
 // Load initial data
 onMounted(async () => {
   isLoading.value = true;
-  await studentStore.loadAllStudents(currentPage.value);
+  await studentStore.loadAllStudents(currentPage.value , null, null, pageSize);
   allStudents.value = studentStore.items;
   filteredStudents.value = allStudents.value;
   currentPage.value++;
@@ -105,7 +110,7 @@ async function loadNextPage() {
   if (isLoading.value || !hasMore.value) return;
   isLoading.value = true;
 
-  await studentStore.loadAllStudents(currentPage.value);
+  await studentStore.loadAllStudents(currentPage.value , null, null, pageSize);
   const newStudents = studentStore.items;
 
   if (allStudents.value?.length >= studentStore.pagination?.total) {
@@ -123,7 +128,7 @@ async function handleAddStudent(addStudent: object) {
   console.log("addStudent", addStudent);
   isLoading.value = true;
   currentPage.value = 1;
-  await studentStore.loadAllStudents(currentPage.value);
+  await studentStore.loadAllStudents(currentPage.value , null, null, pageSize);
   allStudents.value = studentStore.items;
   filteredStudents.value = allStudents.value;
   currentPage.value++;
@@ -173,11 +178,16 @@ async function handleAddStudent(addStudent: object) {
     @addStudent="handleAddStudent"
   />
 
-
-  <div v-else-if="!isEmpty && !selectedStudent" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+  <div
+    v-else-if="!isEmpty && !selectedStudent"
+    class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+  >
     <span
-          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
-        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+      class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"
+    ></span>
+    <p class="text-gray-700 dark:text-gray-300 text-sm">
+      جاري تحميل البيانات...
+    </p>
   </div>
 
   <div
