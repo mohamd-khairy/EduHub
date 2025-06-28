@@ -119,7 +119,7 @@ class HomeController extends Controller
                 $months[] = $start_date->format('Y-m');
                 $start_date->addMonth();
             }
-        } 
+        }
         // else {
         //     // If no start and end dates are provided, generate all 12 months of the current year
         //     $currentYear = now()->year;
@@ -219,6 +219,9 @@ class HomeController extends Controller
                         . ($group_id ?  ' في المجموعة:  ' . DB::table('groups')->where('id', $group_id)->value('name')    : '  في جميع المجموعات') . ' (%) ',
                     'data' =>  $data,
                     'backgroundColor' => '#00a155',
+                    'borderColor' => '#00a155',
+                    'fill' => false,
+                    'tension' => 0.4,
                 ]
             ]
         ]);

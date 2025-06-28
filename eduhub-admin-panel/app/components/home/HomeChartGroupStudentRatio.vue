@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Line } from "vue-chartjs";
+const colorMode = useColorMode()
 
 import {
   Chart as ChartJS,
@@ -34,7 +35,7 @@ const baseOptions = {
     },
     datalabels: {
       display: false,
-      color: "#000",
+      color: colorMode.value == "dark" ?  "#fff" : "#000",
       font: {
         weight: "bold",
         size: 12,
@@ -44,7 +45,7 @@ const baseOptions = {
     },
     customLabels: {
       display: false,
-      color: "#000",
+      color: colorMode.value == "dark" ?  "#fff" : "#000",
       font: {
         weight: "bold",
         size: 12,
@@ -58,6 +59,7 @@ ChartJS.register({
   afterDatasetDraw(chart, args, options) {
     const meta = chart.getDatasetMeta(0);
 
+    
     // if (meta.type === "bar") return;
     // if (meta.type === "pie") return;
 
@@ -89,6 +91,8 @@ const props = defineProps<{
   range: Range;
   groupScoreRatio?: any[]; // Optional prop for passing pre-fetched stats
 }>();
+
+
 </script>
 
 <template>

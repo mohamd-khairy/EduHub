@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\ParentModel;
 use App\Models\Permission;
 use App\Models\Student;
+use App\Models\StudyYear;
 use App\Models\User;
 use App\Services\RoleService;
 use Database\Factories\AttendanceFactory;
@@ -17,6 +18,7 @@ use Database\Factories\ParentModelFactory;
 use Database\Factories\PaymentFactory;
 use Database\Factories\ScheduleFactory;
 use Database\Factories\StudentFactory;
+use Database\Factories\StudyYearFactory;
 use Database\Factories\TeacherAttendanceFactory;
 use Database\Factories\TeacherFactory;
 use Database\Factories\UserFactory;
@@ -47,6 +49,7 @@ class DatabaseSeeder extends Seeder
             'image' => 'http://eduhub.test/eduhub-backend/public/images/photo.jpg'
         ])->assignRole('admin');
 
+        StudyYearFactory::new()->count(1)->create();
         UserFactory::new()->count(10)->create();
         CourseFactory::new()->count(10)->create();
         TeacherFactory::new()->count(10)->create();

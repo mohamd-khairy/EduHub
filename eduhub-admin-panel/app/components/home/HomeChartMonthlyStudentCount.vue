@@ -19,6 +19,7 @@ ChartJS.register(
   LinearScale
 );
 
+const colorMode = useColorMode();
 const baseOptions = {
   responsive: true,
   plugins: {
@@ -27,7 +28,7 @@ const baseOptions = {
     },
     datalabels: {
       display: false,
-      color: "#000",
+      color: colorMode.value == "dark" ? "#fff" : "#000",
       font: {
         weight: "bold",
         size: 12,
@@ -37,7 +38,7 @@ const baseOptions = {
     },
     customLabels: {
       display: false,
-      color: "#000",
+      color: colorMode.value == "dark" ? "#fff" : "#000",
       font: {
         weight: "bold",
         size: 12,
