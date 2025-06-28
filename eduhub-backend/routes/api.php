@@ -18,6 +18,7 @@ use App\Http\Controllers\API\Reports\StudentReportController;
 use App\Http\Controllers\API\ResultController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StudentController;
+use App\Http\Controllers\API\StudyYearController;
 use App\Http\Controllers\API\TeacherController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
@@ -38,6 +39,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('', [GroupController::class, 'store']);
         Route::get('{id}', [GroupController::class, 'show']);
         Route::put('{id}', [GroupController::class, 'update']);
+    });
+    Route::group(['prefix' => 'studyYear'], function () {
+        Route::get('/all', [StudyYearController::class, 'All']);
+        Route::post('/delete-all', [StudyYearController::class, 'deleteAll']);
+        Route::get('/', [StudyYearController::class, 'index']);
+        Route::post('', [StudyYearController::class, 'store']);
+        Route::get('{id}', [StudyYearController::class, 'show']);
+        Route::put('{id}', [StudyYearController::class, 'update']);
     });
     Route::group(['prefix' => 'course'], function () {
         Route::get('/all', [CourseController::class, 'All']);

@@ -26,10 +26,12 @@ class Teacher extends Authenticatable implements Auditable
     protected static function booted()
     {
         static::addGlobalScope(new RoleAccessScope);
-    
+
         static::created(function ($teacher) {
-            $teacher->password = Hash::make($teacher->email);
-            $teacher->saveQuietly(); // avoid triggering events again
+            if (! $teacher->password) {
+                $teacher->password = Hash::make($teacher->email);
+                $teacher->saveQuietly(); // avoid triggering events again
+            }
             if (! $teacher->hasRole('teacher')) {
                 $teacher->assignRole('teacher');
             }

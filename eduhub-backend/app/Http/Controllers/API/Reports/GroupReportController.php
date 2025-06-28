@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\API\Reports;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enrollment;
+use App\Models\Exam;
+use App\Models\ExamResult;
 use App\Models\Group;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -17,7 +20,7 @@ class GroupReportController extends Controller
         $group_id = filled($request->group_id) ? $request->group_id : false;
         $student_id = filled($request->student_id) ? $request->student_id : false;
 
-        $data = DB::table('exam_results')
+        $data = ExamResult::query() // DB::table('exam_results')
             ->join('students', 'exam_results.student_id', '=', 'students.id')
             ->join('exams', 'exam_results.exam_id', '=', 'exams.id')
             ->join('groups', 'exams.group_id', '=', 'groups.id')
@@ -66,7 +69,7 @@ class GroupReportController extends Controller
         $group_id = filled($request->group_id) ? $request->group_id : false;
         $student_id = filled($request->student_id) ? $request->student_id : false;
 
-        $students = DB::table('enrollments')
+        $students = Enrollment::query() // DB::table('enrollments')
             ->join('students', 'enrollments.student_id', '=', 'students.id')
             ->join('groups', 'enrollments.group_id', '=', 'groups.id')
             ->select(
@@ -109,7 +112,7 @@ class GroupReportController extends Controller
         $group_id = filled($request->group_id) ? $request->group_id : false;
         $student_id = filled($request->student_id) ? $request->student_id : false;
 
-        $query = DB::table('groups')
+        $query = Group::query() // DB::table('groups')
             ->leftJoin('attendances', 'attendances.group_id', '=', 'groups.id')
             ->select(
                 'groups.id as group_id',
@@ -166,7 +169,7 @@ class GroupReportController extends Controller
         $group_id = filled($request->group_id) ? $request->group_id : false;
         $student_id = filled($request->student_id) ? $request->student_id : false;
 
-        $query = DB::table('groups')
+        $query = Group::query() // DB::table('groups')
             ->leftJoin('attendances', 'attendances.group_id', '=', 'groups.id')
             ->select(
                 'groups.id as group_id',
@@ -224,7 +227,7 @@ class GroupReportController extends Controller
         $group_id = filled($request->group_id) ? $request->group_id : false;
         $student_id = filled($request->student_id) ? $request->student_id : false;
 
-        $query = DB::table('groups')
+        $query = Group::query() // DB::table('groups')
             ->leftJoin('attendances', 'attendances.group_id', '=', 'groups.id')
             ->select(
                 'groups.id as group_id',

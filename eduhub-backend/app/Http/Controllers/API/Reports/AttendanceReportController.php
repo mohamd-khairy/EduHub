@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Reports;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class AttendanceReportController extends Controller
         $student_id = filled($request->student_id) ? $request->student_id : false;
         $group_id = filled($request->group_id) ? $request->group_id : false;
 
-        $query = DB::table('students')
+        $query = Student::query() // DB::table('students')
             ->leftJoin('attendances', 'attendances.student_id', '=', 'students.id')
             ->select(
                 'students.name as student_name',
@@ -68,7 +69,7 @@ class AttendanceReportController extends Controller
         $student_id = filled($request->student_id) ? $request->student_id : null;
         $group_id = filled($request->group_id) ? $request->group_id : null;
 
-        $query = DB::table('attendances')
+        $query = Attendance::query() // DB::table('attendances')
             ->selectRaw("DATE_FORMAT(date, '%Y-%m') as month")
             ->selectRaw('COUNT(*) as total_sessions')
             ->selectRaw("SUM(CASE WHEN status = 'حضر' THEN 1 ELSE 0 END) as actual_attendance")
@@ -122,7 +123,7 @@ class AttendanceReportController extends Controller
         $student_id = filled($request->student_id) ? $request->student_id : null;
         $group_id = filled($request->group_id) ? $request->group_id : null;
 
-        $query = DB::table('groups')
+        $query = Group::query() // DB::table('groups')
             ->leftJoin('attendances', 'attendances.group_id', '=', 'groups.id')
             ->select(
                 'groups.id',
@@ -175,7 +176,7 @@ class AttendanceReportController extends Controller
         $student_id = filled($request->student_id) ? $request->student_id : null;
         $limit = $request->limit ?? 10;
 
-        $query = DB::table('students')
+        $query = Student::query() // DB::table('students')
             ->join('attendances', 'attendances.student_id', '=', 'students.id')
             ->join('groups', 'attendances.group_id', '=', 'groups.id')
             ->select(

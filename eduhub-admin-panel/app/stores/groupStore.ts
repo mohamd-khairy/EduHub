@@ -31,7 +31,7 @@ export const useGroupStore = defineStore("group", () => {
     items.value = []; // clear current items
 
     const res = await api(
-      `group?relations=teacher,course,schedules,students.parent,exams&page=${page}`
+      `group?relations=teacher,course,schedules,students.parent,exams,studyYear&page=${page}`
     );
     const json = await res.json();
 

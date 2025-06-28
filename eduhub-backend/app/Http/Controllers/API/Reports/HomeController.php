@@ -120,17 +120,9 @@ class HomeController extends Controller
                 $start_date->addMonth();
             }
         }
-        // else {
-        //     // If no start and end dates are provided, generate all 12 months of the current year
-        //     $currentYear = now()->year;
-        //     $months = [];
-        //     for ($month = 1; $month <= 12; $month++) {
-        //         $months[] = $currentYear . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
-        //     }
-        // }
 
         // Query to get the count of students grouped by month
-        $students = DB::table('students')
+        $students = Student::query() // DB::table('students')
             ->selectRaw("DATE_FORMAT(students.created_at, '%Y-%m') as month, COUNT(*) as count")
             ->leftJoin('enrollments', 'students.id', '=', 'enrollments.student_id') // Join the enrollments table
             ->when($group_id, fn($q) => $q->where('enrollments.group_id', $group_id))  // Filter by group_id if provided
@@ -171,7 +163,7 @@ class HomeController extends Controller
         $group_id = $request->group_id ?? null;
         $student_id = $request->student_id ?? null;
 
-        $query = DB::table('groups')
+        $query = Group::query() //DB::table('groups')
             ->leftJoin('exams', 'exams.group_id', '=', 'groups.id')
             ->leftJoin('exam_results', 'exam_results.exam_id', '=', 'exams.id')
             ->select(
@@ -189,7 +181,8 @@ class HomeController extends Controller
         $results = $query->get();
 
         // Get all group names to ensure every group is returned in the result
-        $allGroups = DB::table('groups')->pluck('name')->toArray();
+        $allGroups = Group::query() // DB::table('groups')
+            ->pluck('name')->toArray();
 
         // Prepare labels and data
         $labels = [];

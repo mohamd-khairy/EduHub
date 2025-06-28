@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API\Reports;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
+use App\Models\ExamResult;
 use App\Models\Group;
 use App\Models\Student;
 use Carbon\Carbon;
@@ -73,7 +75,7 @@ class StudentReportController extends Controller
         $startDate = $request->input('start');
         $endDate = $request->input('end');
 
-        $query = DB::table('exam_results')
+        $query = ExamResult::query() // DB::table('exam_results')
             ->select(
                 DB::raw("DATE_FORMAT(exam_results.created_at, '%Y-%m') as month"),
                 DB::raw("SUM(score) as score")
@@ -133,7 +135,7 @@ class StudentReportController extends Controller
         $startDate = $request->input('start');
         $endDate = $request->input('end');
 
-        $query = DB::table('exam_results')
+        $query = ExamResult::query() // DB::table('exam_results')
             ->join('exams', 'exam_results.exam_id', '=', 'exams.id')
             ->select(
                 'exams.title as exam_name',
@@ -191,7 +193,7 @@ class StudentReportController extends Controller
         $startDate = $request->input('start');
         $endDate = $request->input('end');
 
-        $query = DB::table('attendances')
+        $query = Attendance::query() // DB::table('attendances')
             ->select(
                 DB::raw("SUM(CASE WHEN status = 'حضر' THEN 1 ELSE 0 END) as present_count"),
                 DB::raw("SUM(CASE WHEN status = 'غائب' THEN 1 ELSE 0 END) as absent_count"),

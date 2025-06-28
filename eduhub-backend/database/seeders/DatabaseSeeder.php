@@ -2,24 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\ParentModel;
 use App\Models\Permission;
-use App\Models\Student;
-use App\Models\StudyYear;
 use App\Models\User;
 use App\Services\RoleService;
-use Database\Factories\AttendanceFactory;
 use Database\Factories\CourseFactory;
-use Database\Factories\EnrollmentFactory;
-use Database\Factories\ExamFactory;
-use Database\Factories\ExamResultFactory;
 use Database\Factories\GroupFactory;
 use Database\Factories\ParentModelFactory;
-use Database\Factories\PaymentFactory;
-use Database\Factories\ScheduleFactory;
 use Database\Factories\StudentFactory;
 use Database\Factories\StudyYearFactory;
-use Database\Factories\TeacherAttendanceFactory;
 use Database\Factories\TeacherFactory;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Seeder;
@@ -53,8 +43,8 @@ class DatabaseSeeder extends Seeder
         UserFactory::new()->count(10)->create();
         CourseFactory::new()->count(10)->create();
         TeacherFactory::new()->count(10)->create();
-        ParentModelFactory::new()->count(10)->create();
         GroupFactory::new()->count(7)->create();
+        ParentModelFactory::new()->count(10)->create();
         // ScheduleFactory::new()->count(10)->create();
         StudentFactory::new()->count(20)->create();
         // PaymentFactory::new()->count(10)->create();

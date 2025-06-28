@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Reports;
 
 use App\Http\Controllers\Controller;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,7 @@ class PaymentReportController extends Controller
         $group_id = filled($request->group_id) ? $request->group_id : null;
         $student_id = filled($request->student_id) ? $request->student_id : null;
 
-        $query = DB::table('payments')
+        $query = Payment::query() // DB::table('payments')
             ->join('students', 'payments.student_id', '=', 'students.id')
             ->select(
                 'students.name as student_name',
@@ -56,7 +57,7 @@ class PaymentReportController extends Controller
         $group_id = filled($request->group_id) ? $request->group_id : null;
         $student_id = filled($request->student_id) ? $request->student_id : null;
 
-        $query = DB::table('payments')
+        $query = Payment::query() // DB::table('payments')
             ->join('students', 'payments.student_id', '=', 'students.id')
             ->when($group_id, function ($q) {
                 $q->join('enrollments', 'enrollments.student_id', '=', 'students.id')
@@ -100,7 +101,7 @@ class PaymentReportController extends Controller
         $group_id = $request->group_id ?? null;
         $student_id = $request->student_id ?? null;
 
-        $query = DB::table('payments')
+        $query = Payment::query() //DB::table('payments')
             ->join('students', 'payments.student_id', '=', 'students.id')
             ->when($group_id, function ($q) {
                 $q->join('enrollments', 'enrollments.student_id', '=', 'students.id')
@@ -141,7 +142,7 @@ class PaymentReportController extends Controller
         $group_id = $request->group_id ?? null;
         $student_id = $request->student_id ?? null;
 
-        $query = DB::table('payments')
+        $query = Payment::query() // DB::table('payments')
             ->join('students', 'payments.student_id', '=', 'students.id')
             ->join('enrollments', 'enrollments.student_id', '=', 'students.id')
             ->join('groups', 'enrollments.group_id', '=', 'groups.id')

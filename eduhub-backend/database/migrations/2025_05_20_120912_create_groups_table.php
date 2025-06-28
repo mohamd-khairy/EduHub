@@ -17,6 +17,9 @@ return new class extends Migration
             $table->unsignedBigInteger('teacher_id');
             $table->unsignedBigInteger('course_id');
             $table->integer('max_students')->default(30);
+            $table->foreignId('study_year_id')->constrained();
+            $table->boolean('status')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

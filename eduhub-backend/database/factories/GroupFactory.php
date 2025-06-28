@@ -7,6 +7,7 @@ use App\Models\Exam;
 use App\Models\ExamResult;
 use App\Models\Group;
 use App\Models\Schedule;
+use App\Models\StudyYear;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -28,6 +29,8 @@ class GroupFactory extends Factory
             'teacher_id' => Teacher::inRandomOrder()->first()?->id ?? Teacher::factory(),
             'course_id' => Course::inRandomOrder()->first()?->id ?? Course::factory(),
             'max_students' => $this->faker->numberBetween(15, 50),
+            'status' => true,
+            'study_year_id' => StudyYear::where('status', 1)->value('id'),
         ];
     }
 

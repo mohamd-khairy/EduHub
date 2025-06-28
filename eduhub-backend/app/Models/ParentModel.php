@@ -29,8 +29,10 @@ class ParentModel extends Authenticatable implements Auditable
         static::addGlobalScope(new RoleAccessScope);
 
         static::created(function ($parent) {
-            $parent->password = Hash::make($parent->email);
-            $parent->saveQuietly(); // avoid triggering events again
+            if (! $parent->password) {
+                $parent->password = Hash::make($parent->email);
+                $parent->saveQuietly(); // avoid triggering events again
+            }
             if (! $parent->hasRole('parent')) {
                 $parent->assignRole('parent');
             }
@@ -39,6 +41,6 @@ class ParentModel extends Authenticatable implements Auditable
 
     public function students()
     {
-        return $this->hasMany(Student::class , 'parent_id');
+        return $this->hasMany(Student::class, 'parent_id');
     }
 }

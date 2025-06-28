@@ -124,7 +124,14 @@ export const useLinksStore = defineStore("links", () => {
         ],
       },
     ],
-    [
+    [ {
+        class: "text-xl",
+        label: "السنوات الدراسية",
+        icon: "i-lucide-users",
+        to: "/studyyears",
+        permission: "read-studyyear",
+        onSelect: () => (open.value = false),
+      },
       {
         class: "text-xl",
         label: "الموظفين",

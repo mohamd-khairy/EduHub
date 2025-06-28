@@ -288,9 +288,9 @@ watch(
           td: 'border-b border-default',
         }" />
 
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
-        <div class="flex items-center gap-1.5" dir="rtl">
-          <UPagination dir="rtl" :total="userStore?.pagination?.total" :items-per-page="userStore?.pagination?.pageSize"
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
+        <div class="flex items-center gap-1.5" dir="ltr">
+          <UPagination dir="ltr" :total="userStore?.pagination?.total" :items-per-page="userStore?.pagination?.pageSize"
             :default-page="userStore?.pagination?.page" @update:page="(p) => userStore.loadAllUsers(p)" />
         </div>
       </div>

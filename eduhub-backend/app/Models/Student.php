@@ -53,8 +53,10 @@ class Student extends Authenticatable implements Auditable
         static::addGlobalScope(new RoleAccessScope);
 
         static::created(function ($student) {
-            $student->password = Hash::make($student->email);
-            $student->saveQuietly(); // avoid triggering events again
+            if (! $student->password) {
+                $student->password = Hash::make($student->email);
+                $student->saveQuietly(); // avoid triggering events again
+            }
             if (! $student->hasRole('student')) {
                 $student->assignRole('student');
             }

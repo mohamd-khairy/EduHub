@@ -71,8 +71,8 @@ abstract class Controller
 
             return  $this->success($data);
         } catch (\Throwable $th) {
-            //throw $th;
-            return  $this->fail([]);
+            throw $th;
+            // return  $this->fail([]);
         }
     }
 
@@ -95,8 +95,8 @@ abstract class Controller
 
             return $this->success($data);
         } catch (\Throwable $th) {
-            //throw $th;
-            return  $this->fail([]);
+            throw $th;
+            // return  $this->fail([]);
         }
     }
 
@@ -118,8 +118,8 @@ abstract class Controller
 
             return  $this->success($data);
         } catch (\Throwable $th) {
-            //throw $th;
-            return  $this->fail([]);
+            throw $th;
+            // return  $this->fail([]);
         }
     }
 
@@ -143,8 +143,8 @@ abstract class Controller
 
             return $this->success($model);
         } catch (\Throwable $th) {
-            //throw $th;
-            return  $this->fail([]);
+            throw $th;
+            // return  $this->fail([]);
         }
     }
 
@@ -160,8 +160,8 @@ abstract class Controller
 
             return  $this->success($data);
         } catch (\Throwable $th) {
-            // throw $th;
-            return  $this->fail([]);
+            throw $th;
+            // return  $this->fail([]);
         }
     }
 
@@ -174,8 +174,8 @@ abstract class Controller
 
             return  $this->success($data);
         } catch (\Throwable $th) {
-            // throw $th;
-            return  $this->fail([]);
+            throw $th;
+            // return  $this->fail([]);
         }
     }
 

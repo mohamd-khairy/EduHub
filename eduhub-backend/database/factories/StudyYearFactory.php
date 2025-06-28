@@ -17,10 +17,10 @@ class StudyYearFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' =>  ' السنة الدراسية لعام ' . $this->faker->year() . ' الترم الاول',
             'start_date' => '2025-01-01',
-            'end_date' => now()->format('Y-m-d'),
-            'status' => $this->faker->boolean(),
+            'end_date' => '2025-06-29',
+            'status' => 1,
         ];
     }
 }
