@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TableExport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 abstract class Controller
 {
@@ -12,7 +14,8 @@ abstract class Controller
     public function index(Request $request)
     {
         try {
-            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
+            $model_name = ucfirst(request()->segment(2));
+            $model = app('App\\Models\\' . $model_name);
 
             //relations
             if ($request->relations)
@@ -36,6 +39,10 @@ abstract class Controller
                         $model = $model->where($column, 'like', '%' . $value . '%');
                     }
                 }
+
+            if (request('export', null) == 1 && $model->count() > 0) {
+                return Excel::download(new TableExport($model->get()), $model_name . '-' . date('Y-m-d-H-i-s') . '.xlsx');
+            }
 
             $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate(request('per_page', 10));
 

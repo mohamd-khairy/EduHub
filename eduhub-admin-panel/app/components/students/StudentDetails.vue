@@ -57,7 +57,7 @@ const links = computed(() => {
   ];
 
   // Filter the links based on user's permissions
-  const filteredLinks = allLinks.filter(link => {
+  const filteredLinks = allLinks.filter((link) => {
     // Check if user has the permission for the link
     return authStore.permissions.includes(link.permission);
   });
@@ -65,7 +65,6 @@ const links = computed(() => {
   // Return the filtered links
   return [filteredLinks]; // Returning the links wrapped in an array, similar to your original structure
 });
-
 
 function handleUpdateStudent(updatedStudent: object) {
   emit("updateStudent", updatedStudent);
@@ -80,8 +79,20 @@ function handleAddStudent(addStudent: object) {
 <template>
   <UDashboardPanel id="inbox-2">
     <template #header>
-      <UDashboardNavbar :title="`تفاصيل الطالب :  ${student?.name || ''}`" :toggle="true">
+      <UDashboardNavbar
+        :title="`تفاصيل الطالب :  ${student?.name || ''}`"
+        :toggle="true"
+      >
         <template #right>
+          <UButton
+            label="تصدير الطلاب"
+            loading-auto
+            color="success"
+            variant="outline"
+            trailing-icon="i-lucide-file-spreadsheet"
+            v-if="authStore.hasPermission('read-student')"
+            @click="exportToExcel('student')"
+          />
           <AddModal @addStudent="handleAddStudent" />
         </template>
       </UDashboardNavbar>
@@ -91,7 +102,9 @@ function handleAddStudent(addStudent: object) {
       </UDashboardToolbar>
     </template>
     <template #body>
-      <div class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-4xl mx-auto">
+      <div
+        class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-4xl mx-auto"
+      >
         <NuxtPage :student="student" @updateStudent="handleUpdateStudent" />
       </div>
     </template>

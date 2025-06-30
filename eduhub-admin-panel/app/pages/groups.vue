@@ -296,6 +296,16 @@ onMounted(() => {
             </UButton>
           </DeleteModal>
 
+          <UButton
+            label="تصدير"
+            loading-auto
+            color="success"
+            variant="outline"
+            trailing-icon="i-lucide-file-spreadsheet"
+            v-if="authStore.hasPermission('read-group')"
+            @click="exportToExcel('group')"
+          />
+
           <UDropdownMenu
             :items="table?.tableApi
             ?.getAllColumns()

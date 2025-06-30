@@ -302,6 +302,16 @@ const columns: TableColumn[] = [
             </UButton>
           </DeleteModal>
 
+          <UButton
+            label="تصدير"
+            loading-auto
+            color="success"
+            variant="outline"
+            trailing-icon="i-lucide-file-spreadsheet"
+            v-if="authStore.hasPermission('read-payment')"
+            @click="exportToExcel('payment')"
+          />
+
           <UDropdownMenu
             :items="table?.tableApi
             ?.getAllColumns()

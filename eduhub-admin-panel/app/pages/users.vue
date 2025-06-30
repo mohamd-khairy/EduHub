@@ -38,10 +38,7 @@ onMounted(async () => {
 });
 
 function getRowItems(row: any) {
-  const items = [
-    { type: "label", label: "الاجراءات" },
-    { type: "separator" },
-  ];
+  const items = [{ type: "label", label: "الاجراءات" }, { type: "separator" }];
   if (authStore.hasPermission("update-user")) {
     items.push({
       label: "تعديل الموظف",
@@ -74,12 +71,12 @@ const columns: TableColumn<object>[] = [
       h(UCheckbox, {
         modelValue:
           userStore.selectedIds.length > 0 &&
-            userStore.selectedIds.length ===
+          userStore.selectedIds.length ===
             table.getFilteredRowModel().rows.length
             ? true
             : userStore.selectedIds?.length > 0
-              ? "indeterminate"
-              : false,
+            ? "indeterminate"
+            : false,
         "onUpdate:modelValue": (value: boolean | "indeterminate") => {
           if (value) {
             // Select all visible rows
@@ -233,24 +230,40 @@ watch(
         <template #right>
           <AddModal />
 
-          <DeleteModal :count="userStore.selectedIds.length" v-model:open="userStore.deleteModalOpen" />
+          <DeleteModal
+            :count="userStore.selectedIds.length"
+            v-model:open="userStore.deleteModalOpen"
+          />
 
-          <EditModal :item="userStore.editItem" v-model:open="userStore.editModalOpen" />
+          <EditModal
+            :item="userStore.editItem"
+            v-model:open="userStore.editModalOpen"
+          />
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput :model-value="(table?.tableApi?.getColumn('الاسم')?.getFilterValue() as string)" class="max-w-sm"
-          icon="i-lucide-search" placeholder="ابحث ..." @update:model-value="
+        <UInput
+          :model-value="(table?.tableApi?.getColumn('الاسم')?.getFilterValue() as string)"
+          class="max-w-sm"
+          icon="i-lucide-search"
+          placeholder="ابحث ..."
+          @update:model-value="
             table?.tableApi?.getColumn('الاسم')?.setFilterValue($event)
-            " />
+          "
+        />
 
         <div class="flex flex-wrap items-center gap-1.5">
           <DeleteModal :count="userStore.selectedIds.length">
-            <UButton v-if="userStore.selectedIds.length" label="حذف" color="error" variant="subtle"
-              icon="i-lucide-trash">
+            <UButton
+              v-if="userStore.selectedIds.length"
+              label="حذف"
+              color="error"
+              variant="subtle"
+              icon="i-lucide-trash"
+            >
               <template #trailing>
                 <UKbd>
                   {{ userStore.selectedIds.length }}
@@ -259,7 +272,18 @@ watch(
             </UButton>
           </DeleteModal>
 
-          <UDropdownMenu :items="table?.tableApi
+          <UButton
+            label="تصدير"
+            loading-auto
+            color="success"
+            variant="outline"
+            trailing-icon="i-lucide-file-spreadsheet"
+            v-if="authStore.hasPermission('read-user')"
+            @click="exportToExcel('user')"
+          />
+
+          <UDropdownMenu
+            :items="table?.tableApi
             ?.getAllColumns()
             .filter((column) => column.getCanHide())
             .map((column) => ({
@@ -273,25 +297,48 @@ watch(
                 e?.preventDefault()
               }
             }))
-            " :content="{ align: 'end' }">
-            <UButton label="الاعمدة" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
+            "
+            :content="{ align: 'end' }"
+          >
+            <UButton
+              label="الاعمدة"
+              color="neutral"
+              variant="outline"
+              trailing-icon="i-lucide-settings-2"
+            />
           </UDropdownMenu>
         </div>
       </div>
 
-      <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-        v-model:pagination="userStore.pagination" class="shrink-0" :data="items" :columns="columns" :ui="{
+      <UTable
+        ref="table"
+        v-model:column-filters="columnFilters"
+        v-model:column-visibility="columnVisibility"
+        v-model:pagination="userStore.pagination"
+        class="shrink-0"
+        :data="items"
+        :columns="columns"
+        :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
           th: 'py-2  border-y border-default ',
           td: 'border-b border-default',
-        }" />
+        }"
+      />
 
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
+      <div
+        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
+        dir="ltr"
+      >
         <div class="flex items-center gap-1.5" dir="ltr">
-          <UPagination dir="ltr" :total="userStore?.pagination?.total" :items-per-page="userStore?.pagination?.pageSize"
-            :default-page="userStore?.pagination?.page" @update:page="(p) => userStore.loadAllUsers(p)" />
+          <UPagination
+            dir="ltr"
+            :total="userStore?.pagination?.total"
+            :items-per-page="userStore?.pagination?.pageSize"
+            :default-page="userStore?.pagination?.page"
+            @update:page="(p) => userStore.loadAllUsers(p)"
+          />
         </div>
       </div>
     </template>

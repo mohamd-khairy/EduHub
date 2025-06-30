@@ -347,12 +347,18 @@ const markAll = async (status) => {
 
 const exportAttendance = () => {
   // In a real app, this would generate and download a file
-  console.log("Exporting attendance data:", students.value);
-  addActivity(
-    "تم تصدير بيانات الحضور",
-    "i-heroicons-document-arrow-down",
-    "text-blue-500"
-  );
+  const filters = {
+    group_id: selectedGroupTab.value,
+    schedule_id: selectedScheduleTab.value,
+    date: selectedHistoryDate.value
+  }
+  exportToExcel("attendance" , filters);
+
+  toast.add({
+    title: "نجاح",
+    description: `تم تصدير بيانات الحضور`,
+    color: "success",
+  });
 };
 </script>
 <template>
@@ -374,12 +380,24 @@ const exportAttendance = () => {
     </template>
 
     <template #body>
-      <UTabs v-if="items.length > 0" v-model="selectedGroupTab" :items="items" size="xl">
+      <UTabs
+        v-if="items.length > 0"
+        v-model="selectedGroupTab"
+        :items="items"
+        size="xl"
+      >
         <template #content="{ item, index }">
-          <UTabs v-model="selectedScheduleTab" :items="item.current_schedules" variant="link" size="xl">
+          <UTabs
+            v-model="selectedScheduleTab"
+            :items="item.current_schedules"
+            variant="link"
+            size="xl"
+          >
             <template #content="{ item: schedule }">
-              <main v-if="!groupStore.isLoading"
-                class="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6 text-base">
+              <main
+                v-if="!groupStore.isLoading"
+                class="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6 text-base"
+              >
                 <!-- Main Content Area -->
                 <div class="lg:col-span-2 space-y-6">
                   <!-- Manual Entry Card -->
@@ -390,34 +408,79 @@ const exportAttendance = () => {
                           الإدخال اليدوي للحضور
                         </h2>
                         <div class="flex items-center gap-2">
-                          <UBadge color="green" variant="subtle" class="text-base">
+                          <UBadge
+                            color="green"
+                            variant="subtle"
+                            class="text-base"
+                          >
                             {{ presentCount }} / {{ students.length }}
                           </UBadge>
-                          <UButton @click="exportAttendance" icon="i-heroicons-arrow-down-tray" color="gray"
-                            variant="ghost" size="xl" class="text-lg" />
+                          <UButton
+                            @click="exportAttendance"
+                            icon="i-heroicons-arrow-down-tray"
+                            color="gray"
+                            variant="ghost"
+                            size="xl"
+                            class="text-lg"
+                            loading-auto
+                          />
                         </div>
                       </div>
                     </template>
 
                     <!-- Search and Filters -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                      <UInput v-model="searchQuery" icon="i-heroicons-magnifying-glass"
-                        placeholder="ابحث بالاسم أو الرقم..." size="xl" class="md:col-span-1 text-lg" />
-                      <UButton @click="markAll('حضر')" color="success" variant="outline" icon="i-heroicons-check-circle"
-                        label="تحديد الكل حضر" block size="md" class="text-lg" />
-                      <UButton @click="markAll('متأخر')" color="warning" variant="outline" icon="i-heroicons-x-circle"
-                        label="تحديد الكل متأخر" block size="md" class="text-lg" />
-                      <UButton @click="markAll('غائب')" color="error" variant="outline" icon="i-heroicons-x-circle"
-                        label="تحديد الكل غائب" block size="md" class="text-lg" />
+                      <UInput
+                        v-model="searchQuery"
+                        icon="i-heroicons-magnifying-glass"
+                        placeholder="ابحث بالاسم أو الرقم..."
+                        size="xl"
+                        class="md:col-span-1 text-lg"
+                      />
+                      <UButton
+                        @click="markAll('حضر')"
+                        color="success"
+                        variant="outline"
+                        icon="i-heroicons-check-circle"
+                        label="تحديد الكل حضر"
+                        block
+                        size="md"
+                        class="text-lg"
+                      />
+                      <UButton
+                        @click="markAll('متأخر')"
+                        color="warning"
+                        variant="outline"
+                        icon="i-heroicons-x-circle"
+                        label="تحديد الكل متأخر"
+                        block
+                        size="md"
+                        class="text-lg"
+                      />
+                      <UButton
+                        @click="markAll('غائب')"
+                        color="error"
+                        variant="outline"
+                        icon="i-heroicons-x-circle"
+                        label="تحديد الكل غائب"
+                        block
+                        size="md"
+                        class="text-lg"
+                      />
                     </div>
 
                     <!-- Student Table -->
                     <div class="border rounded-lg overflow-hidden text-lg">
-                      <UTable :columns="columns" :data="paginatedStudents" :ui="{
-                        th: { base: 'whitespace-nowrap bg-gray-50 text-lg' },
-                        td: { base: 'max-w-[200px] text-lg' },
-                        divide: 'divide-gray-200',
-                      }" class="w-full">
+                      <UTable
+                        :columns="columns"
+                        :data="paginatedStudents"
+                        :ui="{
+                          th: { base: 'whitespace-nowrap bg-gray-50 text-lg' },
+                          td: { base: 'max-w-[200px] text-lg' },
+                          divide: 'divide-gray-200',
+                        }"
+                        class="w-full"
+                      >
                       </UTable>
                     </div>
 
@@ -428,8 +491,13 @@ const exportAttendance = () => {
                         {{ filteredStudents.length }} طالب
                       </div>
 
-                      <UPagination dir="ltr" :total="filteredStudents.length" :items-per-page="pageCount"
-                        :default-page="page" @update:page="(p) => updatePage(p)" />
+                      <UPagination
+                        dir="ltr"
+                        :total="filteredStudents.length"
+                        :items-per-page="pageCount"
+                        :default-page="page"
+                        @update:page="(p) => updatePage(p)"
+                      />
                     </div>
                   </UCard>
                 </div>
@@ -445,7 +513,10 @@ const exportAttendance = () => {
                     <div class="space-y-4">
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                          <UIcon name="i-heroicons-user-group" class="w-6 h-6 text-gray-500" />
+                          <UIcon
+                            name="i-heroicons-user-group"
+                            class="w-6 h-6 text-gray-500"
+                          />
                           <span>إجمالي الطلاب</span>
                         </div>
                         <span class="font-medium">{{ students.length }}</span>
@@ -453,26 +524,41 @@ const exportAttendance = () => {
 
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                          <UIcon name="i-heroicons-check-circle" class="w-6 h-6 text-green-500" />
+                          <UIcon
+                            name="i-heroicons-check-circle"
+                            class="w-6 h-6 text-green-500"
+                          />
                           <span>الحضور</span>
                         </div>
-                        <span class="font-medium text-green-600">{{ presentCount }} ({{ presentPercentage }}%)</span>
+                        <span class="font-medium text-green-600"
+                          >{{ presentCount }} ({{ presentPercentage }}%)</span
+                        >
                       </div>
 
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                          <UIcon name="i-heroicons-x-circle" class="w-6 h-6 text-red-500" />
+                          <UIcon
+                            name="i-heroicons-x-circle"
+                            class="w-6 h-6 text-red-500"
+                          />
                           <span>الغياب</span>
                         </div>
-                        <span class="font-medium text-red-600">{{ absentCount }} ({{ absentPercentage }}%)</span>
+                        <span class="font-medium text-red-600"
+                          >{{ absentCount }} ({{ absentPercentage }}%)</span
+                        >
                       </div>
 
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                          <UIcon name="i-heroicons-clock" class="w-6 h-6 text-amber-500" />
+                          <UIcon
+                            name="i-heroicons-clock"
+                            class="w-6 h-6 text-amber-500"
+                          />
                           <span>المتأخرون</span>
                         </div>
-                        <span class="font-medium text-amber-600">{{ lateCount }} ({{ latePercentage }}%)</span>
+                        <span class="font-medium text-amber-600"
+                          >{{ lateCount }} ({{ latePercentage }}%)</span
+                        >
                       </div>
                     </div>
                   </UCard>
@@ -486,25 +572,43 @@ const exportAttendance = () => {
                       </div>
                     </template>
                     <div class="relative">
-                      <div class="border-2 border-dashed border-gray-300 rounded-xl aspect-square flex items-center justify-center bg-gray-50 mb-4
-                        dark:bg-(--chip-dark) dark:border-gray-600" :class="{
+                      <div
+                        class="border-2 border-dashed border-gray-300 rounded-xl aspect-square flex items-center justify-center bg-gray-50 mb-4 dark:bg-(--chip-dark) dark:border-gray-600"
+                        :class="{
                           'border-green-500': scanSuccess,
                           'border-red-500': scanError,
-                        }">
+                        }"
+                      >
                         <template v-if="!isScanning">
                           <div class="text-center p-4">
-                            <UIcon name="i-heroicons-qr-code" class="w-20 h-20 text-gray-400 mb-4" />
-                            <p class="text-lg text-gray-500 mb-4" style="cursor: pointer" @click="startScanner">
+                            <UIcon
+                              name="i-heroicons-qr-code"
+                              class="w-20 h-20 text-gray-400 mb-4"
+                            />
+                            <p
+                              class="text-lg text-gray-500 mb-4"
+                              style="cursor: pointer"
+                              @click="startScanner"
+                            >
                               اضغط لبدء المسح الضوئي
                             </p>
                           </div>
                         </template>
                         <template v-else>
-                          <div class="relative w-full h-full flex items-center justify-center">
-                            <div class="absolute inset-0 flex items-center justify-center">
-                              <div class="w-64 h-64 border-4 border-green-500 rounded-lg animate-pulse"></div>
+                          <div
+                            class="relative w-full h-full flex items-center justify-center"
+                          >
+                            <div
+                              class="absolute inset-0 flex items-center justify-center"
+                            >
+                              <div
+                                class="w-64 h-64 border-4 border-green-500 rounded-lg animate-pulse"
+                              ></div>
                             </div>
-                            <UIcon name="i-heroicons-qr-code" class="w-32 h-32 text-green-500 opacity-20" />
+                            <UIcon
+                              name="i-heroicons-qr-code"
+                              class="w-32 h-32 text-green-500 opacity-20"
+                            />
                           </div>
                         </template>
                       </div>
@@ -513,11 +617,17 @@ const exportAttendance = () => {
                 </div>
               </main>
 
-              <div v-else class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+              <div
+                v-else
+                class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+              >
                 <span
-                  class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100">
+                  class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"
+                >
                 </span>
-                <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">
+                  جاري تحميل البيانات...
+                </p>
               </div>
             </template>
           </UTabs>

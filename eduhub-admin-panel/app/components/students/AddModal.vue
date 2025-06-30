@@ -114,7 +114,7 @@ function onFileClick() {
       color="neutral"
       icon="i-lucide-plus"
       dir="rtl"
-      v-if="authStore.hasPermission('create-student')" 
+      v-if="authStore.hasPermission('create-student')"
     />
 
     <template #body dir="rtl">
