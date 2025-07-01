@@ -30,4 +30,9 @@ class StudyYear extends Model
     {
         return $this->id;
     }
+
+    public static function current()
+    {
+        return self::where('status', 1)->first()?->id ?? null;
+    }
 }

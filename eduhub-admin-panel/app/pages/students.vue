@@ -140,6 +140,10 @@ async function handleAddStudent(addStudent: object) {
     router.push(`/students/${selectedStudent.value.id}`);
   }
 }
+
+function onAddStudent() {
+  isMailPanelOpen.value = true;
+}
 </script>
 
 <template>
@@ -206,7 +210,7 @@ async function handleAddStudent(addStudent: object) {
     </div>
 
     <!-- Action Button -->
-    <UButton
+    <!-- <UButton
       label="إضافة طالب"
       color="primary"
       icon="i-lucide-plus"
@@ -214,7 +218,9 @@ async function handleAddStudent(addStudent: object) {
       size="lg"
       class="mt-2"
       v-if="authStore.permissions.includes('create-student')"
-    />
+    /> -->
+
+    <StudentsAddModal @addStudent="handleAddStudent" />
   </div>
 
   <ClientOnly>

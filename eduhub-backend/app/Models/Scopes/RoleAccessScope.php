@@ -2,6 +2,7 @@
 
 namespace App\Models\Scopes;
 
+use App\Models\StudyYear;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -53,7 +54,7 @@ class RoleAccessScope implements Scope
 
     private function applyEnrollmentFilter(Builder $builder, $user)
     {
-        $builder->whereHas('group');
+        // $builder->whereHas('group', fn($q) => $q->where('study_year_id', StudyYear::current()));
 
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('group', fn($q) => $q->where('teacher_id', $user->id));
@@ -71,7 +72,10 @@ class RoleAccessScope implements Scope
     // All helper functions below are private to encapsulate logic
     private function applyStudentFilter(Builder $builder, $user)
     {
-        $builder->whereHas('enrollments');
+        $builder->where(function ($q) {
+            $q->whereDoesntHave('enrollments')
+                ->orWhereHas('enrollments.group', fn($q) => $q->where('study_year_id', StudyYear::current()));
+        });
 
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('enrollments.group', fn($q) => $q->where('teacher_id', $user->id));

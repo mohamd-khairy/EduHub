@@ -49,7 +49,7 @@ async function onSubmit() {
     student_id: state.student_id?.value,
   }
   examResultStore.addExamResult(payload)
-  toast.add({ title: 'Success', description: `درجة اختبار جديد ${state.exam_id?.label} تم اضافة بنجاح`, color: 'success' })
+  toast.add({ title: 'Success', description: `درجة اختبار درجة جديد ${state.exam_id?.label} تم اضافة بنجاح`, color: 'success' })
   open.value = false
   resetState()
 }
@@ -57,15 +57,15 @@ async function onSubmit() {
 </script>
 
 <template>
-  <UModal v-model:open="open" title="اضافة اختبار" description="إضافة اختبار جديد" dir="rtl">
-    <UButton label="إضافة اختبار جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-examresult')" />
+  <UModal v-model:open="open" title="اضافة اختبار درجة" description="إضافة اختبار درجة جديد" dir="rtl">
+    <UButton label="إضافة اختبار درجة جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-examresult')" />
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">
 
-        <UFormField label="اسم الاختبار" placeholder="اسم الاختبار" name="exam_id">
+        <UFormField label="اسم الاختبار درجة" placeholder="اسم الاختبار درجة" name="exam_id">
           <USelectMenu required dir="rtl" v-model:search-term="searchExamTerm" v-model="state.exam_id"
-            :items="examStore.examOptions" class="w-full" placeholder="اختر الاختبار" :search-input="{
+            :items="examStore.examOptions" class="w-full" placeholder="اختر الاختبار درجة" :search-input="{
               placeholder: 'بحث...',
               icon: 'i-lucide-search'
             }" />

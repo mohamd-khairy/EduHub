@@ -20,9 +20,9 @@ async function onSubmit() {
     name: state.name,
     course_id: state.course_id?.value, // no .value if reactive
     teacher_id: state.teacher_id?.value, // same here
-    schedules: state.schedules
+    schedules: state.schedules,
   };
-  
+
   groupStore.addGroup(payload);
 
   toast.add({
@@ -67,8 +67,8 @@ function resetState() {
 
 const days = [
   "السبت",
-  "الاحد",
-  " الاثنين",
+  "الأحد",
+  " الإثنين",
   "الثلاثاء",
   "الاربعاء",
   "الخميس",
@@ -93,7 +93,12 @@ function removeScheduleItem(index: number) {
     description="إضافة مجموعة جديد"
     dir="rtl"
   >
-    <UButton label="إضافة مجموعة جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-group')"/>
+    <UButton
+      label="إضافة مجموعة جديد"
+      icon="i-lucide-plus"
+      dir="rtl"
+      v-if="authStore.hasPermission('create-group')"
+    />
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">

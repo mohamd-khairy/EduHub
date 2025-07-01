@@ -37,7 +37,7 @@ export const useStudentStore = defineStore("student", () => {
       page = 1; // Reset to first page if params or search are provided
     }
 
-    let url = `student?page=${page}&per_page=${limit}`;
+    let url = `student?page=${page}`;
 
     if (relations) {
       url += `&relations=${relations}`;

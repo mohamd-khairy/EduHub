@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Schedule;
+use App\Models\StudyYear;
 use Carbon\Carbon;
 
 class GroupController extends Controller
@@ -55,6 +56,10 @@ class GroupController extends Controller
         try {
             $inpput = $request->all();
 
+            $studyYear = StudyYear::where('status', 1)->first();
+            if ($studyYear) {
+                $inpput['study_year_id'] = $studyYear->id;
+            }
             $data = Group::create($inpput);
 
             if ($request->schedules) {

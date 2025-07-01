@@ -162,6 +162,7 @@ function onFileClick() {
           placeholder="ولي امر الطالب"
           name="parent_id"
           style="font-size: 18px"
+          class="hidden"
         >
           <USelectMenu
             :items="parentStore.parentOptions"
