@@ -52,7 +52,7 @@ function downloadStudentCardPDF(studentId) {
       <!-- QR Code Section -->
       <div class="qr-code">
         <!-- <h3>QR Code</h3> -->
-        <qrcode :value="qrValue" size="150" />
+        <qrcode :value="qrValue" size="200" />
       </div>
 
       <!-- Print Button -->
@@ -77,7 +77,8 @@ function downloadStudentCardPDF(studentId) {
 }
 
 .card {
-  width: 300px;
+  width: 50%;
+  height: 650px;
   padding: 20px;
   background-color: gray;
   border-radius: 10px;
@@ -118,12 +119,13 @@ function downloadStudentCardPDF(studentId) {
 
 .details p {
   font-size: 14px;
+  padding: 10px;
   color: #000;
 }
 
 /* QR Code section */
 .qr-code {
-  margin-bottom: 20px;
+  margin-bottom: 50px;
 }
 
 /* Print Button */
