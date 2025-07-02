@@ -81,6 +81,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('', [StudentController::class, 'store']);
         Route::get('{id}', [StudentController::class, 'show']);
         Route::post('{id}', [StudentController::class, 'update']);
+        Route::get('/student-card/{id}/pdf', [StudentController::class, 'generatePDF']);
+
     });
     Route::group(['prefix' => 'enrollment'], function () {
         Route::get('/all', [EnrollmentController::class, 'All']);

@@ -54,6 +54,12 @@ const links = computed(() => {
       to: `/students/${studentId.value}/payments`,
       permission: "read-student-payment",
     },
+    {
+      label: "qr",
+      icon: "i-lucide-dollar-sign",
+      to: `/students/${studentId.value}/qr`,
+      permission: "read-student-payment",
+    },
   ];
 
   // Filter the links based on user's permissions

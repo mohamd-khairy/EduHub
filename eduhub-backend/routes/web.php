@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\StudentController;
 use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\Student;
@@ -22,3 +23,7 @@ Route::get('/', function () {
         // ->whereHas('schedules', fn($q) => $q->where('day', (string) get_day_name_by_date('2025-07-21')))
         ->get();
 });
+
+
+Route::get('/student-card/{id}/pdf', [StudentController::class, 'generatePDF'])->name('student-card.pdf');
+Route::get('/student-card/{id}/view', [StudentController::class, 'viewgeneratePDF'])->name('student-card.pdf');

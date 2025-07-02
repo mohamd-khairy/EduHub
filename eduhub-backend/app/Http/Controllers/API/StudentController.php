@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Student;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentController extends Controller
 {
@@ -35,5 +36,25 @@ class StudentController extends Controller
         }
 
         return $this->success($student);
+    }
+
+    public function generatePDF($id)
+    {
+        // Fetch student data from the database
+        $student = Student::findOrFail($id);
+
+        // Return PDF as a response, rendered from a Blade view
+        $pdf = Pdf::loadView('student-card', compact('student'));
+
+        // Download the PDF file
+        return $pdf->download('student-card-' . $student->id . '.pdf');
+    }
+
+    public function viewgeneratePDF($id)
+    {
+        // Fetch student data from the database
+        $student = Student::findOrFail($id);
+
+        return view('student-card', compact('student'));
     }
 }

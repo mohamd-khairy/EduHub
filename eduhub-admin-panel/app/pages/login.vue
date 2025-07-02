@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 dark:bg-(--chip-dark) font-sans antialiased">
     <div class="min-h-screen bg-gray-50 dark:bg-(--chip-dark) flex items-center justify-center px-4">
       <div
-        class="lg:w-[50%] grid grid-cols-1 lg:grid-cols-2 gap-0 bg-white dark:bg-(--chip-dark) rounded-2xl shadow-lg overflow-hidden">
+        class="lg:w-[55%] grid grid-cols-1 lg:grid-cols-2 gap-0 bg-white dark:bg-(--chip-dark) rounded-2xl shadow-lg overflow-hidden">
         <!-- Illustration Section -->
         <div class="hidden lg:flex items-center justify-center bg-white dark:bg-gray-800 p-10">
           <img src="assets/images/agency.png" alt="توضيح" class="w-full max-w-md object-contain"
