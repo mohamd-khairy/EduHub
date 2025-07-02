@@ -38,13 +38,13 @@ class GroupFactory extends Factory
     {
         return $this->afterCreating(function (Group $group) {
             $days = collect([
-                'الأحد',
-                'الإثنين',
-                'الثلاثاء',
-                'الأربعاء',
-                'الخميس',
-                'الجمعة',
-                'السبت'
+                'Sunday',
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday'
             ])->shuffle()->take(3); // Get 3 unique days randomly
 
             foreach ($days as $day) {

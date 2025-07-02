@@ -19,22 +19,14 @@ class ScheduleFactory extends Factory
         return [
             'group_id' => \App\Models\Group::inRandomOrder()->value('id'),
             'day' => [
-                'الأحد',
-                'الإثنين',
-                'الثلاثاء',
-                'الأربعاء',
-                'الخميس',
-                'الجمعة',
-                'السبت'
-            ][array_rand([
-                'الأحد',
-                'الإثنين',
-                'الثلاثاء',
-                'الأربعاء',
-                'الخميس',
-                'الجمعة',
-                'السبت'
-            ])],
+                'Sunday',
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday'
+            ][rand(0, 6)],
             'start_time' => $this->faker->dateTimeBetween('-2 weeks', '+2 weeks')->format('H:i'),
             'end_time' => $this->faker->dateTimeBetween('-2 weeks', '+2 weeks')->format('H:i'),
             'room_id' => 1,
