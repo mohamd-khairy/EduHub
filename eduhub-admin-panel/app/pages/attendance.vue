@@ -3,6 +3,7 @@ definePageMeta({
   permission: "read-attendance",
 });
 import { ref, computed, onMounted } from "vue";
+import { Html5QrcodeScanner } from "html5-qrcode";
 
 const groupStore = useGroupStore();
 const attendanceStore = useAttendanceStore();
@@ -166,33 +167,41 @@ const latePercentage = computed(() => {
 });
 
 const startScanner = () => {
-  isScanning.value = true;
   scanSuccess.value = false;
   scanError.value = false;
-  // Simulate scanning
-  setTimeout(() => {
-    const randomStudent =
-      students.value[Math.floor(Math.random() * students.value.length)];
-    if (Math.random() > 0.2) {
-      // 80% success rate
-      randomStudent.status = "حضر";
-      lastScannedStudent.value = randomStudent.name;
-      scanSuccess.value = true;
-      addActivity(
-        `تم تسجيل حضور ${randomStudent.name}`,
-        "i-heroicons-check-circle",
-        "text-green-500"
-      );
-    } else {
-      scanError.value = true;
-      scanErrorMessage.value = "فشل قراءة QR - حاول مرة أخرى";
-    }
-    isScanning.value = false;
-  }, 1500);
+
+  const scanner = new Html5QrcodeScanner(
+    "reader", // The ID of the div to show the scanner feed
+    {
+      fps: 10, // Frames per second for scanning
+      qrbox: 250, // Size of the scanning box
+      videoConstraints: {
+        facingMode: "environment", // Use the rear camera (set to "user" for front-facing)
+      },
+    },
+    false
+  );
+
+  scanner.render(onScanSuccess, onScanError);
 };
 
-const stopScanner = () => {
-  isScanning.value = false;
+const onScanSuccess = (decodedText, decodedResult) => {
+  const student = students.value.find((s) => s.id == decodedText);
+
+  if (!student) {
+    return;
+  }
+
+  if (!scanSuccess.value) {
+    scanSuccess.value = true;
+
+    markAttendance(student, "حضر");
+  }
+};
+
+// This function is called when an error occurs while scanning
+const onScanError = (errorMessage) => {
+  scanError.value = true;
 };
 
 function getRowItems(row) {
@@ -282,43 +291,9 @@ const columns = [
   },
 ];
 
-// Activity Log
-const recentActivities = ref([
-  {
-    message: "تم تسجيل حضور 25 طالب",
-    time: "منذ 10 دقائق",
-    icon: "i-heroicons-check-circle",
-    color: "text-green-500",
-  },
-  {
-    message: "تم تصدير بيانات الحضور",
-    time: "منذ ساعة",
-    icon: "i-heroicons-document-arrow-down",
-    color: "text-blue-500",
-  },
-  {
-    message: "تم تحديث سجلات 3 طلاب",
-    time: "منذ ساعتين",
-    icon: "i-heroicons-pencil-square",
-    color: "text-amber-500",
-  },
-]);
-
-const addActivity = (message, icon, color) => {
-  recentActivities.value.unshift({
-    message,
-    icon,
-    color,
-    time: "الآن",
-  });
-  if (recentActivities.value.length > 5) {
-    recentActivities.value.pop();
-  }
-};
-
 const markAttendance = async (student, status) => {
   await attendanceStore.addAttendance({
-    student_id: student.id,
+    student_id: student?.id ?? student,
     group_id: selectedGroupTab.value,
     schedule_id: selectedScheduleTab.value,
     status,
@@ -350,9 +325,9 @@ const exportAttendance = () => {
   const filters = {
     group_id: selectedGroupTab.value,
     schedule_id: selectedScheduleTab.value,
-    date: selectedHistoryDate.value
-  }
-  exportToExcel("attendance" , filters);
+    date: selectedHistoryDate.value,
+  };
+  exportToExcel("attendance", filters);
 
   toast.add({
     title: "نجاح",
@@ -592,23 +567,13 @@ const exportAttendance = () => {
                             >
                               اضغط لبدء المسح الضوئي
                             </p>
-                          </div>
-                        </template>
-                        <template v-else>
-                          <div
-                            class="relative w-full h-full flex items-center justify-center"
-                          >
-                            <div
-                              class="absolute inset-0 flex items-center justify-center"
-                            >
+
+                            <div>
                               <div
-                                class="w-64 h-64 border-4 border-green-500 rounded-lg animate-pulse"
+                                id="reader"
+                                style="width: 300px; height: 100%"
                               ></div>
                             </div>
-                            <UIcon
-                              name="i-heroicons-qr-code"
-                              class="w-32 h-32 text-green-500 opacity-20"
-                            />
                           </div>
                         </template>
                       </div>

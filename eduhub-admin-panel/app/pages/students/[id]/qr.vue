@@ -8,21 +8,11 @@ const props = defineProps<{
 }>();
 
 const route = useRoute();
+const studentId = route.params.id;
 
 const qrValue = computed(() => {
-  return `${props.student?.name} - ${props.student?.id}`; // Customize based on data
+  return studentId;
 });
-
-function downloadStudentCardPDF(studentId) {
-  const BASE_URL =
-    import.meta.env.NUXT_PUBLIC_SITE_URL ||
-    "http://localhost/EduHub/eduhub-backend/public";
-  // Construct the URL to download the PDF from the Laravel backend
-  const url = BASE_URL + `/student-card/${studentId}/pdf`;
-
-  // Redirect to the URL to trigger the PDF download
-  window.location.href = url;
-}
 </script>
 
 <template>
@@ -57,7 +47,6 @@ function downloadStudentCardPDF(studentId) {
 
       <!-- Print Button -->
       <button
-        @click="downloadStudentCardPDF(props.student?.id)"
         class="print-button"
       >
         Print Card

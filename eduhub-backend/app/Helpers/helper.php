@@ -23,6 +23,6 @@ if (!function_exists('get_day_name_by_date')) {
             $day = Carbon::parse($date);
         }
 
-        return $dayNameArabic[$day->format("l")];
+        return $day->format("l"); //$dayNameArabic[$day->format("l")];
     }
 }
