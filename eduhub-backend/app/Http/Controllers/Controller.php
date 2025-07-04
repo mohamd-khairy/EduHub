@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewMessage;
 use App\Exports\TableExport;
+use App\Models\User;
+use App\Notifications\NewMessageNotification;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -90,15 +93,19 @@ abstract class Controller
     {
         try {
             $inpput = $request->all();
+            $type = request()->segment(2);
 
-            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
+            $model = app('App\\Models\\' . ucfirst($type));
 
             if ($request->image) {
                 $image = $request->image->store('images', 'public');
                 $inpput['image'] = url('/storage/' . $image);
             }
 
-            $data = $model->create($inpput);
+            $data = $model->create($inpput)->toArray();
+
+            $user = auth()->user(); //User::find(1);
+            $user->notify(new NewMessageNotification(__('general.' . $type . '.store'), $type, $data));
 
             return $this->success($data);
         } catch (\Throwable $th) {
@@ -137,18 +144,24 @@ abstract class Controller
     {
         try {
             $input = $request->all();
-            $model = app('App\\Models\\' . ucfirst(request()->segment(2)));
+            $type = request()->segment(2);
+            $model = app('App\\Models\\' . ucfirst($type));
 
-            $model = $model->where('id', $id)->first();
+            $data = $model->where('id', $id)->first();
 
             if ($request->image) {
                 $image = $request->image->store('images', 'public');
                 $input['image'] = url('/storage/' . $image);
             }
 
-            $model->update($input);
+            $data->update($input);
 
-            return $this->success($model);
+            broadcast(new NewMessage($data->toArray()));
+            $user = auth()->user(); //User::find(1);
+            $user->notify(new NewMessageNotification(__('general.' . $type . '.update'), $type, $data));
+
+
+            return $this->success($data);
         } catch (\Throwable $th) {
             throw $th;
             // return  $this->fail([]);

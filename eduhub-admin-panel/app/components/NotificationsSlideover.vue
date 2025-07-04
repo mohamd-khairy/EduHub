@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { formatTimeAgo } from '@vueuse/core'
-import type { Notification } from '~/types'
+import { formatTimeAgo } from "@vueuse/core";
+import type { Notification } from "~/types";
+const { $echo } = useNuxtApp();
 
-const { isNotificationsSlideoverOpen } = useDashboard()
+const { isNotificationsSlideoverOpen } = useDashboard();
 
-const { data: notifications } = await useFetch<Notification[]>('/api/notifications')
+const { data: notifications } = await useFetch<Notification[]>(
+  "/api/notifications"
+);
+const authStore = useAuthStore();
 </script>
 
 <template>
   <USlideover
     v-model:open="isNotificationsSlideoverOpen"
     title="Notifications"
+    side="left"
   >
     <template #body>
       <NuxtLink
@@ -18,12 +23,9 @@ const { data: notifications } = await useFetch<Notification[]>('/api/notificatio
         :key="notification.id"
         :to="`/inbox?id=${notification.id}`"
         class="px-3 py-2.5 rounded-md hover:bg-elevated/50 flex items-center gap-3 relative -mx-3 first:-mt-3 last:-mb-3"
+        dir="ltr"
       >
-        <UChip
-          color="error"
-          :show="!!notification.unread"
-          inset
-        >
+        <UChip color="error" :show="!!notification.unread" inset>
           <UAvatar
             v-bind="notification.sender.avatar"
             :alt="notification.sender.name"
@@ -33,7 +35,9 @@ const { data: notifications } = await useFetch<Notification[]>('/api/notificatio
 
         <div class="text-sm flex-1">
           <p class="flex items-center justify-between">
-            <span class="text-highlighted font-medium">{{ notification.sender.name }}</span>
+            <span class="text-highlighted font-medium">{{
+              notification.sender.name
+            }}</span>
 
             <time
               :datetime="notification.date"

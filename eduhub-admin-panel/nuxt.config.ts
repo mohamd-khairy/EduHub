@@ -34,4 +34,17 @@ export default defineNuxtConfig({
       },
     },
   },
+
+  runtimeConfig: {
+    public: {
+      REVERB_APP_ID: process.env.NUXT_PUBLIC_REVERB_APP_ID,
+      REVERB_APP_KEY: process.env.NUXT_PUBLIC_REVERB_APP_KEY,
+      REVERB_APP_SECRET: process.env.NUXT_PUBLIC_REVERB_APP_SECRET,
+      REVERB_HOST: process.env.NUXT_PUBLIC_REVERB_HOST,
+      REVERB_PORT: process.env.NUXT_PUBLIC_REVERB_PORT,
+      REVERB_SCHEME: process.env.NUXT_PUBLIC_REVERB_SCHEME,
+      API_BASE_URL: process.env.VITE_API_BASE_URL,
+      NUXT_PUBLIC_SITE_URL: process.env.NUXT_PUBLIC_SITE_URL,
+    },
+  },
 });
