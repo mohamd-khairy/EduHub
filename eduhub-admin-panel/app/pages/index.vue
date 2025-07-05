@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import DashboardHeader from "~/components/reports/DashboardHeader.vue";
-const { isNotificationsSlideoverOpen } = useDashboard();
 const resetSignal = ref(false);
 const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();
@@ -20,6 +19,7 @@ const groupScoreRatio = ref({ labels: [], datasets: [] });
 
 onMounted(async () => {
   await getDashboardReports();
+
   // Check permissions
   hasPermission.value = authStore.hasPermission("read-dashboard");
 });

@@ -19,6 +19,10 @@ class Notification extends Model implements Auditable
         'read_at'
     ];
 
+    protected $casts = [
+        'data' => 'array',
+    ];
+
     public function notifiable()
     {
         return $this->morphTo();

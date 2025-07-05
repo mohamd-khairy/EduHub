@@ -13,12 +13,14 @@ class NewMessageNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    protected $title;
     protected $message;
     protected $type;
     protected $data;
 
-    public function __construct($message = null, $type = null, $data = [])
+    public function __construct($title = null, $message = null, $type = null, $data = [])
     {
+        $this->title = $title;
         $this->message = $message;
         $this->type = $type;
         $this->data = $data;
@@ -49,18 +51,24 @@ class NewMessageNotification extends Notification implements ShouldQueue
     public function toDatabase($notifiable)
     {
         return [
+            'title' => $this->title,
             'message' => $this->message,
+            'image' => url('images/noti.png'),
+            'type' => $this->type,
             'url' => '/' . Str::plural($this->type),
-            'data' => $this->data
+            'item' => $this->data
         ];
     }
 
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
+            'title' => $this->title,
             'message' => $this->message,
+            'image' => url('images/noti.png'),
+            'type' => $this->type,
             'url' => '/' . Str::plural($this->type),
-            'data' => $this->data
+            'item' => $this->data
         ]);
     }
 }

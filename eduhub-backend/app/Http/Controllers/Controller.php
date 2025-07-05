@@ -102,10 +102,17 @@ abstract class Controller
                 $inpput['image'] = url('/storage/' . $image);
             }
 
-            $data = $model->create($inpput)->toArray();
+            $data = $model->create($inpput);
 
             $user = auth()->user(); //User::find(1);
-            $user->notify(new NewMessageNotification(__('general.' . $type . '.store'), $type, $data));
+            $user->notify(new NewMessageNotification(
+                __('general.' . $type . '.store'),
+                $user->name . ' بواسطة ' . $data->name .  __('general.' . $type . '.store'),
+                $type,
+                $data->toArray()
+            ));
+
+            broadcast(new NewMessage($data->toArray()));
 
             return $this->success($data);
         } catch (\Throwable $th) {
@@ -156,10 +163,13 @@ abstract class Controller
 
             $data->update($input);
 
-            broadcast(new NewMessage($data->toArray()));
             $user = auth()->user(); //User::find(1);
-            $user->notify(new NewMessageNotification(__('general.' . $type . '.update'), $type, $data));
-
+            $user->notify(new NewMessageNotification(
+                __('general.' . $type . '.store'),
+                $user->name . ' بواسطة ' . $data->name .  __('general.' . $type . '.store'),
+                $type,
+                $data->toArray()
+            ));
 
             return $this->success($data);
         } catch (\Throwable $th) {

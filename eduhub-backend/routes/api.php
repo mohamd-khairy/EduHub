@@ -7,6 +7,7 @@ use App\Http\Controllers\API\CourseController;
 use App\Http\Controllers\API\EnrollmentController;
 use App\Http\Controllers\API\ExamController;
 use App\Http\Controllers\API\GroupController;
+use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\Reports\HomeController;
 use App\Http\Controllers\API\ParentController;
 use App\Http\Controllers\API\PaymentController;
@@ -25,15 +26,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
+Route::group(['prefix' => 'auth'], function () {
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-
+    Route::group(['prefix' => 'auth'], function () {
+        Route::get('/me', [AuthController::class, 'Me']);
+        Route::get('/logout', [AuthController::class, 'logout']);
+        Route::post('/change-password', [AuthController::class, 'changePassword']);
+    });
+    Route::group(['prefix' => 'notification'], function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/all', [NotificationController::class, 'All']);
+        Route::post('/read/{id}', [NotificationController::class, 'readNotification']);
+        Route::post('/read-all', [NotificationController::class, 'readAllNotification']);
+        Route::post('/delete-all', [NotificationController::class, 'deleteAll']);
+    });
     Route::group(['prefix' => 'group'], function () {
         Route::get('/all', [GroupController::class, 'All']);
         Route::get('/groups-by-time', [GroupController::class, 'getGroupsByTime']);
         Route::post('/group-attendance', [GroupController::class, 'groupAttendance']);
-
-
         Route::post('/delete-all', [GroupController::class, 'deleteAll']);
         Route::get('/', [GroupController::class, 'index']);
         Route::post('', [GroupController::class, 'store']);
@@ -64,7 +77,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('{id}', [TeacherController::class, 'update']);
         Route::put('{id}', [TeacherController::class, 'update']);
     });
-
     Route::group(['prefix' => 'user'], function () {
         Route::get('/all', [UserController::class, 'All']);
         Route::post('/delete-all', [UserController::class, 'deleteAll']);
@@ -82,7 +94,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('{id}', [StudentController::class, 'show']);
         Route::post('{id}', [StudentController::class, 'update']);
         Route::get('/student-card/{id}/pdf', [StudentController::class, 'generatePDF']);
-
     });
     Route::group(['prefix' => 'enrollment'], function () {
         Route::get('/all', [EnrollmentController::class, 'All']);
@@ -94,7 +105,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('{id}', [EnrollmentController::class, 'show']);
         Route::post('{id}', [EnrollmentController::class, 'update']);
     });
-
     Route::group(['prefix' => 'parentModel'], function () {
         Route::get('/all', [ParentController::class, 'All']);
         Route::post('/delete-all', [ParentController::class, 'deleteAll']);
@@ -136,9 +146,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('{id}', [PaymentController::class, 'show']);
         Route::put('{id}', [PaymentController::class, 'update']);
     });
-    Route::group(['prefix' => 'audit'], function () {
-        Route::get('/', [AuditController::class, 'index']);
-    });
     Route::group(['prefix' => 'role'], function () {
         Route::get('/', [RoleController::class, 'index']);
         Route::post('/', [RoleController::class, 'store']);
@@ -150,7 +157,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [PermissionController::class, 'index']);
         Route::get('/all', [PermissionController::class, 'All']);
     });
-
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [HomeController::class, 'index']);
         Route::get('/monthly-student-count', [HomeController::class, 'monthlyStudentCount']);
@@ -177,14 +183,4 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/payment-overdue-student-payment', [PaymentReportController::class, 'overduePaymentsReport']);
         Route::get('/payment-per-groups', [PaymentReportController::class, 'paymentsByGroupReport']);
     });
-
-    Route::group(['prefix' => 'auth'], function () {
-        Route::get('/me', [AuthController::class, 'Me']);
-        Route::get('/logout', [AuthController::class, 'logout']);
-        Route::post('/change-password', [AuthController::class, 'changePassword']);
-    });
-});
-
-Route::group(['prefix' => 'auth'], function () {
-    Route::post('/login', [AuthController::class, 'login']);
 });
