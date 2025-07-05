@@ -24,7 +24,6 @@ watch(
   () => notificationStore.items?.value,
   () => {
     notifications.value = notificationStore.items;
-    console.log(notifications.value);
   },
   { immediate: true, deep: true }
 );

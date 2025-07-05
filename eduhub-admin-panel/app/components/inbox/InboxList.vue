@@ -56,7 +56,7 @@ defineShortcuts({
       <div
         class="p-4 sm:px-6 text-sm cursor-pointer border-l-2 transition-colors"
         :class="[
-          mail.unread ? 'text-highlighted' : 'text-toned)',
+          mail.last_message?.is_read ? 'text-highlighted' : 'text-toned)',
           selectedMail && selectedMail.id === mail.id
             ? 'border-primary bg-primary/10'
             : 'border-(--ui-bg) hover:border-primary hover:bg-primary/5',
@@ -68,22 +68,22 @@ defineShortcuts({
           :class="[mail.unread && 'font-semibold']"
         >
           <div class="flex items-center gap-3">
-            {{ mail.from.name }}
+            {{ mail.sender?.name }}
 
-            <UChip v-if="mail.unread" />
+            <UChip v-if="!mail.last_message?.is_read" />
           </div>
 
           <span>{{
-            isToday(new Date(mail.date))
-              ? format(new Date(mail.date), "HH:mm")
-              : format(new Date(mail.date), "dd MMM")
+            isToday(new Date(mail.created_at))
+              ? format(new Date(mail.created_at), "HH:mm")
+              : format(new Date(mail.created_at), "dd MMM")
           }}</span>
         </div>
         <p class="truncate" :class="[mail.unread && 'font-semibold']">
-          {{ mail.subject }}
+          {{ mail.last_message?.message }}
         </p>
         <p class="text-dimmed line-clamp-1">
-          {{ mail.body }}
+          {{ mail.last_message?.message }}
         </p>
       </div>
     </div>

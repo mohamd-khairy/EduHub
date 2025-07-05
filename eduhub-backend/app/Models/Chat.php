@@ -34,4 +34,9 @@ class Chat extends Model implements Auditable
     {
         return $this->hasMany(ChatMessage::class, 'chat_id');
     }
+
+    public function last_message()
+    {
+        return $this->hasOne(ChatMessage::class, 'chat_id')->latestOfMany('sent_at');
+    }
 }

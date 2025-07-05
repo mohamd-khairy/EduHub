@@ -23,6 +23,7 @@ use App\Http\Controllers\API\StudentController;
 use App\Http\Controllers\API\StudyYearController;
 use App\Http\Controllers\API\TeacherController;
 use App\Http\Controllers\API\UserController;
+use App\Models\ChatMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/{id}', [ChatController::class, 'show']);
         Route::post('/', [ChatController::class, 'store']);
         Route::post('/delete-all', [ChatController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'chatMessage'], function () {
+        Route::post('/', [ChatMessage::class, 'store']);
     });
     Route::group(['prefix' => 'audit'], function () {
         Route::get('/', [AuditController::class, 'index']);
