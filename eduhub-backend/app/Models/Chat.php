@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class ChatMessage extends Model implements Auditable
+
+class Chat extends Model implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
@@ -15,10 +16,8 @@ class ChatMessage extends Model implements Auditable
     protected $fillable = [
         'sender_id',
         'sender_type',
-        'chat_id',
-        'message',
-        'is_read',
-        'sent_at'
+        'receiver_id',
+        'receiver_type',
     ];
 
     public function sender()
@@ -26,8 +25,13 @@ class ChatMessage extends Model implements Auditable
         return $this->morphTo(__FUNCTION__, 'sender_type', 'sender_id');
     }
 
-    public function chat()
+    public function receiver()
     {
-        return $this->belongsTo(Chat::class);
+        return $this->morphTo(__FUNCTION__, 'receiver_type', 'receiver_id');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(ChatMessage::class, 'chat_id');
     }
 }

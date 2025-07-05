@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\AuditController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\ChatController;
 use App\Http\Controllers\API\CourseController;
 use App\Http\Controllers\API\EnrollmentController;
 use App\Http\Controllers\API\ExamController;
@@ -26,11 +27,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
+
+
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::group(['prefix' => 'chat'], function () {
+        Route::get('/all', [ChatController::class, 'All']);
+        Route::get('/', [ChatController::class, 'index']);
+        Route::get('/{id}', [ChatController::class, 'show']);
+        Route::post('/', [ChatController::class, 'store']);
+        Route::post('/delete-all', [ChatController::class, 'deleteAll']);
+    });
+    Route::group(['prefix' => 'audit'], function () {
+        Route::get('/', [AuditController::class, 'index']);
+    });
     Route::group(['prefix' => 'auth'], function () {
         Route::get('/me', [AuthController::class, 'Me']);
         Route::get('/logout', [AuthController::class, 'logout']);

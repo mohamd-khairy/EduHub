@@ -23,6 +23,16 @@ const notificationStore = useNotificationStore();
 onMounted(async () => {
   await notificationStore.loadAllNotifications();
 });
+
+const items = [
+  [
+    {
+      label: "رسالة جديدة",
+      icon: "i-lucide-send",
+      to: "/inbox",
+    },
+  ],
+];
 </script>
 
 <template>
@@ -45,6 +55,10 @@ onMounted(async () => {
           <UIcon v-else name="i-lucide-bell" class="size-5 shrink-0" />
         </UButton>
       </UTooltip>
+
+      <UDropdownMenu :items="items">
+        <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
+      </UDropdownMenu>
     </template>
   </UDashboardNavbar>
 

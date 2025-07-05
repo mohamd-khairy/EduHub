@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Chat;
+use App\Models\ParentModel;
 use App\Models\Permission;
 use App\Models\User;
 use App\Services\RoleService;
@@ -113,17 +115,7 @@ class DatabaseSeeder extends Seeder
 
                 if (isset($filters['by_group']))
                     $query->orWhereIn('group', $filters['by_group']);
-                // $query->whereIn('name', $filters['by_name'])
-                //     ->orWhereIn('group', $filters['by_group']);
             })->pluck('id');
-
-            // if (isset($filters['by_name'])) {
-
-            // } elseif (isset($filters['by_group'])) {
-            //     $permissions = Permission::whereIn('group', $filters['by_group'])->pluck('id');
-            // } else {
-            //     continue;
-            // }
 
             $insertData = $permissions->map(function ($permId) use ($roleId) {
                 return [
@@ -136,21 +128,22 @@ class DatabaseSeeder extends Seeder
         }
 
 
+        foreach (ParentModel::all() as $parent) {
+            $user = User::find(1);
 
-        // Role::findByName('parent', 'parent')
-        //     ->givePermissionTo(Permission::whereIn('name', [
-        //         'read-student',
-        //         'read-exam',
-        //         'read-examresult',
-        //         'read-attendance',
-        //         'read-group',
-        //         'read-teacher'
-        //     ])->pluck('id'));
+            $chat = Chat::create([
+                'sender_type' => $user->getMorphClass(),
+                'sender_id' => $user->id,
+                'receiver_type' => $parent->getMorphClass(),
+                'receiver_id' => $parent->id
+            ]);
 
-        // Role::findByName('teacher', 'teacher')
-        //     ->givePermissionTo(Permission::whereIn('group', 'teacher')->pluck('id'));
-
-        // Role::findByName('student', 'student')
-        //     ->givePermissionTo(Permission::whereIn('group', 'student')->pluck('id'));
+            $chat->messages()->create([
+                'sender_type' => $user->getMorphClass(),
+                'sender_id' => $user->id,
+                'message' => 'Hello ' . $parent->name,
+                'sent_at' => now(),
+            ]);
+        }
     }
 }

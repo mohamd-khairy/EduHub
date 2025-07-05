@@ -4,6 +4,7 @@ definePageMeta({
 });
 import { ref, computed, onMounted } from "vue";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import { USelect } from "#components";
 
 const groupStore = useGroupStore();
 const attendanceStore = useAttendanceStore();
@@ -206,8 +207,8 @@ const onScanError = (errorMessage) => {
 
 function getRowItems(row) {
   return [
-    { type: "label", label: "الاجراءات" },
-    { type: "separator" },
+    // { type: "label", label: "الاجراءات" },
+    // { type: "separator" },
     {
       label: " حضر",
       icon: "i-lucide-circle-check",
@@ -265,28 +266,13 @@ const columns = [
     id: "actions",
     header: "إجراءات",
     cell: ({ row }) => {
-      return h(
-        "div",
-        { class: "text-right" },
-        h(
-          UDropdownMenu,
-          {
-            content: {
-              align: "end",
-            },
-            items: getRowItems(row),
-            "aria-label": "Actions dropdown",
-          },
-          () =>
-            h(UButton, {
-              icon: "i-lucide-ellipsis-vertical",
-              color: "neutral",
-              variant: "ghost",
-              class: "ml-auto",
-              "aria-label": "Actions dropdown",
-            })
-        )
-      );
+      return h("div", { class: "w-full text-right" }, [
+        h(USelect, {
+          style: "width: 100px",
+          items: getRowItems(row),
+          placeholder: "اختر الحالة", 
+        }),
+      ]);
     },
   },
 ];

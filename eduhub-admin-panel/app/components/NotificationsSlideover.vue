@@ -39,6 +39,8 @@ watch(
     <template #title>
       <div class="flex flex-row items-center justify-space-between w-full">
         <span class="text-lg font-semibold">الاشعارات</span>
+        <UBadge :label="notificationStore.items?.length" class="ml-2" variant="subtle" />
+
         <UButton
           v-if="notifications.length"
           class="ml-2"

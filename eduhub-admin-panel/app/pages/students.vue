@@ -72,7 +72,7 @@ function handleUpdateStudent(updatedStudent: object) {
 // Load initial data
 onMounted(async () => {
   isLoading.value = true;
-  await studentStore.loadAllStudents(currentPage.value , null, null, pageSize);
+  await studentStore.loadAllStudents(currentPage.value, null, null, pageSize);
   allStudents.value = studentStore.items;
   filteredStudents.value = allStudents.value;
   currentPage.value++;
@@ -110,7 +110,7 @@ async function loadNextPage() {
   if (isLoading.value || !hasMore.value) return;
   isLoading.value = true;
 
-  await studentStore.loadAllStudents(currentPage.value , null, null, pageSize);
+  await studentStore.loadAllStudents(currentPage.value, null, null, pageSize);
   const newStudents = studentStore.items;
 
   if (allStudents.value?.length >= studentStore.pagination?.total) {
@@ -128,22 +128,21 @@ async function handleAddStudent(addStudent: object) {
   console.log("addStudent", addStudent);
   isLoading.value = true;
   currentPage.value = 1;
-  await studentStore.loadAllStudents(currentPage.value , null, null, pageSize);
+  await studentStore.loadAllStudents(currentPage.value, null, null, pageSize);
   allStudents.value = studentStore.items;
   filteredStudents.value = allStudents.value;
   currentPage.value++;
   isLoading.value = false;
 
   // 👇 Select the first student automatically
-  if (allStudents.value.length > 0) {
-    selectedStudent.value = allStudents.value[0];
-    router.push(`/students/${selectedStudent.value.id}`);
+  if (allStudents.value?.length > 0) {
+    selectedStudent.value = allStudents?.value[0];
+    router.push(`/students/${selectedStudent.value?.id}`);
   }
 }
 
-function onAddStudent() {
-  isMailPanelOpen.value = true;
-}
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = breakpoints.smaller("lg");
 </script>
 
 <template>
@@ -208,17 +207,6 @@ function onAddStudent() {
         لم يتم إضافة أي طالب بعد. يمكنك البدء الآن.
       </p>
     </div>
-
-    <!-- Action Button -->
-    <!-- <UButton
-      label="إضافة طالب"
-      color="primary"
-      icon="i-lucide-plus"
-      @click="onAddStudent"
-      size="lg"
-      class="mt-2"
-      v-if="authStore.permissions.includes('create-student')"
-    /> -->
 
     <StudentsAddModal @addStudent="handleAddStudent" />
   </div>

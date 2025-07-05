@@ -40,4 +40,11 @@ if (!function_exists('get_day_name_by_date')) {
 
         return $dayNameArabic[$day];
     }
+
+    function getModelFromType($type)
+    {
+        $model = app('App\\Models\\' . ucfirst($type));
+
+        return $model;
+    }
 }
