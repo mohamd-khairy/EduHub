@@ -36,6 +36,21 @@ watch(
     title="الاشعارات"
     side="left"
   >
+    <template #title>
+      <div class="flex flex-row items-center justify-space-between w-full">
+        <span class="text-lg font-semibold">الاشعارات</span>
+        <UButton
+          v-if="notifications.length"
+          class="ml-2"
+          color="success"
+          size="sm"
+          icon="i-lucide-eye-off"
+          @click="notificationStore.markAllAsRead()"
+          title="عرض كل الاشعارات"
+        />
+      </div>
+    </template>
+
     <template #body>
       <NuxtLink
         v-for="notification in notifications"
@@ -43,6 +58,7 @@ watch(
         :to="`${notification?.data?.url}`"
         @click.prevent="markAsRead(notification)"
         class="px-3 py-2.5 rounded-md hover:bg-elevated/50 flex items-center gap-3 relative -mx-3 first:-mt-3 last:-mb-3"
+        dir="rtl"
       >
         <UChip color="error" :show="!notification.read_at" inset>
           <UAvatar
@@ -59,6 +75,7 @@ watch(
             }}</span>
 
             <time
+              dir="ltr"
               :datetime="notification?.created_at"
               class="text-muted text-xs"
               v-text="formatTimeAgo(new Date(notification?.created_at))"

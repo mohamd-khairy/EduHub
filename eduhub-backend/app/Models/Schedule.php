@@ -10,9 +10,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class Schedule extends Model implements Auditable
 {
-use HasFactory;
- use \OwenIt\Auditing\Auditable;   
- public static bool $inPermission = true;
+    use HasFactory;
+    use \OwenIt\Auditing\Auditable;
+    public static bool $inPermission = true;
 
 
     protected $fillable = [
@@ -27,7 +27,10 @@ use HasFactory;
 
     public function getLabelAttribute()
     {
-        return "{$this->day} {$this->start_time} - {$this->end_time}";
+        $day = get_arabic_day_name_by_english($this->day);
+        $start = Carbon::parse($this->start_time)->format('h:i');
+        $end = Carbon::parse($this->end_time)->format('h:i');
+        return "{$day} ({$start} - {$end})";
     }
 
     public function getValueAttribute()

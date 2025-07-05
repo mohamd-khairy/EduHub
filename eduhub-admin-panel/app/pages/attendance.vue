@@ -388,7 +388,7 @@ const exportAttendance = () => {
                             variant="subtle"
                             class="text-base"
                           >
-                            {{ presentCount }} / {{ students.length }}
+                            حضر {{ presentCount }} / {{ students.length }}
                           </UBadge>
                           <UButton
                             @click="exportAttendance"
@@ -398,6 +398,8 @@ const exportAttendance = () => {
                             size="xl"
                             class="text-lg"
                             loading-auto
+                            style="cursor: pointer"
+                            title="تصدير بيانات الحضور"
                           />
                         </div>
                       </div>

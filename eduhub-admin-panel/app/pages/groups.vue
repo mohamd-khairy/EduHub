@@ -173,10 +173,10 @@ const columns: TableColumn[] = [
       ),
   },
   {
-    accessorKey: "max_students",
+    accessorKey: "students_count",
     id: "عدد الطلاب",
     header: "عدد للطلاب",
-    cell: ({ row }) => h(() => row.original.max_students),
+    cell: ({ row }) => h(() => row.original.students_count),
   },
   {
     accessorKey: "schedule",

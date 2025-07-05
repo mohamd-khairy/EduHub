@@ -107,7 +107,7 @@ abstract class Controller
             $user = auth()->user(); //User::find(1);
             $user->notify(new NewMessageNotification(
                 __('general.' . $type . '.store'),
-                $user->name . ' بواسطة ' . $data->name .  __('general.' . $type . '.store'),
+                __('general.' . $type . '.store') . ' باسم ' . $data->name . ' بواسطة ' . $user->name,
                 $type,
                 $data->toArray()
             ));
@@ -166,10 +166,11 @@ abstract class Controller
             $user = auth()->user(); //User::find(1);
             $user->notify(new NewMessageNotification(
                 __('general.' . $type . '.store'),
-                $user->name . ' بواسطة ' . $data->name .  __('general.' . $type . '.store'),
+                __('general.' . $type . '.store') . ' باسم ' . $data->name . ' بواسطة ' . $user->name,
                 $type,
                 $data->toArray()
             ));
+
 
             return $this->success($data);
         } catch (\Throwable $th) {

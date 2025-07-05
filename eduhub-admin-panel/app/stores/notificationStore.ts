@@ -49,6 +49,18 @@ export const useNotificationStore = defineStore("notification", () => {
     }
   }
 
+  async function markAllAsRead(id: number) {
+    const res = await api(`notification/read-all`, {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      await loadAllNotifications();
+    } else {
+      throw new Error("Failed to mark as read");
+    }
+  }
+
   // Delete selected payments from backend, then update local items and selection
   async function deleteSelectedNotifications() {
     if (selectedIds.value.length === 0) return;
@@ -107,6 +119,7 @@ export const useNotificationStore = defineStore("notification", () => {
     editItem,
     loadAllNotifications,
     markAsRead,
+    markAllAsRead,
     toggleId,
     addId,
     removeId,

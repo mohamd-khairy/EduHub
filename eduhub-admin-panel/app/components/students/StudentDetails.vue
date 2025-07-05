@@ -25,6 +25,12 @@ const links = computed(() => {
       permission: "read-student",
     },
     {
+      label: "QR Code",
+      icon: "i-lucide-qr-code",
+      to: `/students/${studentId.value}/qr`,
+      permission: "read-student-payment",
+    },
+    {
       label: "ولي الامر",
       icon: "i-lucide-user",
       to: `/students/${studentId.value}/parent`,
@@ -52,12 +58,6 @@ const links = computed(() => {
       label: "المدفوعات",
       icon: "i-lucide-dollar-sign",
       to: `/students/${studentId.value}/payments`,
-      permission: "read-student-payment",
-    },
-    {
-      label: "qr",
-      icon: "i-lucide-dollar-sign",
-      to: `/students/${studentId.value}/qr`,
       permission: "read-student-payment",
     },
   ];

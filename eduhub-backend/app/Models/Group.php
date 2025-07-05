@@ -16,13 +16,18 @@ class Group extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     public static bool $inPermission = true;
 
-    protected $fillable = ['name', 'teacher_id', 'course_id', 'max_students', 'status', 'study_year_id'];
+    protected $fillable = ['name', 'teacher_id', 'course_id', 'status', 'study_year_id'];
 
-    protected $appends = ['schedule', 'label', 'value'];
+    protected $appends = ['schedule', 'label', 'value', 'students_count'];
 
     protected static function booted()
     {
         static::addGlobalScope(new RoleAccessScope);
+    }
+
+    public function getStudentsCountAttribute($value)
+    {
+        return $this->students()->count();
     }
 
     public function getLabelAttribute()
@@ -40,7 +45,12 @@ class Group extends Model implements Auditable
         // Get related schedules
         $schedules = $this->schedules()->get(); // Or use $this->schedules if it's eager-loaded
 
-        return $schedules->map(fn($s) => "{$s->day} {$s->start_time} ")
+        return $schedules->map(function ($s) {
+            $day = get_arabic_day_name_by_english($s->day);
+            $start = Carbon::parse($s->start_time)->format('h:i');
+            $end = Carbon::parse($s->end_time)->format('h:i');
+            return "{$day} ({$start} - {$end})";
+        })
             ->implode(', ');
     }
 

@@ -28,7 +28,6 @@ class GroupFactory extends Factory
             'name' => $this->faker->randomElement(['المجموعة أ', 'المجموعة ب', 'المجموعة ج']) . rand(1, 1000),
             'teacher_id' => Teacher::inRandomOrder()->first()?->id ?? Teacher::factory(),
             'course_id' => Course::inRandomOrder()->first()?->id ?? Course::factory(),
-            'max_students' => $this->faker->numberBetween(15, 50),
             'status' => true,
             'study_year_id' => StudyYear::where('status', 1)->value('id'),
         ];

@@ -25,4 +25,19 @@ if (!function_exists('get_day_name_by_date')) {
 
         return $day->format("l"); //$dayNameArabic[$day->format("l")];
     }
+
+    function get_arabic_day_name_by_english($day = null)
+    {
+        $dayNameArabic = [
+            'Saturday' => "السبت",
+            'Sunday' => "الأحد",
+            'Monday' => " الإثنين",
+            'Tuesday' => "الثلاثاء",
+            'Wednesday' => "الأربعاء",
+            'Thursday' => "الخميس",
+            'Friday' => "الجمعة",
+        ];
+
+        return $dayNameArabic[$day];
+    }
 }

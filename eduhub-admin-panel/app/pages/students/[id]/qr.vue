@@ -30,12 +30,18 @@ const qrValue = computed(() => {
 
       <!-- Student Details -->
       <div class="details">
-        <h2 class="student-name text-lg">{{ props.student?.name }}</h2>
-        <p class="text-sm font-bold">
-          <strong>رقم الجوال:</strong> {{ props.student?.phone }}
+        <h2 class="student-name text-3xl">{{ props.student?.name }}</h2>
+        <p class="text-xl">
+          <strong class="font-bold text-warning">رقم الجوال:</strong>
+          {{ props.student?.phone }}
         </p>
-        <p class="text-sm font-bold">
-          <strong>الصف الدراسي:</strong> {{ props.student?.grade_level }}
+        <p class="text-xl">
+          <strong class="font-bold text-white"> ولي الامر:</strong>
+          {{ props.student?.parent?.name }}
+        </p>
+        <p class="text-xl">
+          <strong class="font-bold text-primary">الصف الدراسي:</strong>
+          {{ props.student?.grade_level }}
         </p>
       </div>
 
@@ -44,13 +50,6 @@ const qrValue = computed(() => {
         <!-- <h3>QR Code</h3> -->
         <qrcode :value="qrValue" size="200" />
       </div>
-
-      <!-- Print Button -->
-      <button
-        class="print-button"
-      >
-        Print Card
-      </button>
     </div>
   </div>
 </template>
@@ -100,14 +99,12 @@ const qrValue = computed(() => {
 }
 
 .student-name {
-  font-size: 22px;
   font-weight: bold;
   margin-bottom: 10px;
   color: #000;
 }
 
 .details p {
-  font-size: 14px;
   padding: 10px;
   color: #000;
 }
