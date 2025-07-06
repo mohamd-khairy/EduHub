@@ -1,35 +1,22 @@
 <script setup lang="ts">
 import { format } from "date-fns";
 import type { Mail } from "~/types";
+const chatStore = useChatStore();
+const authStore = useAuthStore();
 
-defineProps<{
+const props = defineProps<{
   mail: Mail;
 }>();
 
-const emits = defineEmits(["close"]);
+watch(
+  () => props.mail, // ✅ reactive prop access
+  (newMail) => {
+    chatStore.loadAllMessages(1, newMail.id);
+  },
+  { immediate: true } // optional: run on initial mount
+);
 
-const dropdownItems = [
-  [
-    {
-      label: "Mark as unread",
-      icon: "i-lucide-check-circle",
-    },
-    {
-      label: "Mark as important",
-      icon: "i-lucide-triangle-alert",
-    },
-  ],
-  [
-    {
-      label: "Star thread",
-      icon: "i-lucide-star",
-    },
-    {
-      label: "Mute thread",
-      icon: "i-lucide-circle-pause",
-    },
-  ],
-];
+const emits = defineEmits(["close"]);
 
 const toast = useToast();
 
@@ -39,25 +26,40 @@ const loading = ref(false);
 function onSubmit() {
   loading.value = true;
 
-  setTimeout(() => {
-    reply.value = "";
+  if (!reply.value.trim()) return;
 
-    toast.add({
-      title: "Email sent",
-      description: "Your email has been sent successfully",
-      icon: "i-lucide-check-circle",
-      color: "success",
-    });
+  const tempMessage = {
+    id: `temp-${Date.now()}`, // temporary unique ID
+    message: reply.value,
+    chat_id: props.mail.id,
+    sender_id: authStore.user?.id,
+    sent_at: new Date().toISOString(),
+    is_read: false,
+  };
 
-    loading.value = false;
-  }, 1000);
+  // Optimistically push to message list
+  chatStore.item_messages.unshift(tempMessage);
+
+  chatStore.sendMessage({
+    message: reply.value,
+    chat_id: props.mail.id,
+  });
+
+  reply.value = "";
+  loading.value = false;
 }
 </script>
 
 <template>
   <UDashboardPanel id="inbox-2">
-    <UDashboardNavbar :title="mail.last_message?.message" :toggle="false">
-      <template #leading>
+    <UDashboardNavbar
+      :title="mail.other_user?.name"
+      :description="mail.other_user?.email"
+      :toggle="false"
+    >
+      <template #leading> </template>
+
+      <template #right>
         <UButton
           icon="i-lucide-x"
           color="neutral"
@@ -66,51 +68,55 @@ function onSubmit() {
           @click="emits('close')"
         />
       </template>
-
-      <template #right>
-        <UTooltip text="Archive">
-          <UButton icon="i-lucide-inbox" color="neutral" variant="ghost" />
-        </UTooltip>
-
-        <UTooltip text="Reply">
-          <UButton icon="i-lucide-reply" color="neutral" variant="ghost" />
-        </UTooltip>
-
-        <UDropdownMenu :items="dropdownItems">
-          <UButton
-            icon="i-lucide-ellipsis-vertical"
-            color="neutral"
-            variant="ghost"
-          />
-        </UDropdownMenu>
-      </template>
     </UDashboardNavbar>
 
-    <div
-      class="flex flex-col sm:flex-row justify-between gap-1 p-4 sm:px-6 border-b border-default"
-    >
-      <div class="flex items-start gap-4 sm:my-1.5">
-        <!-- <UAvatar v-bind="mail.from.avatar" :alt="mail.from.name" size="3xl" /> -->
+    <div class="flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col-reverse gap-3">
+      <!-- 🔁 Loading Skeleton -->
 
-        <div class="min-w-0">
-          <p class="font-semibold text-highlighted">
-            {{ mail.sender?.name }}
-          </p>
-          <p class="text-muted">
-            {{ mail.sender?.email }}
-          </p>
+      <div
+        v-if="chatStore.isLoadingMessages"
+        class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+      >
+        <span
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"
+        >
+        </span>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">
+          جاري تحميل الرسائل...
+        </p>
+      </div>
+
+      <!-- ✅ Messages List -->
+      <div
+        v-else-if="chatStore.item_messages?.length > 0"
+        v-for="message in [...chatStore.item_messages]"
+        :key="message.id"
+        class="flex"
+        :class="{
+          'justify-end': message.sender_id === authStore.user?.id,
+          'justify-start': message.sender_id !== authStore.user?.id,
+        }"
+      >
+        <div
+          class="max-w-xs sm:max-w-md px-4 py-2 rounded-lg shadow text-sm"
+          :class="{
+            'bg-primary text-white rounded-br-none':
+              message.sender_id === authStore.user?.id,
+            'bg-muted text-gray-900 rounded-bl-none':
+              message.sender_id !== authStore.user?.id,
+          }"
+        >
+          <p class="whitespace-pre-wrap">{{ message.message }}</p>
+          <div class="text-xs mt-1 text-right opacity-70">
+            {{ format(new Date(message.sent_at), "HH:mm dd-MM-yyyy") }}
+          </div>
         </div>
       </div>
 
-      <p class="max-sm:pl-16 text-muted text-sm sm:mt-2">
-        {{ format(new Date(mail.last_message?.created_at), "dd MMM HH:mm") }}
-      </p>
-    </div>
-
-    <div class="flex-1 p-4 sm:p-6 overflow-y-auto">
-      <p class="whitespace-pre-wrap">
-        {{ mail.last_message?.message }}
-      </p>
+      <!-- 💤 Empty State -->
+      <div v-else>
+        <p class="text-center text-muted">لا يوجد رسائل</p>
+      </div>
     </div>
 
     <div class="pb-4 px-4 sm:px-6 shrink-0">
@@ -123,7 +129,8 @@ function onSubmit() {
           <UIcon name="i-lucide-reply" class="size-5" />
 
           <span class="text-sm truncate">
-            Reply to {{ mail.receiver?.name }} ({{ mail.receiver?.email }})
+            قم بإرسال رسالة الي ({{ mail.receiver?.email }})
+            {{ mail.receiver?.name }}
           </span>
         </template>
 
@@ -134,7 +141,7 @@ function onSubmit() {
             variant="none"
             required
             autoresize
-            placeholder="Write your reply..."
+            placeholder="اكتب رسالتك هنا"
             :rows="4"
             :disabled="loading"
             class="w-full"
@@ -151,13 +158,13 @@ function onSubmit() {
             </UTooltip>
 
             <div class="flex items-center justify-end gap-2">
-              <UButton color="neutral" variant="ghost" label="Save draft" />
               <UButton
                 type="submit"
                 color="neutral"
                 :loading="loading"
-                label="Send"
+                label="ارسال"
                 icon="i-lucide-send"
+                style="cursor: pointer;"
               />
             </div>
           </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Chat;
+use App\Models\ChatMessage;
 use Illuminate\Http\Request;
 
 class ChatController extends Controller
@@ -32,5 +33,19 @@ class ChatController extends Controller
         ]);
 
         return $this->success($chat);
+    }
+
+    public function read($message_id)
+    {
+        $msg = ChatMessage::findOrFail($message_id);
+        $msg->update(['is_read' => true]);
+        return $this->success(true);
+    }
+
+    public function readAll($chat_id)
+    {
+        $chat = Chat::findOrFail($chat_id);
+        $chat->messages()->update(['is_read' => true]);
+        return $this->success(true);
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\AuditController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ChatController;
+use App\Http\Controllers\API\ChatMessageController;
 use App\Http\Controllers\API\CourseController;
 use App\Http\Controllers\API\EnrollmentController;
 use App\Http\Controllers\API\ExamController;
@@ -40,10 +41,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [ChatController::class, 'index']);
         Route::get('/{id}', [ChatController::class, 'show']);
         Route::post('/', [ChatController::class, 'store']);
+        Route::post('/message-read/{message_id}', [ChatController::class, 'read']);
+        Route::post('/message-read-all/{chat_id}', [ChatController::class, 'readAll']);
         Route::post('/delete-all', [ChatController::class, 'deleteAll']);
     });
     Route::group(['prefix' => 'chatMessage'], function () {
-        Route::post('/', [ChatMessage::class, 'store']);
+        Route::get('/', [ChatMessageController::class, 'index']);
+        Route::post('/', [ChatMessageController::class, 'store']);
     });
     Route::group(['prefix' => 'audit'], function () {
         Route::get('/', [AuditController::class, 'index']);

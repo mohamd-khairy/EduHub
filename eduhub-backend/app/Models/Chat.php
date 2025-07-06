@@ -20,6 +20,14 @@ class Chat extends Model implements Auditable
         'receiver_type',
     ];
 
+    protected $appends = ['other_user'];
+    protected $with = ['messages'];
+
+    public function getOtherUserAttribute()
+    {
+        return $this->sender_id == auth()->id() ? $this->receiver : $this->sender;
+    }
+
     public function sender()
     {
         return $this->morphTo(__FUNCTION__, 'sender_type', 'sender_id');

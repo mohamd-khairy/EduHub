@@ -5,10 +5,12 @@ export const useChatStore = defineStore("chat", () => {
   const api = useApi();
 
   const items = ref<object[]>([]);
+  const item_messages = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
   const deleteModalOpen = ref(false);
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
+  const isLoadingMessages = ref(false);
   const editItem = ref({});
 
   // Pagination state — optional if you want to track for UI
@@ -23,7 +25,7 @@ export const useChatStore = defineStore("chat", () => {
   async function loadAllChats(page = 1) {
     items.value = []; // clear current items
 
-    const res = await api(`chat?page=${page}&relations=sender,receiver,last_message`);
+    const res = await api(`chat?page=${page}&relations=last_message`);
     const json = await res.json();
 
     if (json?.data) {
@@ -37,14 +39,71 @@ export const useChatStore = defineStore("chat", () => {
     }
   }
 
+  async function loadAllMessages(page = 1, chatId: number) {
+    isLoadingMessages.value = true;
+    item_messages.value = []; // clear current items
+
+    const res = await api(`chatMessage?page=${page}&chat_id=${chatId}`);
+    const json = await res.json();
+
+    if (json?.data) {
+      item_messages.value = json?.data?.data;
+    }
+
+    isLoadingMessages.value = false;
+  }
+
+  async function sendMessage(data: object) {
+    const res = await api(`chatMessage`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    if (res.ok) {
+      // await loadAllChats();
+    } else {
+      throw new Error("Failed to delete groups");
+    }
+  }
+
+  async function markAsRead(id: number) {
+    const res = await api(`chat/message-read/${id}`, {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      // await loadAllChats();
+    } else {
+      throw new Error("Failed to mark as read");
+    }
+  }
+
+  async function markAllAsRead(id: number) {
+    const res = await api(`chat/message-read-all/${id}`, {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      // await loadAllChats();
+    } else {
+      throw new Error("Failed to mark as read");
+    }
+  }
+
   return {
     items,
+    item_messages,
     selectedIds,
     deleteModalOpen,
     idsToDelete,
     pagination,
     editModalOpen,
     editItem,
+    isLoadingMessages,
     loadAllChats,
+    loadAllMessages,
+    markAsRead,
+    markAllAsRead,
+    sendMessage,
   };
 });

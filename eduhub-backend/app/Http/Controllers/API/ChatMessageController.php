@@ -8,16 +8,34 @@ use Illuminate\Http\Request;
 
 class ChatMessageController extends Controller
 {
+    public function index(Request $request)
+    {
+        ChatMessage::when(request('chat_id'), function ($query) use ($request) {
+            $query->where('chat_id', $request->chat_id);
+        })
+            ->where('sender_id',  auth()->user()->id)
+            ->update([
+                'is_read' => true
+            ]);
+
+        $messages = ChatMessage::with('sender')
+            ->when(request('chat_id'), function ($query) use ($request) {
+                $query->where('chat_id', $request->chat_id);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(request('per_page', 15));
+
+        return $this->success($messages);
+    }
+
     public function store(Request $request)
     {
-        $sender_type = $request->sender_type;
-        $sender_id = $request->sender_id;
-        $sender = getModelFromType($sender_type)->findOrFail($sender_id);
+        $sender = auth()->user();
 
         $message = ChatMessage::firstOrCreate([
             'chat_id' => $request->chat_id,
             'sender_type' => $sender->getMorphClass(),
-            'sender_id' => $sender_id,
+            'sender_id' => $sender->id,
             'message' => $request->message,
             'sent_at' => now(),
         ]);

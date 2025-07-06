@@ -21,6 +21,8 @@ class ChatMessage extends Model implements Auditable
         'sent_at'
     ];
 
+    protected $with = ['sender'];
+
     public function sender()
     {
         return $this->morphTo(__FUNCTION__, 'sender_type', 'sender_id');

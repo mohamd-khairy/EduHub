@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { breakpointsTailwind } from "@vueuse/core";
-import type { Mail } from "~/types";
-const chatStore = useChatStore();
 
+const chatStore = useChatStore();
 const mails = ref([]);
+
 onMounted(async () => {
   await chatStore.loadAllChats();
 });
@@ -24,7 +24,7 @@ const selectedTab = ref("all");
 // Filter mails based on the selected tab
 const filteredMails = computed(() => {
   if (selectedTab.value == "unread") {
-    return mails.value.filter((mail) => mail?.last_message?.is_read);
+    return mails.value.filter((mail) => !mail?.last_message?.is_read);
   }
 
   return mails.value;
