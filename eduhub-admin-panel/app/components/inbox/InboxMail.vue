@@ -11,14 +11,13 @@ const props = defineProps<{
 watch(
   () => props.mail, // ✅ reactive prop access
   (newMail) => {
+    if (!newMail) return;
     chatStore.loadAllMessages(1, newMail.id);
   },
   { immediate: true } // optional: run on initial mount
 );
 
 const emits = defineEmits(["close"]);
-
-const toast = useToast();
 
 const reply = ref("");
 const loading = ref(false);

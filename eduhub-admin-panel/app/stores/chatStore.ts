@@ -25,7 +25,9 @@ export const useChatStore = defineStore("chat", () => {
   async function loadAllChats(page = 1) {
     items.value = []; // clear current items
 
-    const res = await api(`chat?page=${page}&relations=last_message`);
+    const res = await api(
+      `chat?page=${page}&per_page=20&relations=last_message`
+    );
     const json = await res.json();
 
     if (json?.data) {
@@ -40,6 +42,7 @@ export const useChatStore = defineStore("chat", () => {
   }
 
   async function loadAllMessages(page = 1, chatId: number) {
+    if (!chatId) return;
     isLoadingMessages.value = true;
     item_messages.value = []; // clear current items
 

@@ -8,7 +8,6 @@ const props = defineProps<{
 
 const mailsRefs = ref<Element[]>([]);
 const selectedMail = defineModel<Mail | null>();
-
 watch(selectedMail, () => {
   if (!selectedMail.value) {
     return;

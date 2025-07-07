@@ -56,9 +56,14 @@ const items = [
         </UButton>
       </UTooltip>
 
-      <UDropdownMenu :items="items">
-        <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
-      </UDropdownMenu>
+      <RouterLink to="/inbox">
+        <UButton
+          icon="i-lucide-send"
+          size="md"
+          color="neutral"
+          variant="ghost"
+        />
+      </RouterLink>
     </template>
   </UDashboardNavbar>
 

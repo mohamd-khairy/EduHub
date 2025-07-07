@@ -7,6 +7,8 @@ const mails = ref([]);
 
 onMounted(async () => {
   await chatStore.loadAllChats();
+  mails.value = chatStore.items;
+  selectedMail.value = mails.value?.length > 0 ? mails.value[0] : null;
 });
 
 const tabItems = [
@@ -31,15 +33,6 @@ const filteredMails = computed(() => {
 });
 
 const selectedMail = ref({});
-// Reset selected mail if it's not in the filtered mails
-watch(
-  () => chatStore.items,
-  (values) => {
-    mails.value = values;
-    selectedMail.value = values.length > 0 ? values[0] : null;
-  },
-  { immediate: true, deep: true }
-);
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = breakpoints.smaller("lg");

@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
         CourseFactory::new()->count(10)->create();
         TeacherFactory::new()->count(10)->create();
         GroupFactory::new()->count(7)->create();
-        ParentModelFactory::new()->count(10)->create();
+        ParentModelFactory::new()->count(20)->create();
         // ScheduleFactory::new()->count(10)->create();
         StudentFactory::new()->count(20)->create();
         // PaymentFactory::new()->count(10)->create();
@@ -138,12 +138,16 @@ class DatabaseSeeder extends Seeder
                 'receiver_id' => $parent->id
             ]);
 
-            $chat->messages()->create([
-                'sender_type' => $user->getMorphClass(),
-                'sender_id' => $user->id,
-                'message' => 'Hello ' . $parent->name,
-                'sent_at' => now(),
-            ]);
+            for ($i = 0; $i < 20; $i++) {
+                $chat->messages()->create([
+                    'sender_type' => $i % 2 ? $parent->getMorphClass() : $user->getMorphClass(),
+                    'sender_id' => $i % 2 ? $parent->id : $user->id,
+                    'message' => ' When your application is in debug mode, detailed error messages with
+     stack traces will be shown on every error that occurs within your
+     application. If disabled, a simple generic error page is shown.',
+                    'sent_at' => now(),
+                ]);
+            }
         }
     }
 }
