@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('exam_id');
             $table->float('score');
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

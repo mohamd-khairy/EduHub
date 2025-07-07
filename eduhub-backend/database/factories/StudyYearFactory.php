@@ -17,9 +17,9 @@ class StudyYearFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' =>  ' السنة الدراسية لعام ' . $this->faker->year() . ' الترم الاول',
+            'name' =>  ' السنة الدراسية لعام 2025 الترم الاول',
             'start_date' => '2025-01-01',
-            'end_date' => '2025-06-29',
+            'end_date' => '2025-12-31',
             'status' => 1,
         ];
     }

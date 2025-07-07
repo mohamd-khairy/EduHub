@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
+use App\Traits\HasStudyYear;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +12,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class Schedule extends Model implements Auditable
 {
-    use HasFactory;
+    use HasFactory, HasStudyYear;
     use \OwenIt\Auditing\Auditable;
     public static bool $inPermission = true;
 
@@ -20,10 +22,16 @@ class Schedule extends Model implements Auditable
         'day',
         'start_time',
         'end_time',
-        'room_id'
+        'room_id',
+        'study_year_id'
     ];
 
     protected $appends = ['label', 'value'];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new RoleAccessScope);
+    }
 
     public function getLabelAttribute()
     {

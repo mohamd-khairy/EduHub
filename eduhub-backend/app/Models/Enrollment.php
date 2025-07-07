@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\ActiveStudyYearScope;
 use App\Models\Scopes\RoleAccessScope;
+use App\Traits\HasStudyYear;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -10,9 +12,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class Enrollment extends Model implements Auditable
 {
-use HasFactory;
- use \OwenIt\Auditing\Auditable;   
- public static bool $inPermission = true;
+    use HasFactory, HasStudyYear;
+    use \OwenIt\Auditing\Auditable;
+    public static bool $inPermission = true;
 
 
     protected $fillable = [
@@ -21,13 +23,14 @@ use HasFactory;
         'start_date',
         'end_date',
         'status',
+        'study_year_id'
     ];
 
     protected static function booted()
     {
         static::addGlobalScope(new RoleAccessScope);
     }
-    
+
     // العلاقة مع الطالب
     public function student()
     {

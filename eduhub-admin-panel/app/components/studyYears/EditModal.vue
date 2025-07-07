@@ -103,13 +103,13 @@ watch(
           />
         </UFormField>
 
-        <UFormField
+        <!-- <UFormField
           label="حالة السنة الدراسية"
           placeholder="حالة السنة الدراسية"
           name="status"
         >
           <USwitch required v-model="state.status" class="w-full" />
-        </UFormField>
+        </UFormField> -->
 
         <div class="flex justify-end gap-2">
           <UButton

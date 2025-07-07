@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('date');
             $table->enum('status', ['حضر', 'غائب', 'متأخر']);
             $table->text('note')->nullable();
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

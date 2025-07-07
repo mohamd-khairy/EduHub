@@ -67,10 +67,10 @@ function resetState() {
           <UInput type="date" required v-model="state.end_date" class="w-full" />
         </UFormField>
 
-        <UFormField label="حالة السنة دراسية" placeholder="حالة السنة دراسية" name="status">
+        <!-- <UFormField label="حالة السنة دراسية" placeholder="حالة السنة دراسية" name="status">
           <USwitch  required v-model="state.status" class="w-full" />
         </UFormField>
-        
+         -->
 
         <div class="flex justify-end gap-2">
           <UButton

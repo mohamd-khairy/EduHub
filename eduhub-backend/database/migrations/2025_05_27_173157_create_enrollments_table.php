@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->boolean('status')->default(true);
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

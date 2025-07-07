@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Scopes\RoleAccessScope;
+use App\Traits\HasStudyYear;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -16,9 +17,8 @@ use Illuminate\Support\Facades\Auth;
 
 class Student extends Authenticatable implements Auditable
 {
-    use HasFactory;
+    use HasFactory, HasStudyYear, HasApiTokens, HasRoles;
     use \OwenIt\Auditing\Auditable;
-    use HasApiTokens, HasRoles;
 
     protected $guard_name = 'student';
     public static bool $inPermission = true;
@@ -43,7 +43,8 @@ class Student extends Authenticatable implements Auditable
         'phone',
         'email',
         'image',
-        'password'
+        'password',
+        'study_year_id'
     ];
 
     protected $appends = ['attendance_status'];
@@ -53,11 +54,11 @@ class Student extends Authenticatable implements Auditable
         static::addGlobalScope(new RoleAccessScope);
 
         static::created(function ($student) {
-            if (! $student->password) {
+            if (!$student->password) {
                 $student->password = Hash::make($student->email);
                 $student->saveQuietly(); // avoid triggering events again
             }
-            if (! $student->hasRole('student')) {
+            if (!$student->hasRole('student')) {
                 $student->assignRole('student');
             }
         });
@@ -72,7 +73,8 @@ class Student extends Authenticatable implements Auditable
     public function getAttendanceStatusAttribute()
     {
         $scheduleId = request('schedule_id'); // Be cautious — assumes request context
-        if (!$scheduleId) return null;
+        if (!$scheduleId)
+            return null;
 
         return $this->todayAttendance()
             ->firstWhere('schedule_id', $scheduleId)
@@ -86,7 +88,7 @@ class Student extends Authenticatable implements Auditable
 
     public function groups()
     {
-        return $this->belongsToMany(Group::class, 'enrollments',  'student_id', 'group_id')
+        return $this->belongsToMany(Group::class, 'enrollments', 'student_id', 'group_id')
             ->withPivot('start_date', 'end_date', 'status');
     }
 

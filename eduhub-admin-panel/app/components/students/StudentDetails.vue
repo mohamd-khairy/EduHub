@@ -66,11 +66,11 @@ const links = computed(() => {
   const filteredLinks = allLinks.filter((link) => {
     if(link.permission == 'read-student-parent' && props.student?.parent == null)
       return false
-    if(link.permission == 'read-student-payment' && props.student?.payments.length == 0)
+    if(link.permission == 'read-student-payment' && props.student?.payments?.length == 0)
       return false
-    if(link.permission == 'read-student-exam' && props.student?.groups.length == 0)
+    if(link.permission == 'read-student-exam' && props.student?.groups?.length == 0)
       return false
-    if(link.permission == 'read-student-attendance' && props.student?.groups.length == 0)
+    if(link.permission == 'read-student-attendance' && props.student?.groups?.length == 0)
       return false
     
     // Check if user has the permission for the link

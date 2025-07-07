@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('message');
             $table->boolean('is_read')->default(false);
             $table->timestamp('sent_at');
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

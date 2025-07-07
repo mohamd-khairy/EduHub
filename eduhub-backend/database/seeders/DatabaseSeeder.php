@@ -71,6 +71,7 @@ class DatabaseSeeder extends Seeder
                     'read-student-attendance',
                     'read-student-payment',
                     'read-payment',
+                    'read-notification'
                 ]
             ],
             'parent' => [
@@ -88,6 +89,7 @@ class DatabaseSeeder extends Seeder
                     'read-student-attendance',
                     'read-student-payment',
                     'read-payment',
+                    'read-notification'
                 ]
             ],
             'teacher' => [
@@ -102,6 +104,7 @@ class DatabaseSeeder extends Seeder
                     'read-teacher',
                     'read-parentmodel',
                     'read-payment',
+                    'read-notification'
                 ]
             ],
         ];

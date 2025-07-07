@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class RoleAccessScope implements Scope
 {
-    public function apply(Builder $builder, Model $model): void
+    public $studyYear;
+
+    public function apply(Builder $builder, Model $model)//: void
     {
         $user = Auth::user();
 
@@ -21,24 +24,39 @@ class RoleAccessScope implements Scope
         $modelName = class_basename($model);
 
         match ($modelName) {
-            'Student'     => $this->applyStudentFilter($builder, $user),
-            'Group'       => $this->applyGroupFilter($builder, $user),
-            'Payment'     => $this->applyPaymentFilter($builder, $user),
-            'Enrollment'  => $this->applyEnrollmentFilter($builder, $user),
-            'Exam'        => $this->applyExamFilter($builder, $user),
-            'ExamResult'  => $this->applyExamResultFilter($builder, $user),
+            'Student' => $this->applyStudentFilter($builder, $user),
+            'Group' => $this->applyGroupFilter($builder, $user),
+            'Payment' => $this->applyPaymentFilter($builder, $user),
+            'Enrollment' => $this->applyEnrollmentFilter($builder, $user),
+            'Exam' => $this->applyExamFilter($builder, $user),
+            'ExamResult' => $this->applyExamResultFilter($builder, $user),
             'ParentModel' => $this->applyParentModelFilter($builder, $user),
-            'Teacher'     => $this->applyTeacherFilter($builder, $user),
-            'Attendance'  => $this->applyAttendanceFilter($builder, $user),
-            'Course'      => $this->applyCourseFilter($builder, $user),
-            default       => null
+            'Teacher' => $this->applyTeacherFilter($builder, $user),
+            'Attendance' => $this->applyAttendanceFilter($builder, $user),
+            'Course' => $this->applyCourseFilter($builder, $user),
+            default => null
         };
+
+        $this->applyStudyYearFilter($builder, $model);
+
+    }
+
+    private function applyStudyYearFilter(Builder $builder, Model $model)
+    {
+        $table = $model->getTable();
+
+        // Check if the model has study_year_id column (optional for safety)
+        if (Schema::hasColumn($table, 'study_year_id')) {
+            $activeStudyYearId = cache()->remember('active_study_year_id', 60, function () {
+                return StudyYear::where('status', 1)->value('id');
+            });
+
+            $builder->where("{$table}.study_year_id", $activeStudyYearId);
+        }
     }
 
     private function applyGroupFilter(Builder $builder, $user)
     {
-        $builder->whereHas('activeStudyYear');
-
         if ($user && $user->hasRole('teacher')) {
             $builder->where('teacher_id', $user->id);
         }
@@ -54,8 +72,6 @@ class RoleAccessScope implements Scope
 
     private function applyEnrollmentFilter(Builder $builder, $user)
     {
-        // $builder->whereHas('group', fn($q) => $q->where('study_year_id', StudyYear::current()));
-
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('group', fn($q) => $q->where('teacher_id', $user->id));
         }
@@ -69,14 +85,8 @@ class RoleAccessScope implements Scope
         }
     }
 
-    // All helper functions below are private to encapsulate logic
     private function applyStudentFilter(Builder $builder, $user)
     {
-        $builder->where(function ($q) {
-            $q->whereDoesntHave('enrollments')
-                ->orWhereHas('enrollments.group', fn($q) => $q->where('study_year_id', StudyYear::current()));
-        });
-
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('enrollments.group', fn($q) => $q->where('teacher_id', $user->id));
         }
@@ -92,8 +102,6 @@ class RoleAccessScope implements Scope
 
     private function applyPaymentFilter(Builder $builder, $user)
     {
-        $builder->whereHas('student');
-
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('student.enrollments.group', fn($q) => $q->where('teacher_id', $user->id));
         }
@@ -110,8 +118,6 @@ class RoleAccessScope implements Scope
 
     private function applyExamFilter(Builder $builder, $user)
     {
-        $builder->whereHas('group');
-
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('group', fn($q) => $q->where('teacher_id', $user->id));
         }
@@ -127,8 +133,6 @@ class RoleAccessScope implements Scope
 
     private function applyExamResultFilter(Builder $builder, $user)
     {
-        $builder->whereHas('exam');
-
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('exam.group', fn($q) => $q->where('teacher_id', $user->id));
         }
@@ -144,8 +148,6 @@ class RoleAccessScope implements Scope
 
     private function applyAttendanceFilter(Builder $builder, $user)
     {
-        $builder->whereHas('student');
-
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('student.enrollments.group', fn($q) => $q->where('teacher_id', $user->id));
         }
@@ -161,8 +163,6 @@ class RoleAccessScope implements Scope
 
     private function applyParentModelFilter(Builder $builder, $user)
     {
-        $builder->whereHas('students');
-
         if ($user && $user->hasRole('parent')) {
             $builder->where('id', $user->id);
         }
@@ -178,8 +178,6 @@ class RoleAccessScope implements Scope
 
     private function applyTeacherFilter(Builder $builder, $user)
     {
-        // $builder->whereHas('groups');
-
         if ($user && $user->hasRole('teacher')) {
             $builder->where('id', $user->id);
         }
@@ -195,8 +193,6 @@ class RoleAccessScope implements Scope
 
     private function applyCourseFilter(Builder $builder, $user)
     {
-        // $builder->whereHas('groups');
-
         if ($user && $user->hasRole('teacher')) {
             $builder->whereHas('groups', fn($q) => $q->where('teacher_id', $user->id));
         }
