@@ -15,6 +15,7 @@
     "@iconify-json/lucide": "^1.2.54",
     "@iconify-json/simple-icons": "^1.2.41",
     "@nuxt/ui-pro": "^3.2.0",
+    "@oxc-parser/binding-win32-x64-msvc": "^0.75.1",
     "@pinia/nuxt": "^0.11.1",
     "@unovis/ts": "^1.5.2",
     "@unovis/vue": "^1.5.2",
@@ -46,5 +47,5 @@
       "vue-demi"
     ]
   },
-  "packageManager": "pnpm@10.11.0"
+  "packageManager": "pnpm@10.12.4+sha256.cadfd9e6c9fcc2cb76fe7c0779a5250b632898aea5f53d833a73690c77a778d9"
 }

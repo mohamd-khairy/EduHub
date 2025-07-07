@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RoleAccessScope;
+use App\Traits\HasStudyYear;
 use Illuminate\Database\Eloquent\Model;
 
 class Audit extends Model implements \OwenIt\Auditing\Contracts\Audit
 {
-    use \OwenIt\Auditing\Audit;
+    use \OwenIt\Auditing\Audit, HasStudyYear;
 
     public static bool $inPermission = true;
 
@@ -30,9 +32,9 @@ class Audit extends Model implements \OwenIt\Auditing\Contracts\Audit
         'tags' => 'json',
     ];
 
-    public static function boot()
+    protected static function booted()
     {
-        parent::boot();
+        static::addGlobalScope(new RoleAccessScope);
 
         static::creating(function ($model) {
             $model->user_id = auth()->id() ?? null;

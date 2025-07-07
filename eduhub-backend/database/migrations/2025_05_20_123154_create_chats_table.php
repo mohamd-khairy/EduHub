@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('sender_type');
             $table->unsignedBigInteger('receiver_id');
             $table->string('receiver_type');
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

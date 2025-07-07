@@ -33,6 +33,6 @@ class StudyYear extends Model
 
     public static function current()
     {
-        return self::where('status', 1)->first()?->id ?? null;
+        return self::where('status', 1)->first() ?? null;
     }
 }

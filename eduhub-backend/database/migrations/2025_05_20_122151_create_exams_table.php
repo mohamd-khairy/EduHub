@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('date');
             $table->time('time');
             $table->integer('total_marks');
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

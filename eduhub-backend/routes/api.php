@@ -35,7 +35,7 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::group(['middleware' => 'auth:sanctum'], function () {
+Route::group(['middleware' => ['auth:sanctum', 'cacheResponse']], function () {
     Route::group(['prefix' => 'chat'], function () {
         Route::get('/all', [ChatController::class, 'All']);
         Route::get('/', [ChatController::class, 'index']);

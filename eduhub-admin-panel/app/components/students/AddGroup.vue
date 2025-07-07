@@ -65,68 +65,25 @@ function resetState() {
 </script>
 
 <template>
-  <UModal
-    v-model:open="open"
-    title="اضافة مجموعة"
-    description="إضافة مجموعة جديدة"
-    dir="rtl"
-  >
-    <UButton
-      label="إضافة مجموعة جديدة"
-      color="neutral"
-      icon="i-lucide-plus"
-      dir="rtl"
-      class="w-fit lg:ms-auto"
-      style="font-size: 18px"
-    />
+  <UModal v-model:open="open" title="اضافة مجموعة" description="إضافة مجموعة جديدة" dir="rtl">
+    <UButton label="إضافة مجموعة جديدة" color="neutral" icon="i-lucide-plus" dir="rtl" class="w-fit lg:ms-auto"
+      style="font-size: 18px" />
 
     <template #body dir="rtl">
       <UForm :schema="schema" :state="state" class="space-y-4" dir="rtl">
-        <UFormField
-          label="اسم المجموعة"
-          placeholder="اسم المجموعة"
-          name="group_id"
-          style="font-size: 18px"
-        >
-          <USelectMenu
-            :items="groupStore.groupOptions"
-            v-model="state.group_id"
-            autocomplete="off"
-            class="w-full"
-          />
+        <UFormField label="اسم المجموعة" placeholder="اسم المجموعة" name="group_id" style="font-size: 18px">
+          <USelectMenu required :items="groupStore.groupOptions" v-model="state.group_id" class="w-full" />
         </UFormField>
-        <UFormField
-          label="تاريخ البداية"
-          placeholder="تاريخ البداية"
-          name="start_date"
-          style="font-size: 18px"
-        >
+        <UFormField label="تاريخ البداية" placeholder="تاريخ البداية" name="start_date" style="font-size: 18px">
           <UInput required type="date" v-model="state.start_date" class="w-full" />
         </UFormField>
 
-        <UFormField
-          label="تاريخ النهاية"
-          placeholder="تاريخ النهاية"
-          name="end_date"
-          style="font-size: 18px"
-        >
+        <UFormField label="تاريخ النهاية" placeholder="تاريخ النهاية" name="end_date" style="font-size: 18px">
           <UInput required type="date" v-model="state.end_date" class="w-full" />
         </UFormField>
         <div class="flex justify-end gap-2">
-          <UButton
-            label="الغاء"
-            color="neutral"
-            variant="subtle"
-            @click="open = false"
-          />
-          <UButton
-            label="حفظ"
-            color="primary"
-            variant="solid"
-            type="submit"
-            loading-auto
-            @click="onSubmit"
-          />
+          <UButton label="الغاء" color="neutral" variant="subtle" @click="open = false" />
+          <UButton label="حفظ" color="primary" variant="solid" type="submit" loading-auto @click="onSubmit" />
         </div>
       </UForm>
     </template>

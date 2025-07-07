@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\NewMessageNotification;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 abstract class Controller
 {
@@ -50,7 +51,7 @@ abstract class Controller
             $data = $model->with($relations ?? [])->orderBy('id', 'desc')->paginate(request('per_page', 10));
 
             // dd($data->toSql());
-            return  $this->success($data);
+            return $this->success($data);
         } catch (\Throwable $th) {
             throw $th;
             // return  $this->fail([]);
@@ -79,7 +80,7 @@ abstract class Controller
             }
             $data = $data->orderBy('id', 'desc')->get();
 
-            return  $this->success($data);
+            return $this->success($data);
         } catch (\Throwable $th) {
             throw $th;
             // return  $this->fail([]);
@@ -112,7 +113,7 @@ abstract class Controller
                 $data->toArray()
             ));
 
-            broadcast(new NewMessage($data->toArray()));
+            // broadcast(new NewMessage($data->toArray()));
 
             return $this->success($data);
         } catch (\Throwable $th) {
@@ -137,7 +138,7 @@ abstract class Controller
                 ->where('id', $id)
                 ->first();
 
-            return  $this->success($data);
+            return $this->success($data);
         } catch (\Throwable $th) {
             throw $th;
             // return  $this->fail([]);
@@ -171,7 +172,6 @@ abstract class Controller
                 $data->toArray()
             ));
 
-
             return $this->success($data);
         } catch (\Throwable $th) {
             throw $th;
@@ -189,7 +189,7 @@ abstract class Controller
 
             $data = $model->where('id', $id)->delete();
 
-            return  $this->success($data);
+            return $this->success($data);
         } catch (\Throwable $th) {
             throw $th;
             // return  $this->fail([]);
@@ -203,7 +203,7 @@ abstract class Controller
 
             $data = $model->whereIn('id', $request->ids)->delete();
 
-            return  $this->success($data);
+            return $this->success($data);
         } catch (\Throwable $th) {
             throw $th;
             // return  $this->fail([]);
@@ -233,6 +233,14 @@ abstract class Controller
 
     public function success($data = null, $msg = null)
     {
+        if (
+            request()->isMethod('post')
+            || request()->isMethod('put')
+            || request()->isMethod('delete')
+        ) {
+            ResponseCache::clear(); // or ResponseCache::forget($uri)
+        }
+        
         return response()->json([
             'status' => true,
             'code' => 200,

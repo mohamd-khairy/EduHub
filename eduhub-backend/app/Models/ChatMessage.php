@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\ActiveStudyYearScope;
+use App\Models\Scopes\RoleAccessScope;
+use App\Traits\HasStudyYear;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
 class ChatMessage extends Model implements Auditable
 {
-    use HasFactory;
+    use HasFactory, HasStudyYear;
     use \OwenIt\Auditing\Auditable;
     public static bool $inPermission = true;
 
@@ -18,10 +21,16 @@ class ChatMessage extends Model implements Auditable
         'chat_id',
         'message',
         'is_read',
-        'sent_at'
+        'sent_at',
+        'study_year_id'
     ];
 
     protected $with = ['sender'];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new RoleAccessScope);
+    }
 
     public function sender()
     {

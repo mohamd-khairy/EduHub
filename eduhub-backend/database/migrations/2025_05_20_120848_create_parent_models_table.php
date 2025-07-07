@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('password')->nullable();
             $table->string('address')->nullable();
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

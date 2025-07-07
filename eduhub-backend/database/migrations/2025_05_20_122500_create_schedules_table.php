@@ -18,6 +18,7 @@ return new class extends Migration
             $table->time('start_time');
             $table->time('end_time');
             $table->unsignedBigInteger('room_id')->nullable();
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

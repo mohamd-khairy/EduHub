@@ -149,7 +149,7 @@ export const useStudentStore = defineStore("student", () => {
     });
 
     if (res.ok) {
-      await loadAllStudents();
+      // await loadAllStudents();
     } else {
       throw new Error("Failed to delete groups");
     }

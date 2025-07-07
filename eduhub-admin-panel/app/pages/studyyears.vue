@@ -2,6 +2,7 @@
 definePageMeta({
   permission: "read-studyyear",
 });
+import { USwitch } from '#components';
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import AddModal from '~/components/studyYears/AddModal.vue'
@@ -159,7 +160,7 @@ const columns: TableColumn<User>[] = [
         () => row.original.start_date
       )
   },
-   {
+  {
     accessorKey: 'end_date',
     id: 'تاريخ نهاية السنة الدراسية',
     header: 'تاريخ نهاية السنة الدراسية',
@@ -169,17 +170,38 @@ const columns: TableColumn<User>[] = [
         () => row.original.end_date
       )
   },
-   {
+  {
     accessorKey: 'status',
     id: 'حالة السنة الدراسية',
     header: 'حالة السنة الدراسية',
     cell: ({ row }) =>
-      h(
-        UBadge,
-        { class: 'capitalize', variant: 'subtle', color: 'success' },
-        () => row.original.status ? 'مفعلة' : 'غير مفعلة'
-      )
+      h(USwitch, {
+        modelValue: row.original.status,
+        'onUpdate:modelValue': (val: boolean) => {
+          const selectedId = row.original.id
+
+          if (!val) {
+            return
+          }
+          // Loop through all study years in the store
+          studyYearStore.items.forEach(item => {
+            if (item.status == true) {
+              studyYearStore.editStudyYear(
+                { status: false },
+                item.id
+              )
+            }
+          })
+          studyYearStore.editStudyYear(
+            { status: val },
+            selectedId
+          )
+        },
+        class: 'w-12 h-6',
+      }),
   },
+
+
   {
     accessorKey: 'الاجراءات',
     id: 'الاجراءات',
@@ -221,37 +243,22 @@ const columns: TableColumn<User>[] = [
           <AddModal />
         </template>
 
-        <DeleteModal
-          :count="studyYearStore.selectedIds.length"
-          v-model:open="studyYearStore.deleteModalOpen"
-        />
+        <DeleteModal :count="studyYearStore.selectedIds.length" v-model:open="studyYearStore.deleteModalOpen" />
 
-        <EditModal
-          :item="studyYearStore.editItem"
-          v-model:open="studyYearStore.editModalOpen"
-        />
+        <EditModal :item="studyYearStore.editItem" v-model:open="studyYearStore.editModalOpen" />
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput
-          :model-value="(table?.tableApi?.getColumn('اسم السنة الدراسية')?.getFilterValue() as string)"
-          class="max-w-sm"
-          icon="i-lucide-search"
-          placeholder="ابحث ..."
-          @update:model-value="table?.tableApi?.getColumn('اسم السنة الدراسية')?.setFilterValue($event)"
-        />
+        <UInput :model-value="(table?.tableApi?.getColumn('اسم السنة الدراسية')?.getFilterValue() as string)"
+          class="max-w-sm" icon="i-lucide-search" placeholder="ابحث ..."
+          @update:model-value="table?.tableApi?.getColumn('اسم السنة الدراسية')?.setFilterValue($event)" />
 
         <div class="flex flex-wrap items-center gap-1.5">
           <DeleteModal :count="studyYearStore.selectedIds.length">
-            <UButton
-              v-if="studyYearStore.selectedIds.length"
-              label="حذف"
-              color="error"
-              variant="subtle"
-              icon="i-lucide-trash"
-            >
+            <UButton v-if="studyYearStore.selectedIds.length" label="حذف" color="error" variant="subtle"
+              icon="i-lucide-trash">
               <template #trailing>
                 <UKbd>
                   {{ studyYearStore.selectedIds.length }}
@@ -260,8 +267,7 @@ const columns: TableColumn<User>[] = [
             </UButton>
           </DeleteModal>
 
-          <UDropdownMenu
-            :items="table?.tableApi
+          <UDropdownMenu :items="table?.tableApi
             ?.getAllColumns()
             .filter((column) => column.getCanHide())
             .map((column) => ({
@@ -275,48 +281,27 @@ const columns: TableColumn<User>[] = [
                 e?.preventDefault()
               }
             }))
-            "
-            :content="{ align: 'end' }"
-          >
-            <UButton
-              label="الاعمدة"
-              color="neutral"
-              variant="outline"
-              trailing-icon="i-lucide-settings-2"
-            />
+            " :content="{ align: 'end' }">
+            <UButton label="الاعمدة" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
           </UDropdownMenu>
         </div>
       </div>
 
-      <UTable
-        ref="table"
-        v-model:column-filters="columnFilters"
-        v-model:column-visibility="columnVisibility"
-        v-model:pagination="studyYearStore.pagination"
-        class="shrink-0"
-        :data="studyYearStore.items"
-        :columns="columns"
+      <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+        v-model:pagination="studyYearStore.pagination" class="shrink-0" :data="studyYearStore.items" :columns="columns"
         :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
           th: 'py-2  border-y border-default ',
           td: 'border-b border-default',
-        }"
-      />
+        }" />
 
-      <div
-        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
-        dir="ltr"
-      >
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto" dir="ltr">
         <div class="flex items-center gap-1.5" dir="ltr">
-          <UPagination
-            dir="ltr"
-            :total="studyYearStore.pagination?.total"
-            :items-per-page="studyYearStore.pagination?.pageSize"
-            :default-page="studyYearStore.pagination?.page"
-            @update:page="(p) => studyYearStore.loadAllStudyYears(p)"
-          />
+          <UPagination dir="ltr" :total="studyYearStore.pagination?.total"
+            :items-per-page="studyYearStore.pagination?.pageSize" :default-page="studyYearStore.pagination?.page"
+            @update:page="(p) => studyYearStore.loadAllStudyYears(p)" />
         </div>
       </div>
     </template>

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('password')->nullable();
             $table->string('image')->nullable();
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }

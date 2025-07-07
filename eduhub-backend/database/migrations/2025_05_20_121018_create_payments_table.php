@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('method', ['كاش', 'تحويل بنكي', 'فيزا']);
             $table->enum('status', ['paid', 'pending', 'cancelled'])->default('paid');
             $table->text('note')->nullable();
+            $table->foreignId('study_year_id')->constrained();
             $table->timestamps();
         });
     }
