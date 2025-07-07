@@ -48,6 +48,7 @@ const items = [
           variant="ghost"
           square
           @click="isNotificationsSlideoverOpen = true"
+          style="cursor: pointer"
         >
           <UChip color="error" inset v-if="notificationStore.items?.length > 0">
             <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
@@ -62,6 +63,7 @@ const items = [
           size="md"
           color="neutral"
           variant="ghost"
+          style="cursor: pointer"
         />
       </RouterLink>
     </template>
