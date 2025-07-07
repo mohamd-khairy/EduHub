@@ -70,8 +70,8 @@ ChartJS.register({
 
     meta.data.forEach((arc, index) => {
       const { x, y } = arc.tooltipPosition();
-      const label = chart.data.labels?.[index] || "";
-      const value = chart.data.datasets[0].data[index];
+      const label = chart?.data?.labels?.[index] || "";
+      const value = chart?.data?.datasets[0]?.data[index];
       ctx.save();
       ctx.fillStyle = options.color || "#000";
       ctx.font = `${options.font?.weight || "bold"} ${
