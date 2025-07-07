@@ -47,7 +47,7 @@ class GroupController extends Controller
             return $this->success($data);
         } catch (\Throwable $th) {
             throw $th;
-            return  $this->fail([]);
+            // return  $this->fail([]);
         }
     }
 
