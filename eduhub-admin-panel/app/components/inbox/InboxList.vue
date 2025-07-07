@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { format, isToday } from "date-fns";
 import type { Mail } from "~/types";
-
+const chatStore = useChatStore();
 const props = defineProps<{
   mails: Mail[];
 }>();
@@ -12,7 +12,10 @@ watch(selectedMail, () => {
   if (!selectedMail.value) {
     return;
   }
-  selectedMail.value.last_message.is_read = true;
+  if (!selectedMail.value.last_message.is_read) {
+    selectedMail.value.last_message.is_read = true;
+    chatStore.markAllAsRead(selectedMail.value.id);
+  }
   const ref = mailsRefs.value[selectedMail.value.id];
   if (ref) {
     ref.scrollIntoView({ block: "nearest" });

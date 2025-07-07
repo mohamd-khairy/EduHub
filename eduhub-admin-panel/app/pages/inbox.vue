@@ -4,11 +4,12 @@ import { breakpointsTailwind } from "@vueuse/core";
 
 const chatStore = useChatStore();
 const mails = ref([]);
+const selectedMail = defineModel<null>();
 
 onMounted(async () => {
   await chatStore.loadAllChats();
   mails.value = chatStore.items;
-  selectedMail.value = mails.value?.length > 0 ? mails.value[0] : null;
+  // selectedMail.value = mails.value?.length > 0 ? mails.value[0] : null;
 });
 
 const tabItems = [
@@ -32,7 +33,6 @@ const filteredMails = computed(() => {
   return mails.value;
 });
 
-const selectedMail = ref({});
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = breakpoints.smaller("lg");

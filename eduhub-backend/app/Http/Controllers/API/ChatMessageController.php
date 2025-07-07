@@ -10,20 +10,6 @@ class ChatMessageController extends Controller
 {
     public function index(Request $request)
     {
-        ChatMessage::when(request('chat_id'), function ($query, $chatId) {
-            $query->where('chat_id', $chatId);
-        })
-            ->whereHas('chat', function ($query) {
-                $query->where(function ($q) {
-                    $q->where('sender_id', auth()->id())
-                        ->orWhere('receiver_id', auth()->id());
-                });
-            })
-            ->where('sender_id', '!=', auth()->id())
-            ->where('is_read', false)
-            ->update([
-                'is_read' => true,
-            ]);
         $messages = ChatMessage::with('sender')
             ->when(request('chat_id'), function ($query) use ($request) {
                 $query->where('chat_id', $request->chat_id);

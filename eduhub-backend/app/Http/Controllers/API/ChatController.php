@@ -45,7 +45,7 @@ class ChatController extends Controller
     public function readAll($chat_id)
     {
         $chat = Chat::findOrFail($chat_id);
-        $chat->messages()->update(['is_read' => true]);
+        $chat->messages()->where('sender_id', '!=', auth()->id())->update(['is_read' => true]);
         return $this->success(true);
     }
 }
