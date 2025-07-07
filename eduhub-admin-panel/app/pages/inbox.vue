@@ -27,7 +27,7 @@ const selectedTab = ref("all");
 // Filter mails based on the selected tab
 const filteredMails = computed(() => {
   if (selectedTab.value == "unread") {
-    return mails.value.filter((mail) => !mail?.last_message?.is_read);
+    return mails.value.filter((mail) => mail?.last_message?.is_read == false);
   }
 
   return mails.value;

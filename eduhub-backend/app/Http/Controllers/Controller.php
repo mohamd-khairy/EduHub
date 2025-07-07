@@ -238,9 +238,9 @@ abstract class Controller
             || request()->isMethod('put')
             || request()->isMethod('delete')
         ) {
-            ResponseCache::clear(); // or ResponseCache::forget($uri)
+            ResponseCache::clear();
         }
-        
+
         return response()->json([
             'status' => true,
             'code' => 200,
