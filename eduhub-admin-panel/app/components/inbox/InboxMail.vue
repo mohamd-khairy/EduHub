@@ -92,16 +92,16 @@ function onSubmit() {
         :key="message.id"
         class="flex"
         :class="{
-          'justify-end': message.sender_id === authStore.user?.id,
-          'justify-start': message.sender_id !== authStore.user?.id,
+          'justify-start': message.sender_id === authStore.user?.id,
+          'justify-end': message.sender_id !== authStore.user?.id,
         }"
       >
         <div
           class="max-w-xs sm:max-w-md px-4 py-2 rounded-lg shadow text-sm"
           :class="{
-            'bg-primary text-white rounded-br-none':
+            'bg-primary text-white dark:text-black rounded-bl-none':
               message.sender_id === authStore.user?.id,
-            'bg-muted text-gray-900 rounded-bl-none':
+            'bg-muted text-gray-900 dark:text-white rounded-br-none':
               message.sender_id !== authStore.user?.id,
           }"
         >
