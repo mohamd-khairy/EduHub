@@ -54,6 +54,6 @@ class Chat extends Model implements Auditable
 
     public function last_message()
     {
-        return $this->hasOne(ChatMessage::class, 'chat_id')->latestOfMany('sent_at');
+        return $this->hasOne(ChatMessage::class, 'chat_id')->where('sender_id', '!=', auth()->id())->latestOfMany('sent_at');
     }
 }

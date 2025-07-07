@@ -12,7 +12,8 @@ watch(selectedMail, () => {
   if (!selectedMail.value) {
     return;
   }
-  if (!selectedMail.value.last_message.is_read) {
+
+  if (selectedMail.value.last_message?.is_read == false) {
     selectedMail.value.last_message.is_read = true;
     chatStore.markAllAsRead(selectedMail.value.id);
   }
@@ -58,7 +59,7 @@ defineShortcuts({
       <div
         class="p-4 sm:px-6 text-sm cursor-pointer border-l-2 transition-colors"
         :class="[
-          !mail.last_message.is_read ? 'text-highlighted' : 'text-toned)',
+          mail.last_message?.is_read == false ? 'text-highlighted' : 'text-toned)',
           selectedMail && selectedMail.id === mail.id
             ? 'border-primary bg-primary/10'
             : 'border-(--ui-bg) hover:border-primary hover:bg-primary/5',
@@ -83,11 +84,11 @@ defineShortcuts({
           <div class="pr-15 flex flex-col justify-center z-10 w-full">
             <div
               class="flex items-center justify-between"
-              :class="[!mail.last_message.is_read && 'font-semibold']"
+              :class="[mail?.last_message?.is_read == false && 'font-semibold']"
             >
               <div class="flex items-center gap-2">
                 {{ mail.other_user?.name }}
-                <UChip v-if="!mail.last_message.is_read" />
+                <UChip v-if="mail?.last_message?.is_read == false" />
               </div>
 
               <span class="text-xs text-muted">
@@ -101,13 +102,13 @@ defineShortcuts({
 
             <p
               class="text-dimmed text-sm line-clamp-1"
-              :class="[!mail.last_message.is_read && 'font-semibold']"
+              :class="[mail?.last_message?.is_read == false && 'font-semibold']"
             >
               {{ mail.other_user?.phone }}
             </p>
             <p
               class="text-dimmed text-sm line-clamp-1"
-              :class="[!mail.last_message.is_read && 'font-semibold']"
+              :class="[mail?.last_message?.is_read == false && 'font-semibold']"
             >
               {{ mail.other_user?.email }}
             </p>

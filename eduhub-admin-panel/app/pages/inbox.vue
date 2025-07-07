@@ -33,7 +33,6 @@ const filteredMails = computed(() => {
   return mails.value;
 });
 
-
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = breakpoints.smaller("lg");
 </script>
@@ -45,6 +44,7 @@ const isMobile = breakpoints.smaller("lg");
     :min-size="20"
     :max-size="30"
     resizable
+    v-if="filteredMails.length > 0"
   >
     <UDashboardNavbar title="الرسائل">
       <template #leading>
