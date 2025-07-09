@@ -22,7 +22,14 @@ const qrValue = computed(() => {
       <!-- Student Image in the middle -->
       <div class="image-container">
         <img
+          v-if="props.student?.image"
           :src="props.student?.image"
+          :alt="props.student?.name"
+          class="student-image"
+        />
+         <img
+          v-else
+          src="assets/images/agency.png"
           :alt="props.student?.name"
           class="student-image"
         />

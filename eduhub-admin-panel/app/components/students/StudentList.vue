@@ -24,6 +24,32 @@ watch(selectedStudent, () => {
   const ref = studentsRefs.value[selectedStudent.value.id];
   if (ref) ref.scrollIntoView({ block: "nearest" });
 });
+
+defineShortcuts({
+  arrowdown: () => {
+    const index = props.students.findIndex(
+      (mail) => mail.id === selectedStudent.value?.id
+    );
+
+    if (index === -1) {
+      selectedStudent.value = props.students[0];
+    } else if (index < props.students.length - 1) {
+      selectedStudent.value = props.students[index + 1];
+    }
+  },
+  arrowup: () => {
+    const index = props.students.findIndex(
+      (mail) => mail.id === selectedStudent.value?.id
+    );
+
+    if (index === -1) {
+      selectedStudent.value = props.students[props.students.length - 1];
+    } else if (index > 0) {
+      selectedStudent.value = props.students[index - 1];
+    }
+  },
+});
+
 </script>
 
 <template>
@@ -34,7 +60,7 @@ watch(selectedStudent, () => {
       :ref="el => { studentsRefs[student.id] = el as Element }"
       class="p-4 sm:px-6 text-sm cursor-pointer border-l-2 transition-colors"
       :class="[
-        student?.unread ? 'text-highlighted' : 'text-toned)',
+        student?.id == selectedStudent?.id ? 'text-highlighted' : 'text-toned)',
         selectedStudent && selectedStudent.id === student.id
           ? 'border-primary bg-primary/10'
           : 'border-(--ui-bg) hover:border-primary hover:bg-primary/5',
@@ -49,6 +75,7 @@ watch(selectedStudent, () => {
           <span>{{ student.id }}#</span>
 
           <UAvatar :src="student.image" :alt="student.name" size="lg" />
+         
           {{ student.name }}
         </div>
         <!-- <span>{{

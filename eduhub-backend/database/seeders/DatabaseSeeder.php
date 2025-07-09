@@ -42,13 +42,13 @@ class DatabaseSeeder extends Seeder
         ])->assignRole('admin');
 
         StudyYearFactory::new()->count(1)->create();
-        UserFactory::new()->count(10)->create();
+        UserFactory::new()->count(1000)->create();
         CourseFactory::new()->count(10)->create();
         TeacherFactory::new()->count(10)->create();
-        GroupFactory::new()->count(7)->create();
-        ParentModelFactory::new()->count(20)->create();
+        GroupFactory::new()->count(10)->create();
+        ParentModelFactory::new()->count(1000)->create();
         // ScheduleFactory::new()->count(10)->create();
-        StudentFactory::new()->count(20)->create();
+        StudentFactory::new()->count(1000)->create();
         // PaymentFactory::new()->count(10)->create();
         // ExamFactory::new()->count(10)->create();
         // ExamResultFactory::new()->count(10)->create();

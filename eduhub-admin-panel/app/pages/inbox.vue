@@ -43,7 +43,6 @@ const isMobile = breakpoints.smaller("lg");
     :default-size="25"
     :min-size="20"
     :max-size="30"
-    resizable
     v-if="filteredMails.length > 0"
   >
     <UDashboardNavbar title="الرسائل">

@@ -1,4 +1,3 @@
-// File: components/students/StudentDetails.vue
 <script setup lang="ts">
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";

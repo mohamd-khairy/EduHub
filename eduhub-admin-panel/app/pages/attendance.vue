@@ -27,9 +27,6 @@ const paginatedStudents = ref([]);
 const isScanning = ref(false);
 const scanSuccess = ref(false);
 const scanError = ref(false);
-const scanErrorMessage = ref("");
-const lastScannedStudent = ref("");
-const statusOptions = ["حضر", "غائب", "متأخر"];
 const statusColors = {
   حضر: "success",
   غائب: "error",

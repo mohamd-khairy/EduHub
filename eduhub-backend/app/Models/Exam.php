@@ -25,6 +25,18 @@ class Exam extends Model implements Auditable
         'study_year_id'
     ];
 
+    protected $appends = ['label', 'value'];
+
+    public function getLabelAttribute()
+    {
+        return $this->title;
+    }
+
+    public function getValueAttribute()
+    {
+        return $this->id;
+    }
+
     protected static function booted()
     {
         static::addGlobalScope(new RoleAccessScope);

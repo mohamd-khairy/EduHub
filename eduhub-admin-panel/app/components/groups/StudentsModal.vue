@@ -16,9 +16,9 @@ const searchStudentTerm = ref("");
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
 const data = ref([]);
-const filteredStudent = ref([]);
+const AllStudents = ref([]);
 
-const columns: TableColumn<User>[] = [
+const columns = [
   {
     accessorKey: "id",
     id: "الرقم ",
@@ -128,80 +128,97 @@ const columns: TableColumn<User>[] = [
   },
 ];
 
-watch(
-  () => student_id?.value,
-  (val) => {
-    if (!val) {
-      filteredStudent.value = props.students;
-    } else {
-      filteredStudent.value = props.students.filter((i) => i.id == val.value);
-    }
-  },
-  { immediate: true, deep: true }
-);
+const paginatedStudents = ref([]);
+const page = ref(1);
+const pageCount = ref(10);
+const searchQuery = ref("");
 
-watch(
-  () => props.students,
-  (val) => {
-    if (!val) return;
+const filteredStudent = computed(() => {
+  let result = props.students;
 
-    data.value = props.students?.map((item) => {
-      return {
-        label: item.name,
-        value: item.id,
-      };
-    });
+  if (searchQuery.value) {
+    // updatePage(1)
+    const query = searchQuery.value.toLowerCase();
+    result = result.filter((s) => s.name.toLowerCase().includes(query));
+  }
 
-    filteredStudent.value = props.students;
-  },
-  { immediate: true, deep: true }
-);
+  return result;
+});
+
+function paginateStudents() {
+  const start = (page.value - 1) * pageCount.value;
+  const end = start + pageCount.value;
+  paginatedStudents.value = filteredStudent.value.slice(start, end);
+}
+
+watch(filteredStudent, () => {
+  updatePage(1);
+  paginateStudents();
+});
+
+watch(page, () => {
+  paginateStudents();
+});
+
+function updatePage(p) {
+  page.value = p;
+}
 </script>
 
 <template>
   <UModal fullscreen v-model:open="open" :title="`جميع الطلاب`">
-    <template #body dir="rtl">
+    <template #body dir="rtl" v-if="paginatedStudents.length > 0">
       <div
         class="flex items-center space-x-4 mb-6 w-full"
         style="margin-bottom: 10px"
         dir="rtl"
       >
-        <USelectMenu
-          dir="rtl"
-          v-model:search-term="searchStudentTerm"
-          v-model="student_id"
-          :items="data"
-          placeholder="اختر الطالب"
-          :search-input="{
-            placeholder: 'بحث...',
-            icon: 'i-lucide-search',
-          }"
-          size="xl"
-          class="w-62"
+        <UInput
+          class="max-w-sm"
+          icon="i-lucide-search"
+          placeholder="ابحث ..."
+          v-model="searchQuery"
         />
 
         <UButton
           icon="i-lucide-x"
           color="gray"
           size="sm"
-          @click="student_id = null"
+          @click="searchQuery = null"
           class="hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-300"
         />
       </div>
-      <UTable
-        ref="table"
-        class="shrink-0"
-        :data="filteredStudent"
-        :columns="columns"
-        :ui="{
-          base: 'table-fixed border-separate border-spacing-0',
-          thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:border-b-0',
-          th: 'py-2  border-y border-default ',
-          td: 'border-b border-default',
-        }"
-        dir="rtl"
-      />
+      <div class="border rounded-lg overflow-hidden text-lg">
+        <UTable
+          ref="table"
+          class="shrink-0"
+          :data="paginatedStudents"
+          :columns="columns"
+          :ui="{
+            base: 'table-fixed border-separate border-spacing-0',
+            thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+            tbody: '[&>tr]:last:[&>td]:border-b-0',
+            th: 'py-2  border-y border-default ',
+            td: 'border-b border-default',
+          }"
+          dir="rtl"
+        />
+      </div>
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-4 text-lg">
+        <div class="text-gray-500">
+          عرض {{ paginatedStudents.length }} من
+          {{ filteredStudent.length }} طالب
+        </div>
+
+        <UPagination
+          dir="ltr"
+          :total="filteredStudent.length"
+          :items-per-page="pageCount"
+          :default-page="page"
+          @update:page="(p) => updatePage(p)"
+        />
+      </div>
     </template>
   </UModal>
 </template>

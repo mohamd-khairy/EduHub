@@ -47,7 +47,17 @@ class Student extends Authenticatable implements Auditable
         'study_year_id'
     ];
 
-    protected $appends = ['attendance_status'];
+    protected $appends = ['attendance_status' , 'label' , 'value'];
+
+    public function getLabelAttribute()
+    {
+        return $this->name;
+    }
+
+    public function getValueAttribute()
+    {
+        return $this->id;
+    }
 
     protected static function booted()
     {

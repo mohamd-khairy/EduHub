@@ -152,7 +152,6 @@ const isMobile = breakpoints.smaller("lg");
     :default-size="25"
     :min-size="20"
     :max-size="30"
-    resizable
   >
     <UDashboardNavbar title="الطلاب">
       <template #leading>
