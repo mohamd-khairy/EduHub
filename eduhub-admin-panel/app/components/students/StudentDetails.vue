@@ -27,7 +27,7 @@ const links = computed(() => {
       label: "QR Code",
       icon: "i-lucide-qr-code",
       to: `/students/${studentId.value}/qr`,
-      permission: "read-student-payment",
+      permission: "read-student",
     },
     {
       label: "ولي الامر",
