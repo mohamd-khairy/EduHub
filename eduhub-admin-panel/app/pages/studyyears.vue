@@ -198,6 +198,7 @@ const columns: TableColumn<User>[] = [
           )
         },
         class: 'w-12 h-6',
+        style: 'cursor: pointer',
       }),
   },
 
