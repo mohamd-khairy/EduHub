@@ -270,7 +270,7 @@ onMounted(() => {
       </UDashboardNavbar>
     </template>
 
-    <template #body v-if="groupStore.items.length > 0">
+    <template #body v-if="!groupStore.isItemLoading">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('اسم المجموعة')?.getFilterValue() as string)"

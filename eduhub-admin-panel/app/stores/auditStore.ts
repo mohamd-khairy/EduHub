@@ -11,7 +11,7 @@ export const useAuditStore = defineStore("audit", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
-
+  const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -22,6 +22,7 @@ export const useAuditStore = defineStore("audit", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllAudits(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(`audit?page=${page}`);
@@ -36,6 +37,8 @@ export const useAuditStore = defineStore("audit", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   // Delete selected payments from backend, then update local items and selection
@@ -95,6 +98,7 @@ export const useAuditStore = defineStore("audit", () => {
     pagination,
     editModalOpen,
     editItem,
+    isItemLoading,
     loadAllAudits,
     toggleId,
     addId,

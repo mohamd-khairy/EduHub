@@ -11,7 +11,7 @@ export const useParentStore = defineStore("parent", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
-
+  const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -22,6 +22,7 @@ export const useParentStore = defineStore("parent", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllParents(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(`parentModel?relations=students&page=${page}`);
@@ -36,6 +37,8 @@ export const useParentStore = defineStore("parent", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadParents(search = null) {
@@ -163,6 +166,7 @@ export const useParentStore = defineStore("parent", () => {
     pagination,
     editModalOpen,
     editItem,
+    isItemLoading,
     addParent,
     editParent,
     loadAllParents,

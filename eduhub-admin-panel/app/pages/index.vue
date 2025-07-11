@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import DashboardHeader from "~/components/reports/DashboardHeader.vue";
+definePageMeta({
+  permission: "read-dashboard",
+});
 const resetSignal = ref(false);
 const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();

@@ -338,7 +338,7 @@ const exportAttendance = () => {
       </UDashboardNavbar>
     </template>
 
-    <template #body>
+    <template #body v-if="!attendanceStore.isItemLoading">
       <UTabs
         v-if="items.length > 0"
         v-model="selectedGroupTab"
@@ -587,6 +587,9 @@ const exportAttendance = () => {
       <div v-else class="flex items-center justify-center h-64">
         لا يوجد بيانات في هذا اليوم
       </div>
+    </template>
+    <template #body v-else>
+      <Loader />
     </template>
   </UDashboardPanel>
 </template>

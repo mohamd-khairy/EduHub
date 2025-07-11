@@ -11,7 +11,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
-
+  const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -22,6 +22,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllAttendances(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(`attendance?relations=student&page=${page}`);
@@ -36,6 +37,8 @@ export const useAttendanceStore = defineStore("attendance", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadAttendances(search = null) {
@@ -176,6 +179,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
     pagination,
     editModalOpen,
     editItem,
+    isItemLoading,
     updateAllAttendance,
     editAttendance,
     addAttendance,

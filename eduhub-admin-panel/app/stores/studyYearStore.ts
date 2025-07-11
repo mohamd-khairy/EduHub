@@ -11,7 +11,7 @@ export const useStudyYearStore = defineStore("studyYear", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
-
+  const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -22,6 +22,7 @@ export const useStudyYearStore = defineStore("studyYear", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllStudyYears(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(`studyYear?page=${page}`);
@@ -36,6 +37,8 @@ export const useStudyYearStore = defineStore("studyYear", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadStudyYears(search = null) {
@@ -133,6 +136,7 @@ export const useStudyYearStore = defineStore("studyYear", () => {
     pagination,
     editModalOpen,
     editItem,
+    isItemLoading,
     editStudyYear,
     addStudyYear,
     loadAllStudyYears,

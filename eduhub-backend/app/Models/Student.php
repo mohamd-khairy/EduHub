@@ -13,11 +13,12 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 
 class Student extends Authenticatable implements Auditable
 {
-    use HasFactory, HasStudyYear, HasApiTokens, HasRoles;
+    use HasFactory, HasStudyYear, HasApiTokens, HasRoles, Notifiable;
     use \OwenIt\Auditing\Auditable;
 
     protected $guard_name = 'student';
@@ -47,7 +48,7 @@ class Student extends Authenticatable implements Auditable
         'study_year_id'
     ];
 
-    protected $appends = ['attendance_status' , 'label' , 'value'];
+    protected $appends = ['attendance_status', 'label', 'value'];
 
     public function getLabelAttribute()
     {

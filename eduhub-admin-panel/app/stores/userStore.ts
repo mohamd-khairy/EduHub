@@ -11,7 +11,7 @@ export const useUserStore = defineStore("user", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
-
+  const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -22,6 +22,7 @@ export const useUserStore = defineStore("user", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllUsers(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(`user?relations=roles&page=${page}`);
@@ -36,6 +37,8 @@ export const useUserStore = defineStore("user", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadUsers(search = null) {
@@ -163,6 +166,7 @@ export const useUserStore = defineStore("user", () => {
     pagination,
     editModalOpen,
     editItem,
+    isItemLoading,
     addUser,
     editUser,
     loadAllUsers,

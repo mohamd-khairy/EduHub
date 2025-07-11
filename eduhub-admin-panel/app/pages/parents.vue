@@ -234,7 +234,7 @@ const columns: TableColumn<User>[] = [
       </UDashboardNavbar>
     </template>
 
-    <template #body v-if="parentStore.items.length > 0">
+    <template #body v-if="!parentStore.isItemLoading">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('اسم ولي الامر')?.getFilterValue() as string)"

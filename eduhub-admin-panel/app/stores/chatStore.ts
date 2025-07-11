@@ -13,7 +13,7 @@ export const useChatStore = defineStore("chat", () => {
   const editModalOpen = ref(false);
   const isLoadingMessages = ref(false);
   const editItem = ref({});
-
+const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -24,6 +24,7 @@ export const useChatStore = defineStore("chat", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllChats(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(
@@ -40,6 +41,8 @@ export const useChatStore = defineStore("chat", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadAllMessages(page = 1, chatId: number) {
@@ -128,6 +131,7 @@ export const useChatStore = defineStore("chat", () => {
     editModalOpen,
     editItem,
     isLoadingMessages,
+    isItemLoading,
     createChat,
     loadAllUsers,
     loadAllChats,

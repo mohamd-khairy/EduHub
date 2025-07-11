@@ -11,6 +11,7 @@ export const useExamStore = defineStore("exam", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
+  const isItemLoading = ref(false);
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -22,6 +23,7 @@ export const useExamStore = defineStore("exam", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllExams(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(`exam?relations=group&page=${page}`);
@@ -36,6 +38,8 @@ export const useExamStore = defineStore("exam", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadExams(search = null) {
@@ -165,6 +169,7 @@ export const useExamStore = defineStore("exam", () => {
     pagination,
     editModalOpen,
     editItem,
+    isItemLoading,
     addExam,
     editExam,
     loadAllExams,

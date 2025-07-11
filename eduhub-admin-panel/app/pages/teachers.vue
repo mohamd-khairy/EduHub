@@ -244,7 +244,7 @@ const columns: TableColumn<object>[] = [
       </UDashboardNavbar>
     </template>
 
-    <template #body v-if="teacherStore.items.length > 0">
+    <template #body v-if="!teacherStore.isItemLoading">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('اسم المدرس')?.getFilterValue() as string)"

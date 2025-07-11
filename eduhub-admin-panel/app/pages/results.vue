@@ -253,7 +253,7 @@ const columns: TableColumn<User>[] = [
       </UDashboardNavbar>
     </template>
 
-    <template #body v-if="examResultStore.items.length > 0">
+    <template #body v-if="!examResultStore.isItemLoading">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('درجةالطالب')?.getFilterValue() as string)"

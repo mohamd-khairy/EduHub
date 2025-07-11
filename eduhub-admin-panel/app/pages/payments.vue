@@ -274,7 +274,7 @@ const columns: TableColumn[] = [
       </UDashboardNavbar>
     </template>
 
-    <template #body v-if="paymentStore.items.length > 0">
+    <template #body v-if="!paymentStore.isItemLoading">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('حالة الدفع')?.getFilterValue() as string)"

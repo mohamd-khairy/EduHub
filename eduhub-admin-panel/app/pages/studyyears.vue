@@ -238,7 +238,7 @@ const columns: TableColumn<User>[] = [
       </UDashboardNavbar>
     </template>
 
-    <template #body v-if="studyYearStore.items.length > 0">
+    <template #body v-if="!studyYearStore.isItemLoading">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('اسم السنة الدراسية')?.getFilterValue() as string)"

@@ -11,7 +11,7 @@ export const usePaymentStore = defineStore("payment", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
-
+  const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -22,6 +22,7 @@ export const usePaymentStore = defineStore("payment", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllPayments(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(`payment?relations=student&page=${page}`);
@@ -36,6 +37,8 @@ export const usePaymentStore = defineStore("payment", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadPayments(search = null) {
@@ -163,6 +166,7 @@ export const usePaymentStore = defineStore("payment", () => {
     pagination,
     editModalOpen,
     editItem,
+    isItemLoading,
     editPayment,
     addPayment,
     loadAllPayments,

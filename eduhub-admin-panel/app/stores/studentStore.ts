@@ -13,7 +13,7 @@ export const useStudentStore = defineStore("student", () => {
   const editItem = ref({});
   const item = ref({});
   const information = ref({});
-
+  const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -29,6 +29,7 @@ export const useStudentStore = defineStore("student", () => {
     search = null,
     limit = null
   ) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const relations = "parent";
@@ -75,6 +76,8 @@ export const useStudentStore = defineStore("student", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadStudents(search = null, limit = null) {

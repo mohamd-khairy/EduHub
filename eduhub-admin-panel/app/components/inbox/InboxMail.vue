@@ -129,8 +129,8 @@ function onSubmit() {
           <UIcon name="i-lucide-reply" class="size-5" />
 
           <span class="text-sm truncate">
-            قم بإرسال رسالة الي ({{ mail.receiver?.email }})
-            {{ mail.receiver?.name }}
+            قم بإرسال رسالة الي ({{ mail.other_user?.email }})
+            {{ mail.other_user?.name }}
           </span>
         </template>
 

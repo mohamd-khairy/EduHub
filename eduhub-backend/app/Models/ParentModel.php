@@ -10,11 +10,12 @@ use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 
 class ParentModel extends Authenticatable implements Auditable
 {
-    use HasFactory, HasStudyYear, HasApiTokens, HasRoles;
+    use HasFactory, HasStudyYear, HasApiTokens, HasRoles, Notifiable;
     use \OwenIt\Auditing\Auditable;
 
     protected $guard_name = 'parent';

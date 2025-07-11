@@ -11,6 +11,7 @@ export const useCourseStore = defineStore("course", () => {
   const idsToDelete = ref<number[]>([]);
   const editModalOpen = ref(false);
   const editItem = ref({});
+  const isItemLoading = ref(false);
 
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
@@ -22,6 +23,7 @@ export const useCourseStore = defineStore("course", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllCourses(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(`course?relations=groups&page=${page}`);
@@ -36,6 +38,8 @@ export const useCourseStore = defineStore("course", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadCourses(search = null) {
@@ -163,6 +167,7 @@ export const useCourseStore = defineStore("course", () => {
     pagination,
     editModalOpen,
     editItem,
+    isItemLoading,
     editCourse,
     addCourse,
     loadAllCourses,

@@ -17,7 +17,7 @@ export const useGroupStore = defineStore("group", () => {
   const idsToDelete = ref<number[]>([]);
   const todayGroupAttendance = ref([]);
   const isLoading = ref(false);
-
+  const isItemLoading = ref(false);
   // Pagination state — optional if you want to track for UI
   const pagination = ref({
     page: 1,
@@ -28,6 +28,7 @@ export const useGroupStore = defineStore("group", () => {
 
   // Load all pages from backend, combine all items into one array
   async function loadAllGroups(page = 1) {
+    isItemLoading.value = true;
     items.value = []; // clear current items
 
     const res = await api(
@@ -44,6 +45,8 @@ export const useGroupStore = defineStore("group", () => {
       pagination.value.pageSize = json.data.per_page;
       pagination.value.total = json.data.total;
     }
+
+    isItemLoading.value = false;
   }
 
   async function loadAllGroupsByTime(date = null) {
@@ -195,6 +198,7 @@ export const useGroupStore = defineStore("group", () => {
     groupsByTime,
     todayGroupAttendance,
     isLoading,
+    isItemLoading,
     loadGroupTodayAttendance,
     loadAllGroupsByTime,
     loadGroupsForSelect,

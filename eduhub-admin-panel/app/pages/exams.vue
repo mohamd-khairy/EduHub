@@ -253,7 +253,7 @@ const columns: TableColumn<User>[] = [
       </UDashboardNavbar>
     </template>
 
-    <template #body v-if="examStore.items.length > 0">
+    <template #body v-if="!examStore.isItemLoading">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('اسم الاختبار')?.getFilterValue() as string)"
