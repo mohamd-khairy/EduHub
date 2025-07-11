@@ -2,7 +2,9 @@
 import { computed, ref, watch } from "vue";
 import { breakpointsTailwind } from "@vueuse/core";
 import AddModal from "~/components/inbox/AddModal.vue";
-
+definePageMeta({
+  permission: "read-chat",
+});
 const chatStore = useChatStore();
 const mails = ref([]);
 const selectedMail = defineModel<null>();

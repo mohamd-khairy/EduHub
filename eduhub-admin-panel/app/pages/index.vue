@@ -80,6 +80,7 @@ const hasFilter = computed(() => {
         :student_id="student_id"
         :is-loading="isLoading"
         :has-filter="hasFilter"
+        :has-permission="hasPermission"
         @update:range="(val) => (range = val)"
         @update:group_id="(val) => (group_id = val)"
         @update:student_id="(val) => (student_id = val)"

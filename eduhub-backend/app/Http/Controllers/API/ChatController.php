@@ -14,32 +14,6 @@ use App\Models\User;
 
 class ChatController extends Controller
 {
-    public function index(Request $request)
-    {
-        try {
-            $model_name = ucfirst(request()->segment(2));
-            $model = app('App\\Models\\' . $model_name);
-
-            //relations
-            if ($request->relations)
-                $relations = explode(',', $request->relations);
-
-            $data = $model->with($relations ?? [])
-                ->where(function ($query) {
-                    $query->where('sender_id', auth()->user()->id)
-                        ->orWhere('receiver_id', auth()->user()->id);
-                })
-                ->orderBy('id', 'desc')
-                ->paginate(request('per_page', 10));
-
-            // dd($data->toSql());
-            return $this->success($data);
-        } catch (\Throwable $th) {
-            throw $th;
-            // return  $this->fail([]);
-        }
-    }
-
     public function AllUsers(Request $request)
     {
         $request->validate([

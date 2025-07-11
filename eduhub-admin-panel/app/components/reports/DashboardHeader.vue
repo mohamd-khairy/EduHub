@@ -7,6 +7,7 @@ const props = defineProps<{
   student_id: any;
   isLoading: boolean;
   hasFilter: boolean;
+  hasPermission: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -27,7 +28,7 @@ const emit = defineEmits<{
     </template>
   </UDashboardNavbar>
 
-  <UDashboardToolbar>
+  <UDashboardToolbar v-if="hasPermission">
     <template #left>
       <HomeDateRangePicker
         :reset-signal="resetSignal"

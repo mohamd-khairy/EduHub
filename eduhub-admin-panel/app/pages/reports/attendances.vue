@@ -12,6 +12,9 @@ import {
   PointElement,
 } from "chart.js";
 import DashboardHeader from "~/components/reports/DashboardHeader.vue";
+definePageMeta({
+  permission: "read-attendancereport",
+});
 
 ChartJS.register(
   Title,
@@ -24,6 +27,7 @@ ChartJS.register(
   PointElement
 );
 
+const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();
 const group_id = ref(null);
 const student_id = ref(null);
@@ -62,8 +66,10 @@ async function getDashboardReports(params = {}) {
       dashboardStore.fetchAttendanceRankStudents(params),
     ]);
 
-    attendanceOverallStudentCommitment.value = dashboardStore.attendanceOverallStudentCommitment;
-    attendanceCommitmentOverTime.value = dashboardStore.attendanceCommitmentOverTime;
+    attendanceOverallStudentCommitment.value =
+      dashboardStore.attendanceOverallStudentCommitment;
+    attendanceCommitmentOverTime.value =
+      dashboardStore.attendanceCommitmentOverTime;
     attendanceCompareGroups.value = dashboardStore.attendanceCompareGroups;
     attendanceRankStudents.value = dashboardStore.attendanceRankStudents;
   } finally {
@@ -71,8 +77,12 @@ async function getDashboardReports(params = {}) {
   }
 }
 
+const hasPermission = ref(false);
+
 onMounted(async () => {
   await getDashboardReports();
+
+  hasPermission.value = authStore.hasPermission("read-attendancereport");
 });
 
 watch(
@@ -88,7 +98,7 @@ watch(
   }
 );
 
-const colorMode = useColorMode()
+const colorMode = useColorMode();
 const baseOptions = {
   responsive: true,
   plugins: {
@@ -97,7 +107,7 @@ const baseOptions = {
     },
     datalabels: {
       display: false,
-      color: colorMode.value == "dark" ?  "#fff" : "#000",
+      color: colorMode.value == "dark" ? "#fff" : "#000",
       font: {
         weight: "bold",
         size: 12,
@@ -107,7 +117,7 @@ const baseOptions = {
     },
     customLabels: {
       display: false,
-      color: colorMode.value == "dark" ?  "#fff" : "#000",
+      color: colorMode.value == "dark" ? "#fff" : "#000",
       font: {
         weight: "bold",
         size: 10,
@@ -135,8 +145,9 @@ ChartJS.register({
       const value = chart?.data?.datasets[0]?.data[index];
       ctx.save();
       ctx.fillStyle = options.color || "#000";
-      ctx.font = `${options.font?.weight || "bold"} ${options.font?.size || 14
-        }px sans-serif`;
+      ctx.font = `${options.font?.weight || "bold"} ${
+        options.font?.size || 14
+      }px sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // ctx.fillText(`${label}: ${value}`, x, y);
@@ -150,26 +161,45 @@ ChartJS.register({
 <template>
   <UDashboardPanel id="home">
     <template #header>
-      <DashboardHeader title="تقارير الحضور و الغياب" :reset-signal="resetSignal" :range="range" :group_id="group_id"
-        :student_id="student_id" :is-loading="isLoading" :has-filter="hasFilter" @update:range="val => range = val"
-        @update:group_id="val => group_id = val" @update:student_id="val => student_id = val" @reset="resetFilters" />
+      <DashboardHeader
+        title="تقارير الحضور و الغياب"
+        :reset-signal="resetSignal"
+        :range="range"
+        :group_id="group_id"
+        :student_id="student_id"
+        :is-loading="isLoading"
+        :has-filter="hasFilter"
+        :has-permission="hasPermission"
+        @update:range="(val) => (range = val)"
+        @update:group_id="(val) => (group_id = val)"
+        @update:student_id="(val) => (student_id = val)"
+        @reset="resetFilters"
+      />
     </template>
 
     <template #body>
-
-      <div v-if="isLoading" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+      <div
+        v-if="isLoading"
+        class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+      >
         <span
-          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
-        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"
+        ></span>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">
+          جاري تحميل البيانات...
+        </p>
       </div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
         <div class="w-full">
           <h3 class="text-xl font-bold mb-2">1. تقرير الالتزام العام للطالب</h3>
           <p class="text-sm text-gray-600 mb-4">
-            يوضح نسبة حضور كل طالب من إجمالي عدد الجلسات المحجوزة له، مما يساعد في تحديد الطلاب الذين يحتاجون
-            إلى دعم إضافي.
+            يوضح نسبة حضور كل طالب من إجمالي عدد الجلسات المحجوزة له، مما يساعد
+            في تحديد الطلاب الذين يحتاجون إلى دعم إضافي.
           </p>
-          <Bar :data="attendanceOverallStudentCommitment" :options="baseOptions" />
+          <Bar
+            :data="attendanceOverallStudentCommitment"
+            :options="baseOptions"
+          />
         </div>
 
         <div class="w-full">

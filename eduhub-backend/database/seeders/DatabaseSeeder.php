@@ -71,7 +71,8 @@ class DatabaseSeeder extends Seeder
                     'read-student-attendance',
                     'read-student-payment',
                     'read-payment',
-                    'read-notification'
+                    'read-notification',
+                    'read-chat',
                 ]
             ],
             'parent' => [
@@ -89,7 +90,11 @@ class DatabaseSeeder extends Seeder
                     'read-student-attendance',
                     'read-student-payment',
                     'read-payment',
-                    'read-notification'
+                    'read-notification',
+                    'read-chat',
+                ],
+                'by_group' => [
+                    'chatmessage'
                 ]
             ],
             'teacher' => [
@@ -98,6 +103,8 @@ class DatabaseSeeder extends Seeder
                     'exam',
                     'examresult',
                     'attendance',
+                    'chat',
+                    'chatmessage'
                 ],
                 'by_name' => [
                     'read-group',

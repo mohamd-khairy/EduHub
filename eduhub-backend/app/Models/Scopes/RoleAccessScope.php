@@ -13,7 +13,7 @@ class RoleAccessScope implements Scope
 {
     public $studyYear;
 
-    public function apply(Builder $builder, Model $model)//: void
+    public function apply(Builder $builder, Model $model) //: void
     {
         $user = Auth::user();
 
@@ -34,11 +34,11 @@ class RoleAccessScope implements Scope
             'Teacher' => $this->applyTeacherFilter($builder, $user),
             'Attendance' => $this->applyAttendanceFilter($builder, $user),
             'Course' => $this->applyCourseFilter($builder, $user),
+            'chat' => $this->applyChatFilter($builder, $user),
             default => null
         };
 
         $this->applyStudyYearFilter($builder, $model);
-
     }
 
     private function applyStudyYearFilter(Builder $builder, Model $model)
@@ -203,6 +203,16 @@ class RoleAccessScope implements Scope
 
         if ($user && $user->hasRole('parent')) {
             $builder->whereHas('groups.enrollments.student', fn($q) => $q->where('parent_id', $user->id));
+        }
+    }
+
+    private function applyChatFilter(Builder $builder, $user)
+    {
+        if ($user) {
+            $builder->where(function ($query) use ($user) {
+                $query->where('sender_id', $user->id)
+                    ->orWhere('receiver_id', $user->id);
+            });
         }
     }
 }

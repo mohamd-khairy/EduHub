@@ -14,10 +14,11 @@ import {
   Filler,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-
 import { Bar, Line, Pie, Doughnut, PolarArea } from "vue-chartjs";
 import DashboardHeader from "~/components/reports/DashboardHeader.vue";
-
+definePageMeta({
+  permission: "read-studentreport",
+});
 // Register all chart elements + datalabels plugin
 ChartJS.register(
   Title,
@@ -34,6 +35,7 @@ ChartJS.register(
   ChartDataLabels
 );
 
+const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();
 const group_id = ref(null);
 const student_id = ref(null);
@@ -71,8 +73,10 @@ async function getDashboardReports(params = {}) {
       dashboardStore.fetchStudentAttendanceSummary(params),
       dashboardStore.fetchStudentPerformancePerExam(params),
     ]);
-    studentPerformancePerGroup.value = dashboardStore.studentPerformancePerGroup;
-    studentPerformanceOverTime.value = dashboardStore.studentPerformanceOverTime;
+    studentPerformancePerGroup.value =
+      dashboardStore.studentPerformancePerGroup;
+    studentPerformanceOverTime.value =
+      dashboardStore.studentPerformanceOverTime;
     studentAttendanceSummary.value = dashboardStore.studentAttendanceSummary;
     studentPerformancePerExam.value = dashboardStore.studentPerformancePerExam;
   } finally {
@@ -80,8 +84,12 @@ async function getDashboardReports(params = {}) {
   }
 }
 
+const hasPermission = ref(false);
+
 onMounted(async () => {
   await getDashboardReports();
+  // Check permissions
+  hasPermission.value = authStore.hasPermission("read-studentreport");
 });
 
 watch(
@@ -97,7 +105,7 @@ watch(
   }
 );
 
-const colorMode = useColorMode()
+const colorMode = useColorMode();
 const baseOptions = {
   responsive: true,
   plugins: {
@@ -144,8 +152,9 @@ ChartJS.register({
       const value = chart?.data?.datasets[0]?.data[index];
       ctx.save();
       ctx.fillStyle = options.color || "#000";
-      ctx.font = `${options.font?.weight || "bold"} ${options.font?.size || 14
-        }px sans-serif`;
+      ctx.font = `${options.font?.weight || "bold"} ${
+        options.font?.size || 14
+      }px sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // ctx.fillText(`${label}: ${value}`, x, y);
@@ -159,21 +168,40 @@ ChartJS.register({
 <template>
   <UDashboardPanel id="home">
     <template #header>
-      <DashboardHeader title="تقارير أداء الطلاب" :reset-signal="resetSignal" :range="range" :group_id="group_id"
-        :student_id="student_id" :is-loading="isLoading" :has-filter="hasFilter" @update:range="val => range = val"
-        @update:group_id="val => group_id = val" @update:student_id="val => student_id = val" @reset="resetFilters" />
+      <DashboardHeader
+        title="تقارير أداء الطلاب"
+        :reset-signal="resetSignal"
+        :range="range"
+        :group_id="group_id"
+        :student_id="student_id"
+        :is-loading="isLoading"
+        :has-filter="hasFilter"
+        :has-permission="hasPermission"
+        @update:range="(val) => (range = val)"
+        @update:group_id="(val) => (group_id = val)"
+        @update:student_id="(val) => (student_id = val)"
+        @reset="resetFilters"
+      />
     </template>
 
     <template #body>
-      <div v-if="isLoading" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+      <div
+        v-if="isLoading"
+        class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+      >
         <span
-          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
-        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"
+        ></span>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">
+          جاري تحميل البيانات...
+        </p>
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
         <div class="w-full" v-if="studentPerformancePerGroup">
-          <h2 class="text-xl font-bold mb-2">1. أداء الطالب في كل وحدة دراسية</h2>
+          <h2 class="text-xl font-bold mb-2">
+            1. أداء الطالب في كل وحدة دراسية
+          </h2>
           <p class="text-sm text-gray-600 mb-4">
             يوضح درجات الطالب في كل وحدة على حدة، لتحديد نقاط القوة والضعف.
           </p>
@@ -189,7 +217,9 @@ ChartJS.register({
         </div>
 
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">3. أداء الطالب في الحضور والغياب</h2>
+          <h2 class="text-xl font-bold mb-2">
+            3. أداء الطالب في الحضور والغياب
+          </h2>
           <p class="text-sm text-gray-600 mb-4">
             يعرض هذا الرسم عدد الأيام التي حضرها الطالب مقابل الأيام التي تغيب
             فيها لكل شهر، مما يساعد على تقييم التزامه.

@@ -13,7 +13,9 @@ import {
   ArcElement,
 } from "chart.js";
 import DashboardHeader from "~/components/reports/DashboardHeader.vue";
-
+definePageMeta({
+  permission: "read-paymentreport",
+});
 ChartJS.register(
   Title,
   Tooltip,
@@ -25,7 +27,7 @@ ChartJS.register(
   LinearScale,
   ArcElement
 );
-
+const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();
 const group_id = ref(null);
 const student_id = ref(null);
@@ -47,7 +49,7 @@ function resetFilters() {
   student_id.value = null;
 }
 
-const colorMode = useColorMode()
+const colorMode = useColorMode();
 const baseOptions = {
   responsive: true,
   plugins: {
@@ -94,8 +96,9 @@ ChartJS.register({
       const value = chart?.data?.datasets[0]?.data[index];
       ctx.save();
       ctx.fillStyle = options.color || "#000";
-      ctx.font = `${options.font?.weight || "bold"} ${options.font?.size || 14
-        }px sans-serif`;
+      ctx.font = `${options.font?.weight || "bold"} ${
+        options.font?.size || 14
+      }px sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // ctx.fillText(`${label}: ${value}`, x, y);
@@ -124,15 +127,21 @@ async function getDashboardReports(params = {}) {
 
     paymentPerStudent.value = dashboardStore.paymentPerStudent;
     paymentMonthlyRevenue.value = dashboardStore.paymentMonthlyRevenue;
-    paymentOverdueStudentPayments.value = dashboardStore.paymentOverdueStudentPayments;
+    paymentOverdueStudentPayments.value =
+      dashboardStore.paymentOverdueStudentPayments;
     paymentPerGroups.value = dashboardStore.paymentPerGroups;
   } finally {
     isLoading.value = false; // ✅ التحميل انتهى في كل الحالات
   }
 }
 
+const hasPermission = ref(false);
+
 onMounted(async () => {
   await getDashboardReports();
+
+  // Check permissions
+  hasPermission.value = authStore.hasPermission("read-paymentreport");
 });
 
 watch(
@@ -152,24 +161,41 @@ watch(
 <template>
   <UDashboardPanel id="home">
     <template #header>
-      <DashboardHeader title="تقارير المالية والمصاريف" :reset-signal="resetSignal" :range="range"
-        :group_id="group_id" :student_id="student_id" :is-loading="isLoading" :has-filter="hasFilter"
-        @update:range="val => range = val" @update:group_id="val => group_id = val"
-        @update:student_id="val => student_id = val" @reset="resetFilters" />
+      <DashboardHeader
+        title="تقارير المالية والمصاريف"
+        :reset-signal="resetSignal"
+        :range="range"
+        :group_id="group_id"
+        :student_id="student_id"
+        :is-loading="isLoading"
+        :has-filter="hasFilter"
+        :has-permission="hasPermission"
+        @update:range="(val) => (range = val)"
+        @update:group_id="(val) => (group_id = val)"
+        @update:student_id="(val) => (student_id = val)"
+        @reset="resetFilters"
+      />
     </template>
 
     <template #body>
-      <div v-if="isLoading" class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8">
+      <div
+        v-if="isLoading"
+        class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+      >
         <span
-          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></span>
-        <p class="text-gray-700 dark:text-gray-300 text-sm">جاري تحميل البيانات...</p>
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"
+        ></span>
+        <p class="text-gray-700 dark:text-gray-300 text-sm">
+          جاري تحميل البيانات...
+        </p>
       </div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-4">
         <!-- 1. تقرير المدفوعات حسب الطالب -->
         <div class="w-full">
           <h2 class="text-xl font-bold mb-2">تقرير المدفوعات حسب الطالب</h2>
           <p class="text-sm text-muted mb-4">
-            يوضح إجمالي المدفوعات التي قام بها كل طالب خلال الفترة المحددة. يساعد على تتبع الالتزام المالي لكل طالب.
+            يوضح إجمالي المدفوعات التي قام بها كل طالب خلال الفترة المحددة.
+            يساعد على تتبع الالتزام المالي لكل طالب.
           </p>
           <Bar :data="paymentPerStudent" :options="baseOptions" />
         </div>
@@ -178,7 +204,8 @@ watch(
         <div class="w-full">
           <h2 class="text-xl font-bold mb-2">تقرير الإيرادات الشهرية</h2>
           <p class="text-sm text-muted mb-4">
-            يعرض تطور الإيرادات شهريًا، مما يساعد في تقييم الأداء المالي وتحديد أشهر النشاط الأعلى أو الأدنى.
+            يعرض تطور الإيرادات شهريًا، مما يساعد في تقييم الأداء المالي وتحديد
+            أشهر النشاط الأعلى أو الأدنى.
           </p>
           <Line :data="paymentMonthlyRevenue" :options="baseOptions" />
         </div>
@@ -187,19 +214,26 @@ watch(
         <div class="w-full">
           <h2 class="text-xl font-bold mb-2">تقرير الدفعات المتأخرة</h2>
           <p class="text-sm text-muted mb-4">
-            يعرض الطلاب الذين لديهم دفعات مستحقة لم تُسدَّد بعد، مما يساعد على تحسين التحصيل المالي.
+            يعرض الطلاب الذين لديهم دفعات مستحقة لم تُسدَّد بعد، مما يساعد على
+            تحسين التحصيل المالي.
           </p>
           <Bar :data="paymentOverdueStudentPayments" :options="baseOptions" />
         </div>
 
         <!-- 4. تقرير المدفوعات حسب المجموعة أو المستوى -->
         <div class="w-full">
-          <h2 class="text-xl font-bold mb-2">تقرير المدفوعات حسب المجموعة أو المستوى</h2>
+          <h2 class="text-xl font-bold mb-2">
+            تقرير المدفوعات حسب المجموعة أو المستوى
+          </h2>
           <p class="text-sm text-muted mb-4">
-            يوضح توزيع إجمالي المدفوعات على المجموعات الدراسية أو المستويات المختلفة، مما يساعد في تحليل أداء كل مجموعة
-            ماليًا.
+            يوضح توزيع إجمالي المدفوعات على المجموعات الدراسية أو المستويات
+            المختلفة، مما يساعد في تحليل أداء كل مجموعة ماليًا.
           </p>
-          <Doughnut :data="paymentPerGroups" :options="baseOptions" style="max-width: 400px; margin: auto" />
+          <Doughnut
+            :data="paymentPerGroups"
+            :options="baseOptions"
+            style="max-width: 400px; margin: auto"
+          />
         </div>
       </div>
     </template>
