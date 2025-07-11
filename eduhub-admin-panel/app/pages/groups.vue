@@ -175,7 +175,21 @@ const columns: TableColumn[] = [
   {
     accessorKey: "students_count",
     id: "عدد الطلاب",
-    header: "عدد للطلاب",
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+      return h(UButton, {
+        color: "neutral",
+        variant: "ghost",
+        label: "عدد للطلاب",
+        icon: isSorted
+          ? isSorted === "asc"
+            ? "i-lucide-arrow-up-narrow-wide"
+            : "i-lucide-arrow-down-wide-narrow"
+          : "i-lucide-arrow-up-down",
+        class: "-mx-2.5",
+        onClick: () => column.toggleSorting(isSorted === "asc"),
+      });
+    },
     cell: ({ row }) => h(() => row.original.students_count),
   },
   {
