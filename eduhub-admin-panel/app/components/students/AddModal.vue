@@ -111,7 +111,7 @@ function onFileClick() {
   >
     <UButton
       label="إضافة طالب جديد"
-      color="neutral"
+      color="success"
       icon="i-lucide-plus"
       dir="rtl"
       v-if="authStore.hasPermission('create-student')"

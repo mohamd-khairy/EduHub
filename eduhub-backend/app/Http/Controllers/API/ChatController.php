@@ -6,14 +6,100 @@ use App\Http\Controllers\Controller;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\ParentModel;
+use App\Models\Student;
+use App\Models\Teacher;
+use App\Models\User;
 
 class ChatController extends Controller
 {
+    public function index(Request $request)
+    {
+        try {
+            $model_name = ucfirst(request()->segment(2));
+            $model = app('App\\Models\\' . $model_name);
+
+            //relations
+            if ($request->relations)
+                $relations = explode(',', $request->relations);
+
+            $data = $model->with($relations ?? [])
+                ->where(function ($query) {
+                    $query->where('sender_id', auth()->user()->id)
+                        ->orWhere('receiver_id', auth()->user()->id);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(request('per_page', 10));
+
+            // dd($data->toSql());
+            return $this->success($data);
+        } catch (\Throwable $th) {
+            throw $th;
+            // return  $this->fail([]);
+        }
+    }
+
+    public function AllUsers(Request $request)
+    {
+        $request->validate([
+            'search' => 'required|string',
+        ]);
+
+        // Initialize the query builder for combining results
+        $usersQuery = User::query()
+            ->select('id', 'name', DB::raw('"user" as type'))
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            });
+
+        $teachersQuery = Teacher::query()
+            ->select('id', 'name', DB::raw('"teacher" as type'))
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            });
+
+        $parentsQuery = ParentModel::query()
+            ->select('id', 'name', DB::raw('"parentModel" as type'))
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            });
+
+        $studentsQuery = Student::query()
+            ->select('id', 'name', DB::raw('"student" as type'))
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            });
+
+        // Combine all queries into a single query using `unionAll`
+        $allUsersQuery = $usersQuery->unionAll($teachersQuery)
+            ->unionAll($parentsQuery)
+            ->unionAll($studentsQuery);
+
+        // Execute the query and get the results
+        $users = $allUsersQuery->get();
+
+        $transformedUsers = $users->map(function ($user) {
+            return [
+                'label' => $user->name,
+                'value' => $user->id,
+                'type' => $user->type
+            ];
+        });
+        // Return success response
+        return $this->success($transformedUsers);
+    }
+
     public function store(Request $request)
     {
+        $request->validate([
+            'type' => 'required|string|in:user,teacher,parentModel,student',
+            'id' => 'required',
+        ]);
+
         $sender = auth()->user();
-        $receiver_type = $request->receiver_type;
-        $receiver_id = $request->receiver_id;
+        $receiver_type = $request->type;
+        $receiver_id = $request->id;
         $receiver = getModelFromType($receiver_type)->findOrFail($receiver_id);
 
         // Normalize participant pairs

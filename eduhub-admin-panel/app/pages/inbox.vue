@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { breakpointsTailwind } from "@vueuse/core";
+import AddModal from "~/components/inbox/AddModal.vue";
 
 const chatStore = useChatStore();
 const mails = ref([]);
@@ -8,9 +9,16 @@ const selectedMail = defineModel<null>();
 
 onMounted(async () => {
   await chatStore.loadAllChats();
-  mails.value = chatStore.items;
   // selectedMail.value = mails.value?.length > 0 ? mails.value[0] : null;
 });
+
+watch(
+  () => chatStore.items,
+  () => {
+    mails.value = chatStore.items;
+  },
+  { immediate: true, deep: true }
+);
 
 const tabItems = [
   {
@@ -43,7 +51,7 @@ const isMobile = breakpoints.smaller("lg");
     :default-size="25"
     :min-size="20"
     :max-size="30"
-    v-if="filteredMails.length > 0"
+    v-if="mails.length > 0"
   >
     <UDashboardNavbar title="الرسائل">
       <template #leading>
@@ -70,8 +78,22 @@ const isMobile = breakpoints.smaller("lg");
     :mail="selectedMail"
     @close="selectedMail = null"
   />
-  <div v-else class="hidden lg:flex flex-1 items-center justify-center">
+  <div
+    v-else
+    class="hidden lg:flex flex-col items-center justify-center flex-1 gap-4 text-center p-8"
+  >
+    <!-- Icon -->
     <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
+
+    <!-- Description -->
+    <div>
+      <h2 class="text-xl font-semibold text-gray-600 mb-1">
+        إضافة محادثة جديدة
+      </h2>
+      <p class="text-sm text-gray-500">يمكنك البدء الآن.</p>
+    </div>
+
+    <AddModal />
   </div>
 
   <ClientOnly>

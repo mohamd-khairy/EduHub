@@ -245,6 +245,7 @@ onMounted(() => {
 
         <template #right>
           <AddModal />
+          <Communication />
         </template>
 
         <DeleteModal
@@ -269,7 +270,7 @@ onMounted(() => {
       </UDashboardNavbar>
     </template>
 
-    <template #body>
+    <template #body v-if="groupStore.items.length > 0">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('اسم المجموعة')?.getFilterValue() as string)"
@@ -365,6 +366,9 @@ onMounted(() => {
           />
         </div>
       </div>
+    </template>
+    <template #body v-else>
+      <Loader />
     </template>
   </UDashboardPanel>
 </template>

@@ -201,23 +201,22 @@ const columns: TableColumn<User>[] = [
 
         <template #right>
           <AddModal />
+          <Communication />
         </template>
 
         <DeleteModal
           :count="courseStore.selectedIds.length"
           v-model:open="courseStore.deleteModalOpen"
-          v-can="'delete-course'"
         />
 
         <EditModal
           :item="courseStore.editItem"
           v-model:open="courseStore.editModalOpen"
-          v-can="'update-course'"
         />
       </UDashboardNavbar>
     </template>
 
-    <template #body>
+    <template #body v-if="courseStore.items.length > 0">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('اسم الكورس')?.getFilterValue() as string)"
@@ -315,6 +314,10 @@ const columns: TableColumn<User>[] = [
           />
         </div>
       </div>
+    </template>
+
+    <template #body v-else>
+      <Loader />
     </template>
   </UDashboardPanel>
 </template>

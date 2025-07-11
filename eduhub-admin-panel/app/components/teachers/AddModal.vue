@@ -50,7 +50,7 @@ function resetState() {
 </script>
 
 <template>
-  <UModal v-model:open="open" title="اضافة مدرس" description="إضافة مدرس جديد" dir="rtl">
+  <UModal v-model:open="open" title="اضافة مدرس" description="إضافة مدرس جديد" dir="rtl" >
     <UButton label="إضافة مدرس جديد" icon="i-lucide-plus" dir="rtl" v-if="authStore.hasPermission('create-teacher')" />
 
     <template #body dir="rtl">

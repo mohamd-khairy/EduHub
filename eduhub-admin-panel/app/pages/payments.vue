@@ -259,21 +259,22 @@ const columns: TableColumn[] = [
 
         <template #right>
           <AddModal />
-
-          <DeleteModal
-            :count="paymentStore.selectedIds.length"
-            v-model:open="paymentStore.deleteModalOpen"
-          />
-
-          <EditModal
-            :item="paymentStore.editItem"
-            v-model:open="paymentStore.editModalOpen"
-          />
+          <Communication />
         </template>
+
+        <DeleteModal
+          :count="paymentStore.selectedIds.length"
+          v-model:open="paymentStore.deleteModalOpen"
+        />
+
+        <EditModal
+          :item="paymentStore.editItem"
+          v-model:open="paymentStore.editModalOpen"
+        />
       </UDashboardNavbar>
     </template>
 
-    <template #body>
+    <template #body v-if="paymentStore.items.length > 0">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('حالة الدفع')?.getFilterValue() as string)"
@@ -371,6 +372,9 @@ const columns: TableColumn[] = [
           />
         </div>
       </div>
+    </template>
+    <template #body v-else>
+      <Loader />
     </template>
   </UDashboardPanel>
 </template>

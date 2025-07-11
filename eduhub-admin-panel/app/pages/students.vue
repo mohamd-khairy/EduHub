@@ -9,8 +9,6 @@ import StudentList from "~/components/students/StudentList.vue";
 import StudentDetails from "~/components/students/StudentDetails.vue";
 
 const studentStore = useStudentStore();
-const authStore = useAuthStore();
-
 const currentPage = ref(1);
 const pageSize = 15;
 const isLoading = ref(false);

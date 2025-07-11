@@ -72,6 +72,9 @@ onMounted(() => {
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
+        <template #right>
+          <Communication />
+        </template>
       </UDashboardNavbar>
 
       <UDashboardToolbar>

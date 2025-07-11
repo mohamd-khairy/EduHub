@@ -37,6 +37,7 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::group(['middleware' => ['auth:sanctum', 'cacheResponse']], function () {
     Route::group(['prefix' => 'chat'], function () {
+        Route::get('/all-users', [ChatController::class, 'AllUsers']);
         Route::get('/all', [ChatController::class, 'All']);
         Route::get('/', [ChatController::class, 'index']);
         Route::get('/{id}', [ChatController::class, 'show']);

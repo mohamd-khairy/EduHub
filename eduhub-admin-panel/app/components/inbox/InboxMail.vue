@@ -86,6 +86,7 @@ function onSubmit() {
       </div>
 
       <!-- ✅ Messages List -->
+
       <div
         v-else-if="chatStore.item_messages?.length > 0"
         v-for="message in [...chatStore.item_messages]"
@@ -133,7 +134,7 @@ function onSubmit() {
           </span>
         </template>
 
-        <form @submit.prevent="onSubmit">
+        <form @submit.prevent="onSubmit" v-if="authStore.hasPermission('create-chatmessage')">
           <UTextarea
             v-model="reply"
             color="neutral"
@@ -142,19 +143,24 @@ function onSubmit() {
             autoresize
             placeholder="اكتب رسالتك هنا"
             :rows="4"
-            :disabled="loading"
+            :disabled="
+              loading || !authStore.hasPermission('create-chatmessage')
+            "
             class="w-full"
             :ui="{ base: 'p-0 resize-none' }"
           />
 
           <div class="flex items-center justify-between">
-            <UTooltip text="Attach file">
+            <!-- <UTooltip text="Attach file">
               <UButton
                 color="neutral"
                 variant="ghost"
                 icon="i-lucide-paperclip"
+                :disabled="
+                  loading || !authStore.hasPermission('create-chatmessage')
+                "
               />
-            </UTooltip>
+            </UTooltip> -->
 
             <div class="flex items-center justify-end gap-2">
               <UButton
@@ -163,7 +169,10 @@ function onSubmit() {
                 :loading="loading"
                 label="ارسال"
                 icon="i-lucide-send"
-                style="cursor: pointer;"
+                style="cursor: pointer"
+                :disabled="
+                  loading || !authStore.hasPermission('create-chatmessage')
+                "
               />
             </div>
           </div>

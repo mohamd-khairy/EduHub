@@ -6,6 +6,7 @@ export const useChatStore = defineStore("chat", () => {
 
   const items = ref<object[]>([]);
   const item_messages = ref<object[]>([]);
+  const all_users = ref<object[]>([]);
   const selectedIds = ref<number[]>([]);
   const deleteModalOpen = ref(false);
   const idsToDelete = ref<number[]>([]);
@@ -56,6 +57,29 @@ export const useChatStore = defineStore("chat", () => {
     isLoadingMessages.value = false;
   }
 
+  async function loadAllUsers(search = null) {
+    if (!search) return;
+    const res = await api(`chat/all-users?search=${search}`);
+    const json = await res.json();
+
+    if (json?.data) {
+      all_users.value = json?.data;
+    }
+  }
+
+    async function createChat(user = null) {
+    const res = await api(`chat`, {
+      method: "POST",
+      body: JSON.stringify(user),
+    });
+
+    if (res.ok) {
+      await loadAllChats();
+    } else {
+      throw new Error("Failed to mark as read");
+    }
+  }
+
   async function sendMessage(data: object) {
     const res = await api(`chatMessage`, {
       method: "POST",
@@ -96,6 +120,7 @@ export const useChatStore = defineStore("chat", () => {
   return {
     items,
     item_messages,
+    all_users,
     selectedIds,
     deleteModalOpen,
     idsToDelete,
@@ -103,6 +128,8 @@ export const useChatStore = defineStore("chat", () => {
     editModalOpen,
     editItem,
     isLoadingMessages,
+    createChat,
+    loadAllUsers,
     loadAllChats,
     loadAllMessages,
     markAsRead,

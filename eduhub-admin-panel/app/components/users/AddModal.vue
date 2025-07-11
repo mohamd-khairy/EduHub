@@ -107,7 +107,7 @@ function onFileClick() {
   >
     <UButton
       label="إضافة موظف جديد"
-      color="neutral"
+      color="success"
       icon="i-lucide-plus"
       dir="rtl"
         v-if="authStore.hasPermission('create-user')" 

@@ -15,24 +15,6 @@ const emit = defineEmits<{
   (e: "update:student_id", value: any): void;
   (e: "reset"): void;
 }>();
-
-const { isNotificationsSlideoverOpen } = useDashboard();
-const authStore = useAuthStore();
-const notificationStore = useNotificationStore();
-
-onMounted(async () => {
-  await notificationStore.loadAllNotifications();
-});
-
-const items = [
-  [
-    {
-      label: "رسالة جديدة",
-      icon: "i-lucide-send",
-      to: "/inbox",
-    },
-  ],
-];
 </script>
 
 <template>
@@ -40,32 +22,8 @@ const items = [
     <template #leading>
       <UDashboardSidebarCollapse />
     </template>
-
-    <template #right v-if="authStore.hasPermission('read-notification')">
-      <UTooltip text="Notifications" :shortcuts="['N']">
-        <UButton
-          color="neutral"
-          variant="ghost"
-          square
-          @click="isNotificationsSlideoverOpen = true"
-          style="cursor: pointer"
-        >
-          <UChip color="error" inset v-if="notificationStore.items?.length > 0">
-            <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
-          </UChip>
-          <UIcon v-else name="i-lucide-bell" class="size-5 shrink-0" />
-        </UButton>
-      </UTooltip>
-
-      <RouterLink to="/inbox">
-        <UButton
-          icon="i-lucide-send"
-          size="md"
-          color="neutral"
-          variant="ghost"
-          style="cursor: pointer"
-        />
-      </RouterLink>
+    <template #right>
+      <Communication />
     </template>
   </UDashboardNavbar>
 

@@ -229,6 +229,7 @@ const columns: TableColumn<object>[] = [
 
         <template #right>
           <AddModal />
+          <Communication />
         </template>
 
         <DeleteModal
@@ -243,7 +244,7 @@ const columns: TableColumn<object>[] = [
       </UDashboardNavbar>
     </template>
 
-    <template #body>
+    <template #body v-if="teacherStore.items.length > 0">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('اسم المدرس')?.getFilterValue() as string)"
@@ -341,6 +342,9 @@ const columns: TableColumn<object>[] = [
           />
         </div>
       </div>
+    </template>
+    <template #body v-else>
+      <Loader />
     </template>
   </UDashboardPanel>
 </template>

@@ -61,9 +61,13 @@ const columns: TableColumn<Payment>[] = [
     cell: ({ row }) =>
       h(
         UBadge,
-        { class: 'capitalize', variant: 'subtle', color: getColorByStatus(row.original.event) },
+        {
+          class: "capitalize",
+          variant: "subtle",
+          color: getColorByStatus(row.original.event),
+        },
         () => row.getValue("event")
-      )
+      ),
   },
   {
     id: "auditable_type",
@@ -119,53 +123,60 @@ const columns: TableColumn<Payment>[] = [
 </script>
 
 <template>
-  <UTable
-    v-model:expanded="expanded"
-    v-model:pagination="auditStore.pagination"
-    :columns="columns"
-    :data="auditStore.items"
-    :ui="{ tr: 'data-[expanded=true]:bg-elevated/50' }"
-    class="flex-1"
-  >
-    <template #expanded="{ row }">
-      <table class="w-full table-auto border mt-2 text-sm">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="border px-2 py-1">النوع</th>
-            <th class="border px-2 py-1">القيم</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="border px-2 py-1">القيم القديمة</td>
-            <td class="border px-2 py-1">
-              {{ row.original.old_values}}
-            </td>
-          </tr>
-          <tr>
-            <td class="border px-2 py-1">القيم الحديثة</td>
+  <template v-if="auditStore.items.length > 0">
+    <UTable
+      v-model:expanded="expanded"
+      v-model:pagination="auditStore.pagination"
+      :columns="columns"
+      :data="auditStore.items"
+      :ui="{
+        tr: 'data-[expanded=true]:bg-elevated/50',
+      }"
+      class="flex-1"
+    >
+      <template #expanded="{ row }">
+        <table class="w-full table-auto border mt-2 text-sm">
+          <thead class="bg-gray-100">
+            <tr class="dark:bg-elevated/100">
+              <th class="border px-2 py-1">النوع</th>
+              <th class="border px-2 py-1">القيم</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="border px-2 py-1">القيم القديمة</td>
+              <td class="border px-2 py-1">
+                {{ row.original.old_values }}
+              </td>
+            </tr>
+            <tr>
+              <td class="border px-2 py-1">القيم الحديثة</td>
 
-            <td class="border px-2 py-1">
-              {{ row.original.new_values }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </template>
-  </UTable>
+              <td class="border px-2 py-1">
+                {{ row.original.new_values }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </template>
+    </UTable>
 
-  <div
-    class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
-    dir="ltr"
-  >
-    <div class="flex items-center gap-1.5" dir="ltr">
-      <UPagination
-        dir="ltr"
-        :total="auditStore.pagination?.total"
-        :items-per-page="auditStore.pagination?.pageSize"
-        :default-page="auditStore.pagination?.page"
-        @update:page="(p) => auditStore.loadAllAudits(p)"
-      />
+    <div
+      class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
+      dir="ltr"
+    >
+      <div class="flex items-center gap-1.5" dir="ltr">
+        <UPagination
+          dir="ltr"
+          :total="auditStore.pagination?.total"
+          :items-per-page="auditStore.pagination?.pageSize"
+          :default-page="auditStore.pagination?.page"
+          @update:page="(p) => auditStore.loadAllAudits(p)"
+        />
+      </div>
     </div>
-  </div>
+  </template>
+  <template v-else>
+    <Loader />
+  </template>
 </template>

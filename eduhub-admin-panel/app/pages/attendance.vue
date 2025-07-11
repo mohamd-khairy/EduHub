@@ -267,7 +267,7 @@ const columns = [
         h(USelect, {
           style: "width: 100px",
           items: getRowItems(row),
-          placeholder: "اختر الحالة", 
+          placeholder: "اختر الحالة",
         }),
       ]);
     },
@@ -333,6 +333,7 @@ const exportAttendance = () => {
             </UBadge>
             <UInput type="date" v-model="selectedHistoryDate" size="xl" />
           </div>
+          <Communication />
         </template>
       </UDashboardNavbar>
     </template>

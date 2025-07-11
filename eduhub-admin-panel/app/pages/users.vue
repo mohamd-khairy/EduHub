@@ -229,21 +229,22 @@ watch(
 
         <template #right>
           <AddModal />
-
-          <DeleteModal
-            :count="userStore.selectedIds.length"
-            v-model:open="userStore.deleteModalOpen"
-          />
-
-          <EditModal
-            :item="userStore.editItem"
-            v-model:open="userStore.editModalOpen"
-          />
+          <Communication />
         </template>
+
+        <DeleteModal
+          :count="userStore.selectedIds.length"
+          v-model:open="userStore.deleteModalOpen"
+        />
+
+        <EditModal
+          :item="userStore.editItem"
+          v-model:open="userStore.editModalOpen"
+        />
       </UDashboardNavbar>
     </template>
 
-    <template #body>
+    <template #body v-if="userStore.items.length > 0">
       <div class="flex flex-wrap items-center justify-between gap-1.5">
         <UInput
           :model-value="(table?.tableApi?.getColumn('الاسم')?.getFilterValue() as string)"
@@ -341,6 +342,9 @@ watch(
           />
         </div>
       </div>
+    </template>
+    <template #body v-else>
+      <Loader />
     </template>
   </UDashboardPanel>
 </template>
